@@ -148,6 +148,8 @@
     <ClCompile Include="CGameManager.cpp" />
     <ClCompile Include="CScene.cpp" />
     <ClCompile Include="CSceneEnums.cpp" />
+    <ClCompile Include="CSceneManager.cpp" />
+    <ClCompile Include="CTile.cpp" />
     <ClCompile Include="CUIManager.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
@@ -155,11 +157,9 @@
     <ClInclude Include="CGameManager.h" />
     <ClInclude Include="CScene.h" />
     <ClInclude Include="CSceneEnums.h" />
+    <ClInclude Include="CSceneManager.h" />
+    <ClInclude Include="CTile.h" />
     <ClInclude Include="CUIManager.h" />
-    <ClInclude Include="resource.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="SimpleWars.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

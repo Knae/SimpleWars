@@ -4,25 +4,46 @@
 
 #include <SFML/Graphics.hpp>
 #include <string>
+#include <fstream>
+#include <iostream>
 #include <map>
 #include "CSceneEnums.h"
+#include "CTile.h"
 
 /// <summary>
-/// Base class for all scenes in map. Set up as interface
+/// Generic class for generating a scene/map
+/// Currently no need for specialized creation
 /// </summary>
 class CScene :public sf::Drawable, public sf::Transformable
 {
 public:
 	CScene();
 	virtual ~CScene();
-	virtual bool InitializeMap() = 0;
-	virtual CSceneEnums::SCENENAME GetSceneName() = 0;
-	virtual CSceneEnums::TILETYPE GetTileType(sf::Vector2i ) = 0;
-	virtual int GetNumberOfUnits_Player() = 0;
-	virtual int GetNumberOfUnits_Opponent() = 0;
+
+	virtual bool LoadMapConfig(const std::string& _filePath);
+	virtual bool InitializeMap();
+	virtual CSceneEnums::TILETYPE GetTileType(sf::Vector2i );
+	virtual int GetUnits_Player();
+	virtual int GetUnits_Opponent();
 
 private:
+	static std::string ParseLine(const std::string& _inputLine,const std::string& _inputSearchCriteria);
 
+	const std::string m_strTileMapFilePath = "assets/tilemaps/MountainGrassland.png";
+	//18 rows x 26 columns
+	//CTile m_MapTile[18][26];
+	std::vector<std::vector<CTile>>* m_MapTiles;
+	unsigned int m_iMapColumns;
+	unsigned int m_iMapRows;
+	std::map<unsigned int, CSceneEnums::TILETYPE> m_MapTileValuesToCheck;
+	sf::VertexArray m_SceneTileVertices;
+	sf::Texture* m_MapTileMap;
+	int unitsRed[3] = { 0 };
+	int unitsBlue[3] = { 0 };
+
+	//This overriding function was taken from SFML's tutorial
+	//for using the vertex array
+	virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
 };
 
 #endif // !__CSCENE_H__

@@ -7,12 +7,14 @@
 class CUIManager
 {
 public:
-	CUIManager();
 	~CUIManager();
+	static CUIManager& GetRef() { static CUIManager m_UIMgr; return m_UIMgr; }
 
-	void IntializeUI();
+	//void IntializeUI();
 private:
-
+	CUIManager();
+	CUIManager(CUIManager const&) = delete;
+	void operator=(CUIManager const&) = delete;
 };
 
 #endif // !__CUIMANAGER_H__

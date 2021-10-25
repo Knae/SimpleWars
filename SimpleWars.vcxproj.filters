@@ -19,6 +19,18 @@
     <Filter Include="Source Files\SceneRelatedSource">
       <UniqueIdentifier>{a402b566-a526-4af9-8dfb-36c2b998a7df}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Systems">
+      <UniqueIdentifier>{177127b0-a884-44b5-aee5-70c623c381d2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Systems">
+      <UniqueIdentifier>{f30a8f96-36e9-4abc-bfb7-aab05c59ca2a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\SceneRelatedHeaders\Tiles">
+      <UniqueIdentifier>{d94214c5-592b-4805-910b-6da75d92fe76}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\SceneRelatedSource\Tiles">
+      <UniqueIdentifier>{8563c820-45b6-4649-b3d2-d2843da89056}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -31,9 +43,15 @@
       <Filter>Source Files\SceneRelatedSource</Filter>
     </ClCompile>
     <ClCompile Include="CUIManager.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Systems</Filter>
     </ClCompile>
     <ClCompile Include="CGameManager.cpp">
+      <Filter>Source Files\Systems</Filter>
+    </ClCompile>
+    <ClCompile Include="CTile.cpp">
+      <Filter>Source Files\SceneRelatedSource\Tiles</Filter>
+    </ClCompile>
+    <ClCompile Include="CSceneManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -44,19 +62,17 @@
     <ClInclude Include="CSceneEnums.h">
       <Filter>Header Files\SceneRelatedHeaders</Filter>
     </ClInclude>
-    <ClInclude Include="resource.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="CUIManager.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Systems</Filter>
     </ClInclude>
     <ClInclude Include="CGameManager.h">
+      <Filter>Header Files\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="CTile.h">
+      <Filter>Header Files\SceneRelatedHeaders\Tiles</Filter>
+    </ClInclude>
+    <ClInclude Include="CSceneManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="SimpleWars.rc">
-      <Filter>Resource Files</Filter>
-    </ResourceCompile>
   </ItemGroup>
 </Project>
