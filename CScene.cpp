@@ -46,38 +46,47 @@ bool CScene::LoadMapConfig(const std::string& _filePath)
 			}
 			else if (currentLine.compare("<Tiles>")==0)
 			{
-				//Getting the tile setup from map config
-				std::cout << "\nReading tile information\n";
-				std::size_t markerFirstPosition = 0;
-				std::size_t markerSecondPosition = 0;
-				int parsedTileValue = 0;
-				std::map<unsigned int, CSceneEnums::TILETYPE>::iterator tileTypeIt;
-				while (currentLine.compare("</Tiles>") != 0)
+				if (m_MapTiles != nullptr)
 				{
-					for (unsigned int row = 0; row < m_iMapRows; row++)
+					//Getting the tile setup from map config
+					std::cout << "\nReading tile information\n";
+					std::size_t markerFirstPosition = 0;
+					std::size_t markerSecondPosition = 0;
+					int parsedTileValue = 0;
+					std::map<unsigned int, CSceneEnums::TILETYPE>::iterator tileTypeIt;
+					while (currentLine.compare("</Tiles>") != 0)
 					{
-						std::getline(mapSettings, currentLine);
-						for (unsigned int column = 0; column < m_iMapColumns; column++)
+						for (unsigned int row = 0; row < m_iMapRows; row++)
 						{
-							markerFirstPosition = markerSecondPosition;
-							if (markerFirstPosition != 0) { markerFirstPosition++; }
-							markerSecondPosition = currentLine.find(',', markerFirstPosition);
-							parsedTileValue = std::stoi(currentLine.substr(markerFirstPosition, markerSecondPosition - markerFirstPosition));
-							(*m_MapTiles)[row][column].SetTileValue(parsedTileValue);
-							tileTypeIt = m_MapTileValuesToCheck.find(parsedTileValue);
-							if (tileTypeIt != m_MapTileValuesToCheck.end())
+							std::getline(mapSettings, currentLine);
+							for (unsigned int column = 0; column < m_iMapColumns; column++)
 							{
-								(*m_MapTiles)[row][column].SetTileType(tileTypeIt->second);
-							}
-							else
-							{
-								(*m_MapTiles)[row][column].SetTileType(CSceneEnums::TILETYPE::NONE);
+								markerFirstPosition = markerSecondPosition;
+								if (markerFirstPosition != 0) { markerFirstPosition++; }
+								markerSecondPosition = currentLine.find(',', markerFirstPosition);
+								parsedTileValue = std::stoi(currentLine.substr(markerFirstPosition, markerSecondPosition - markerFirstPosition));
+								(*m_MapTiles)[row][column].SetTileValue(parsedTileValue);
+								tileTypeIt = m_MapTileValuesToCheck.find(parsedTileValue);
+								if (tileTypeIt != m_MapTileValuesToCheck.end())
+								{
+									(*m_MapTiles)[row][column].SetTileType(tileTypeIt->second);
+								}
+								else
+								{
+									(*m_MapTiles)[row][column].SetTileType(CSceneEnums::TILETYPE::NONE);
+								}
 							}
 						}
+						std::getline(mapSettings, currentLine);
 					}
-					std::getline(mapSettings, currentLine);
 				}
-				
+				else
+				{
+					//ERROR: MapTiles not created yet
+					std::cout	<< "\nUnable to create map tiles. Config file may not be arranged correctly\n"
+								<< "or the map size was stored incorrectly\n";
+					std::getline(mapSettings, currentLine);
+				}			
 			}
 			else if (currentLine.compare("<TileTypes>")==0)
 			{

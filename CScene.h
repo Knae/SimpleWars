@@ -29,7 +29,7 @@ public:
 private:
 	static std::string ParseLineGetLabel (const std::string& _inputLine, std::string& _lineSettingValues);
 
-	std::string m_strTileMapFilePath/* = "assets/tilemaps/MountainGrassland.png"*/;
+	std::string m_strTileMapFilePath;
 	//18 rows x 26 columns
 	//CTile m_MapTile[18][26];
 	std::vector<std::vector<CTile>>* m_MapTiles;
