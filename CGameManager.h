@@ -33,6 +33,7 @@ public:
 	//Scene management related
 	//====================================
 	virtual bool LoadScene();
+	virtual bool DisplayScene();
 
 	virtual sf::RenderWindow* GetGameWindow() { return m_pGameWindow; }
 
@@ -52,7 +53,6 @@ private:
 	sf::RenderTexture* m_pGameBackground;
 	sf::Sprite* m_pSpriteBackground;
 	sf::Font* m_pFont;
-
 	sf::Vector2u m_v2uGameWindowSize_Current;
 };
 

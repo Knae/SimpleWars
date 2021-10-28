@@ -14,6 +14,7 @@ public:
 	//}
 	virtual ~CSceneManager();
 	static bool CreateScene(CSceneEnums::SCENETYPE& _inputType,const std::string& _inputConfigPath);
+	static CScene* GetCurrentScene() { return m_pCurrentManagedScene; }
 
 
 private:
@@ -22,7 +23,7 @@ private:
 	void operator=(CSceneManager const&) = delete;
 
 	static CSceneManager m_SceneMgr;
-	static CScene* m_ManagedScene;
+	static CScene* m_pCurrentManagedScene;
 };
 
 #endif // !__CSCENEMANAGER_H__

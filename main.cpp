@@ -34,7 +34,7 @@ int main()
 
 		}
 
-
+		m_GMRef.DisplayScene();
 		m_GMRef.DisplayGameWorld();
 	}
 

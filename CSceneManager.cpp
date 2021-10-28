@@ -1,29 +1,30 @@
 #include "CSceneManager.h"
 CSceneManager CSceneManager::m_SceneMgr;
-CScene* CSceneManager::m_ManagedScene;
+CScene* CSceneManager::m_pCurrentManagedScene;
 
 CSceneManager::CSceneManager()
 {
-	m_ManagedScene = nullptr;
+	m_pCurrentManagedScene = nullptr;
 }
 
 CSceneManager::~CSceneManager()
 {
-	delete m_ManagedScene;
-	m_ManagedScene = nullptr;
+	delete m_pCurrentManagedScene;
+	m_pCurrentManagedScene = nullptr;
 }
 
 bool CSceneManager::CreateScene(CSceneEnums::SCENETYPE& _inputType,const std::string& _inputConfigPath)
 {
 	if (_inputType == CSceneEnums::SCENETYPE::MOUNTAINGRASS)
 	{
-		if (m_ManagedScene != nullptr)
+		if (m_pCurrentManagedScene != nullptr)
 		{
-			delete m_ManagedScene;
-			m_ManagedScene = nullptr;
+			delete m_pCurrentManagedScene;
+			m_pCurrentManagedScene = nullptr;
 		}
-		m_ManagedScene = new CScene();
-		m_ManagedScene->LoadMapConfig(_inputConfigPath);
+		m_pCurrentManagedScene = new CScene();
+		m_pCurrentManagedScene->LoadMapConfig(_inputConfigPath);
+		m_pCurrentManagedScene->InitializeMap();
 		return true;
 	}
 	else

@@ -18,11 +18,21 @@ public:
 		GRASS,
 		TALLGRASS,
 		ROAD,
+		COAST,
 		WATER,
 		HILL,
 		MOUNTAIN,
 		URBAN,
-		FORT
+		FORT,
+		BASETILE
+	};
+
+	enum class UNITTYPE
+	{
+		NONE,
+		INFANTRY,
+		TANK,
+		ARTILLERY
 	};
 };
 
