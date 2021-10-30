@@ -2,7 +2,9 @@
 #ifndef __CSCENEENUMS_H__
 #define __CSCENEENUMS_H__
 
-
+/// <summary>
+/// Enums used specifically by SceneManager
+/// </summary>
 class CSceneEnums
 {
 public:

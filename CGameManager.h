@@ -7,11 +7,10 @@
 #include <iostream>
 #include "CUIManager.h"
 #include "CSceneManager.h"
+
 /// <summary>
 /// This will be the main class accessed by main
 /// to manipulate game elements.
-///*attempting to implement as a singleton as
-/// described by Shilpa
 /// </summary>
 
 class CGameManager

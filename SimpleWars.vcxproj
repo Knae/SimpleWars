@@ -151,6 +151,7 @@
     <ClCompile Include="CSceneManager.cpp" />
     <ClCompile Include="CTile.cpp" />
     <ClCompile Include="CUIManager.cpp" />
+    <ClCompile Include="CUnit.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -160,6 +161,8 @@
     <ClInclude Include="CSceneManager.h" />
     <ClInclude Include="CTile.h" />
     <ClInclude Include="CUIManager.h" />
+    <ClInclude Include="CUnit.h" />
+    <ClInclude Include="CUnitEnums.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -3,7 +3,10 @@
 #define __CUIMANAGER_H__
 
 #include<SFML/Graphics.hpp>
-
+/// <summary>
+/// Manager class that is responsible for creating and managing
+/// the UI
+/// </summary>
 class CUIManager
 {
 public:

@@ -31,6 +31,12 @@
     <Filter Include="Source Files\SceneRelatedSource\Tiles">
       <UniqueIdentifier>{8563c820-45b6-4649-b3d2-d2843da89056}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\UnitRelatedSource">
+      <UniqueIdentifier>{66a0298b-ed72-481e-a95f-9c15b672add9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\UnitRelatedHeaders">
+      <UniqueIdentifier>{d9b9d408-7457-4d6b-84a0-7da858021903}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -54,6 +60,9 @@
     <ClCompile Include="CSceneManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="CUnit.cpp">
+      <Filter>Source Files\UnitRelatedSource</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CScene.h">
@@ -73,6 +82,12 @@
     </ClInclude>
     <ClInclude Include="CSceneManager.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CUnit.h">
+      <Filter>Header Files\UnitRelatedHeaders</Filter>
+    </ClInclude>
+    <ClInclude Include="CUnitEnums.h">
+      <Filter>Header Files\UnitRelatedHeaders</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

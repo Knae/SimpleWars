@@ -4,6 +4,11 @@
 
 #include "CScene.h"
 
+/// <summary>
+/// Manager class responsible for creating and destroying the
+/// game map
+/// </summary>
+
 class CSceneManager
 {
 public:
