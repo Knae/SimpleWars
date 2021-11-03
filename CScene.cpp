@@ -17,6 +17,7 @@ CScene::~CScene()
 
 /// <summary>
 /// Load map configuration from a external file
+/// TODO: separate each parsing process to its own function
 /// </summary>
 /// <param name="_filePath"></param>
 /// <returns></returns>
@@ -219,7 +220,7 @@ bool CScene::InitializeMap()
 	}
 
 	m_SceneTileVertices.setPrimitiveType(sf::Quads);
-	//Based on SFML tutorial, I am assuming it's number of tile
+	//Based on SFML tutorial, I am assuming it's number of tiles
 	//and 4 points each tile
 	m_SceneTileVertices.resize(m_iTileWidth * m_iTileWidth * 4);
 
@@ -422,6 +423,12 @@ bool CScene::ConvertToTileType(std::string& _inputString, CSceneEnums::TILETYPE&
 	return true;
 }
 
+/// <summary>
+/// Overriding the sfml default draw function to draw all the vertices
+/// created to render the background map
+/// </summary>
+/// <param name="target"></param>
+/// <param name="states"></param>
 void CScene::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {
 	// apply the transform

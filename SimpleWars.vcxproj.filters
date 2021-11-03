@@ -57,11 +57,14 @@
     <ClCompile Include="CTile.cpp">
       <Filter>Source Files\SceneRelatedSource\Tiles</Filter>
     </ClCompile>
-    <ClCompile Include="CSceneManager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="CUnit.cpp">
       <Filter>Source Files\UnitRelatedSource</Filter>
+    </ClCompile>
+    <ClCompile Include="CUnitManager.cpp">
+      <Filter>Source Files\Systems</Filter>
+    </ClCompile>
+    <ClCompile Include="CSceneManager.cpp">
+      <Filter>Source Files\Systems</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -80,14 +83,20 @@
     <ClInclude Include="CTile.h">
       <Filter>Header Files\SceneRelatedHeaders\Tiles</Filter>
     </ClInclude>
-    <ClInclude Include="CSceneManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="CUnit.h">
       <Filter>Header Files\UnitRelatedHeaders</Filter>
     </ClInclude>
     <ClInclude Include="CUnitEnums.h">
       <Filter>Header Files\UnitRelatedHeaders</Filter>
+    </ClInclude>
+    <ClInclude Include="CSceneManager.h">
+      <Filter>Header Files\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="CUnitManager.h">
+      <Filter>Header Files\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="CSystemEnums.h">
+      <Filter>Source Files\Systems</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

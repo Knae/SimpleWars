@@ -101,12 +101,7 @@ bool CGameManager::LoadScene()
 	
 }
 
-bool CGameManager::DisplayScene()
+void CGameManager::DisplayScene()
 {
-	int* sceneColourValues = m_pSceneMgr->GetCurrentScene()->GetBaseColourArrayPointer();
-	sf::Color sceneBackground(*sceneColourValues, *(sceneColourValues+1), *(sceneColourValues+2) );
-	m_pGameBackground->clear(sceneBackground);
-	m_pGameBackground->draw(*m_pSceneMgr->GetCurrentScene());
-	m_pGameBackground->display();
-	return false;
+	m_pSceneMgr->DisplayScene(*m_pGameWindow);
 }

@@ -12,7 +12,6 @@
 /// This will be the main class accessed by main
 /// to manipulate game elements.
 /// </summary>
-
 class CGameManager
 {
 public:
@@ -23,7 +22,6 @@ public:
 	//====================================
 	virtual bool IntializeGame();
 	virtual void SetPointersToOtherSystems(CUIManager* _inputUI, CSceneManager* _inputScene);
-	//void MoveToScene();
 	virtual void DrawObject(sf::Drawable* _object);
 	virtual void DisplayGameWorld();
 	virtual void DestroyGameWorld();
@@ -32,7 +30,7 @@ public:
 	//Scene management related
 	//====================================
 	virtual bool LoadScene();
-	virtual bool DisplayScene();
+	virtual void DisplayScene();
 
 	virtual sf::RenderWindow* GetGameWindow() { return m_pGameWindow; }
 

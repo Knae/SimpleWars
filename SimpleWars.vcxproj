@@ -152,6 +152,7 @@
     <ClCompile Include="CTile.cpp" />
     <ClCompile Include="CUIManager.cpp" />
     <ClCompile Include="CUnit.cpp" />
+    <ClCompile Include="CUnitManager.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -159,10 +160,12 @@
     <ClInclude Include="CScene.h" />
     <ClInclude Include="CSceneEnums.h" />
     <ClInclude Include="CSceneManager.h" />
+    <ClInclude Include="CSystemEnums.h" />
     <ClInclude Include="CTile.h" />
     <ClInclude Include="CUIManager.h" />
     <ClInclude Include="CUnit.h" />
     <ClInclude Include="CUnitEnums.h" />
+    <ClInclude Include="CUnitManager.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

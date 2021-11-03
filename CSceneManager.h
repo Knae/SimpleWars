@@ -2,6 +2,7 @@
 #ifndef __CSCENEMANAGER_H__
 #define __CSCENEMANAGER_H__
 
+#include <SFML/Window.hpp>
 #include "CScene.h"
 
 /// <summary>
@@ -13,12 +14,9 @@ class CSceneManager
 {
 public:
 	static CSceneManager& GetRef() { return m_SceneMgr; }
-	//{
-	//	static CSceneManager m_SceneMgr;
-	//	return m_SceneMgr;
-	//}
 	virtual ~CSceneManager();
 	static bool CreateScene(CSceneEnums::SCENETYPE& _inputType,const std::string& _inputConfigPath);
+	static void DisplayScene(sf::RenderWindow& _targetWindow);
 	static CScene* GetCurrentScene() { return m_pCurrentManagedScene; }
 
 

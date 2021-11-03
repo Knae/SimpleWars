@@ -13,11 +13,17 @@ public:
 	~CUIManager();
 	static CUIManager& GetRef() { static CUIManager m_UIMgr; return m_UIMgr; }
 
-	//void IntializeUI();
+	static void IntializeUI();
+	static void DisplayUI(sf::Window& _inWindow);
+	static bool ProcessClick(sf::Vector2f& _inCoords);
 private:
 	CUIManager();
 	CUIManager(CUIManager const&) = delete;
 	void operator=(CUIManager const&) = delete;
+
+	static void ChangeMouseState();
+
+	static sf::Font* m_pFont;
 };
 
 #endif // !__CUIMANAGER_H__
