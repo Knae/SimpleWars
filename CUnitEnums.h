@@ -31,10 +31,10 @@ public:
 		float m_tfAtk;
 		float m_tfMove;
 		int m_tiRange;
-		float m_tiSpriteWidth;
-		float m_tiSpriteHeight;
-		float m_tiSpriteTop;
-		float m_tiSpriteLeft;
+		int m_tiSpriteWidth;
+		int m_tiSpriteHeight;
+		int m_tiSpriteTop;
+		int m_tiSpriteLeft;
 	};
 
 	enum class TYPE

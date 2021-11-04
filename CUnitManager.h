@@ -20,7 +20,8 @@ public:
 	static CUnitManager& GetRef() { static CUnitManager m_umThis; return m_umThis; }
 
 	static void ParseConfig(const std::string& _inFilePath, const std::string& _inFactionConfigPath);
-	static void CreateUnit(CUnitEnums::TYPE _inType);
+	static void DisplayUnits(sf::RenderWindow& _inWindow);
+	static CUnit* CreateUnit(CUnitEnums::TYPE _inType, CUnitEnums::FACTION _inFaction, CUnitEnums::SIDE _inSide);
 	static bool MoveUnit();
 	static bool Attack(CUnit* _inAttackinUnit, CUnit* _inDefendingPlayer);
 	static void ClearUnits();
@@ -37,6 +38,9 @@ private:
 
 	static std::string m_UnitTexturePath_Blue;
 	static std::string m_UnitTexturePath_Red;
+	static sf::Texture* m_UnitTexture_Blue;
+	static sf::Texture* m_UnitTexture_Red;
+
 	static std::map<CUnitEnums::TYPE, CUnitEnums::UnitRecord*> m_UnitStats;
 	static std::map<CUnitEnums::FACTION, CUnitEnums::StatBonus_Add*> m_FactionsBonuses;
 };

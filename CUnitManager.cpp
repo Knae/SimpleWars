@@ -4,51 +4,24 @@ std::vector<CUnit*> CUnitManager::m_CurrentUnits_Blue;
 std::vector<CUnit*> CUnitManager::m_CurrentUnits_Red;
 std::string CUnitManager::m_UnitTexturePath_Blue;
 std::string CUnitManager::m_UnitTexturePath_Red;
+sf::Texture* CUnitManager::m_UnitTexture_Blue;
+sf::Texture* CUnitManager::m_UnitTexture_Red;
 std::map<CUnitEnums::TYPE, CUnitEnums::UnitRecord*> CUnitManager::m_UnitStats;
 std::map<CUnitEnums::FACTION, CUnitEnums::StatBonus_Add*> CUnitManager::m_FactionsBonuses;
 
-bool CUnitManager::MoveUnit()
-{
-	return false;
-}
-
-bool CUnitManager::Attack(CUnit* _inAttackinUnit, CUnit* _inDefendingPlayer)
-{
-	return false;
-}
-
-void CUnitManager::ClearUnits()
-{
-	/// <summary>
-	/// TODO: CHECK THESE!
-	/// </summary>
-	for (auto& element : m_CurrentUnits_Blue)
-	{
-		delete element;
-		element = nullptr;
-	}
-
-	for (auto& element : m_CurrentUnits_Red)
-	{
-		delete element;
-		element = nullptr;
-	}
-
-	m_CurrentUnits_Blue.clear();
-	m_CurrentUnits_Red.clear();
-}
-
-bool CUnitManager::CheckIfAnyUnitsLeft(CUnitEnums::SIDE _inSide)
-{
-	return false;
-}
-
 CUnitManager::CUnitManager()
 {
+	m_UnitTexture_Blue = nullptr;
+	m_UnitTexture_Red = nullptr;
 }
 
 CUnitManager::~CUnitManager()
 {
+	delete m_UnitTexture_Red;
+	delete m_UnitTexture_Blue;
+
+	m_UnitTexture_Blue = nullptr;
+	m_UnitTexture_Red = nullptr;
 }
 
 void CUnitManager::ParseConfig(const std::string& _inUnitConfigPath, const std::string& _inFactionConfigPath)
@@ -151,19 +124,19 @@ void CUnitManager::ParseConfig(const std::string& _inUnitConfigPath, const std::
 							readLabel = ParseLineGetLabel(currentLine, readValue);
 							if (readLabel.compare("Width") == 0)
 							{
-								currentUnitStats->m_tiSpriteWidth = stof(readValue);
+								currentUnitStats->m_tiSpriteWidth = stoi(readValue);
 							}
 							else if (readLabel.compare("Height") == 0)
 							{
-								currentUnitStats->m_tiSpriteHeight = stof(readValue);
+								currentUnitStats->m_tiSpriteHeight = stoi(readValue);
 							}
 							else if (readLabel.compare("TopCorner") == 0)
 							{
-								currentUnitStats->m_tiSpriteTop = stof(readValue);
+								currentUnitStats->m_tiSpriteTop = stoi(readValue);
 							}
 							else if (readLabel.compare("LeftCorner") == 0)
 							{
-								currentUnitStats->m_tiSpriteLeft = stof(readValue);
+								currentUnitStats->m_tiSpriteLeft = stoi(readValue);
 							}
 							std::getline(currentConfig, currentLine);
 						}
@@ -253,10 +226,117 @@ void CUnitManager::ParseConfig(const std::string& _inUnitConfigPath, const std::
 			}
 		}
 	}
+
+	if (m_UnitTexture_Blue != nullptr)
+	{
+		delete m_UnitTexture_Blue;
+		m_UnitTexture_Blue = nullptr;
+	}
+
+	if (m_UnitTexture_Red != nullptr)
+	{
+		delete m_UnitTexture_Red;
+		m_UnitTexture_Red = nullptr;
+	}
+
+	m_UnitTexture_Blue = new sf::Texture();
+	if (!m_UnitTexture_Blue->loadFromFile(m_UnitTexturePath_Blue))
+	{
+		std::cout << "\nERROR:Unable to load textures for Blue units!" << std::endl;
+	}
+
+	m_UnitTexture_Red = new sf::Texture();
+	if (!m_UnitTexture_Red->loadFromFile(m_UnitTexturePath_Red))
+	{
+		std::cout << "\nERROR:Unable to load textures for Red units!" << std::endl;
+	}
 }
 
-
-void CUnitManager::CreateUnit(CUnitEnums::TYPE _inType)
+void CUnitManager::DisplayUnits(sf::RenderWindow& _inWindow)
 {
+	for (auto& element : m_CurrentUnits_Blue)
+	{
+		_inWindow.draw(*element->GetSprite());
+	}
+
+	for (auto& element : m_CurrentUnits_Red)
+	{
+		_inWindow.draw(*element->GetSprite());
+	}
 }
 
+CUnit* CUnitManager::CreateUnit(CUnitEnums::TYPE _inType,CUnitEnums::FACTION _inFaction, CUnitEnums::SIDE _inSide)
+{
+	std::map<CUnitEnums::TYPE, CUnitEnums::UnitRecord*>::iterator mapIter;
+	mapIter = m_UnitStats.find(_inType);
+	CUnitEnums::UnitRecord* newUnitStats = (*mapIter).second;
+	CUnit* newUnit = new CUnit(	
+		_inType,
+		newUnitStats->m_tiSpriteHeight,
+		newUnitStats->m_tfHP,
+		newUnitStats->m_tfMove,
+		newUnitStats->m_tfAtk,
+		newUnitStats->m_tiRange);
+	newUnit->SetFaction(_inFaction);
+
+	sf::IntRect unitTextureRect(
+		newUnitStats->m_tiSpriteLeft,
+		newUnitStats->m_tiSpriteTop,
+		newUnitStats->m_tiSpriteWidth,
+		newUnitStats->m_tiSpriteHeight
+	);
+	sf::Sprite* unitSprite = new sf::Sprite();
+	if (_inSide == CUnitEnums::SIDE::BLUE)
+	{
+		unitSprite->setTexture(*m_UnitTexture_Blue);
+		unitSprite->setTextureRect(unitTextureRect);
+		newUnit->Initialize(unitSprite);
+		m_CurrentUnits_Blue.push_back(newUnit);
+	}
+	else
+	{
+		unitSprite->setTexture(*m_UnitTexture_Red);
+		unitSprite->setTextureRect(unitTextureRect);
+		newUnit->Initialize(unitSprite);
+		m_CurrentUnits_Red.push_back(newUnit);
+	}
+	unitSprite = nullptr;
+	return newUnit;
+}
+
+
+bool CUnitManager::MoveUnit()
+{
+	return false;
+}
+
+bool CUnitManager::Attack(CUnit* _inAttackinUnit, CUnit* _inDefendingPlayer)
+{
+	return false;
+}
+
+void CUnitManager::ClearUnits()
+{
+	/// <summary>
+	/// TODO: CHECK THESE!
+	/// </summary>
+	for (auto& element : m_CurrentUnits_Blue)
+	{
+		delete element;
+		element = nullptr;
+	}
+
+	for (auto& element : m_CurrentUnits_Red)
+	{
+		delete element;
+		element = nullptr;
+	}
+
+	m_CurrentUnits_Blue.clear();
+	m_CurrentUnits_Red.clear();
+}
+
+bool CUnitManager::CheckIfAnyUnitsLeft(CUnitEnums::SIDE _inSide)
+{
+	return false;
+}

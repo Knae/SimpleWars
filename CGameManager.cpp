@@ -47,6 +47,8 @@ bool CGameManager::IntializeGame()
 							"Simple Wars"
 						);
 
+	m_eCurrentState = UIEnums::GAMESTATE::UNITPLACEMENT;
+
 	m_pGameWindow->setVerticalSyncEnabled(false);
 	m_pGameWindow->setFramerateLimit(30);
 	m_pUIMgr->IntializeUI(m_pGameWindow->getSize() , m_v2uGameWindowSize_Current.x - 192);
@@ -103,9 +105,11 @@ bool CGameManager::LoadScene()
 	
 }
 
+//Display the map and the units in it
 void CGameManager::DisplayScene()
 {
 	m_pSceneMgr->DisplayScene(*m_pGameWindow);
+	m_pUnitMgr->DisplayUnits(*m_pGameWindow);
 }
 
 bool CGameManager::InitializeUI()
@@ -118,6 +122,53 @@ bool CGameManager::InitializeUI()
 	{
 		std::cout << "/nScene Manager not yet set up!" << std::endl;
 		return false;
+	}
+
+}
+
+void CGameManager::ProcessMouseClick()
+{
+	sf::Vector2f mousePosition = m_pGameWindow->mapPixelToCoords(sf::Mouse::getPosition(*(m_pGameWindow)) );
+	if (m_pUIMgr->ProcessClick(mousePosition))
+	{
+		//m_eCurrentState = m_pUIMgr->GetCurrentState();
+		switch (m_eCurrentState)
+		{
+			case UIEnums::GAMESTATE::UNITPLACEMENT:
+			{	
+				m_eCurrentUnitChosen = m_pUIMgr->GetChosenUnit();
+				break;
+			}
+			default:
+			{
+				break;
+			}
+		}
+	}
+	else
+	{
+		switch (m_eCurrentState)
+		{
+			case UIEnums::GAMESTATE::UNITPLACEMENT:
+			{
+				if (m_eCurrentUnitChosen != CUnitEnums::TYPE::NONE)
+				{
+					CTile* clickedTile = m_pSceneMgr->GetTileInScene(mousePosition);
+					if (clickedTile != nullptr && clickedTile->GetUnitOnTile() == nullptr &&
+						m_pSceneMgr->GetCurrentScene()->GetTileType(mousePosition)!= CSceneEnums::TILETYPE::MOUNTAIN)
+					{
+						CUnit* newUnit = m_pUnitMgr->CreateUnit(m_eCurrentUnitChosen, CUnitEnums::FACTION::TALONS, CUnitEnums::SIDE::BLUE);
+						clickedTile->UnitEntersTile(newUnit);
+						newUnit->MoveTo(mousePosition);
+					}
+				}
+				break;
+			}
+			default:
+			{
+				break;
+			}
+		}
 	}
 
 }

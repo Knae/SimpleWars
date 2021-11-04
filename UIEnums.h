@@ -12,12 +12,6 @@ public:
 		RED,
 	};
 
-	enum class MOUSESTATE
-	{
-		NONE,
-		SELECTING
-	};
-
 	enum class GAMESTATE
 	{
 		NONE,
@@ -26,6 +20,13 @@ public:
 		GAMELOOP
 	};
 
+	enum class MOUSESTATE
+	{
+		NONE,
+		SELECT,
+		MOVE,
+		ATTACK
+	};
 private:
 };
 

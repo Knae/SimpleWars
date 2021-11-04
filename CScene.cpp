@@ -266,9 +266,14 @@ bool CScene::InitializeMap()
 	return false;
 }
 
-CSceneEnums::TILETYPE CScene::GetTileType(sf::Vector2i)
+CSceneEnums::TILETYPE CScene::GetTileType(sf::Vector2f _input)
 {
-	return CSceneEnums::TILETYPE();
+	return GetTile(_input)->GetTileType();
+}
+
+CSceneEnums::TILETYPE CScene::GetTileType(unsigned int _inX, unsigned int _inY)
+{
+	return GetTile(_inX, _inY)->GetTileType();
 }
 
 int CScene::GetUnits_Player()
@@ -280,29 +285,37 @@ int CScene::GetUnits_Opponent()
 {
 	return 0;
 }
-/// <summary>
-/// Processes the line provided. Returns the label at the beginning
-/// of the line and writes the values into arg2
-/// NOTE:*Seems like a common function. Create a base parser class?*
-/// </summary>
-/// <param name="_inputLine"></param>
-/// <param name="_lineSettingValues"></param>
-/// <returns></returns>
-//std::string CScene::ParseLineGetLabel (const std::string& _inputLine, std::string& _lineSettingValues)
-//{ 
-//	std::size_t positionOfSymbol = _inputLine.find('=');
-//	if (positionOfSymbol != std::string::npos)
-//	{
-//		std::string parsedLabel = _inputLine.substr(0, positionOfSymbol);
-//		std::string parsedValue = _inputLine.substr(positionOfSymbol + 1, std::string::npos);
-//		_lineSettingValues = parsedValue;
-//		return parsedLabel;
-//	}
-//	else
-//	{
-//		return std::string();
-//	}
-//}
+CTile* CScene::GetTile(sf::Vector2f _inPosition)
+{
+	unsigned int tilePositionX = (unsigned int)(_inPosition.x / m_iTileWidth);
+	unsigned int tilePositionY = (unsigned int)(_inPosition.y / m_iTileWidth);
+
+	if (tilePositionX < m_iMapColumns &&
+		tilePositionY < m_iMapRows &&
+		tilePositionX >= 0 && tilePositionY >= 0)
+	{
+		CTile* tile = GetTile(tilePositionX, tilePositionY);
+		return tile;
+	}
+	else
+	{
+		return nullptr;
+	}
+
+}
+CTile* CScene::GetTile(unsigned int _inX, unsigned int _inY)
+{
+	if (_inX < m_iMapColumns && _inY < m_iMapRows &&
+		_inX >= 0 && _inY >= 0)
+	{
+		CTile* tile = &(*m_MapTiles)[_inY][_inX];
+		return tile;
+	}
+	else
+	{
+		return nullptr;
+	}
+}
 
 /// <summary>
 /// Read the line to the number of rows or columns

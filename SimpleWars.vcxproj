@@ -162,7 +162,6 @@
     <ClInclude Include="CScene.h" />
     <ClInclude Include="CSceneEnums.h" />
     <ClInclude Include="CSceneManager.h" />
-    <ClInclude Include="CSystemEnums.h" />
     <ClInclude Include="CTile.h" />
     <ClInclude Include="CUIManager.h" />
     <ClInclude Include="CUnit.h" />

@@ -17,6 +17,7 @@ public:
 	static CUIManager& GetRef() { static CUIManager m_UIMgr; return m_UIMgr; }
 
 	static bool IntializeUI(sf::Vector2u _inWindowSize, const unsigned int _inSceneWidth = 832);
+	static void UpdateUI();
 	static void DisplayUI(sf::RenderWindow& _inWindow);
 	static bool ProcessClick(sf::Vector2f& _inCoords);
 	static int ProcessClickInCtrlPanel(sf::Vector2f& _inCoords);
@@ -24,7 +25,7 @@ public:
 	static void SetCurrentGameState(UIEnums::GAMESTATE _inState) { m_eCurrentUIState = _inState; }
 	static void SetCurrentTurn(UIEnums::TURN _inTurn) { m_eCurrentTurn = _inTurn; }
 	static void SetChosenUnitToNone() { m_eCurrentUnitChosen = CUnitEnums::TYPE::NONE; }
-	static CUnitEnums::TYPE GetChosenUnitToNone() { return m_eCurrentUnitChosen; }
+	static CUnitEnums::TYPE GetChosenUnit() { return m_eCurrentUnitChosen; }
 	static UIEnums::MOUSESTATE GetCurrentState() {return m_eCurrentMouseState;}
 
 private:
@@ -49,11 +50,11 @@ private:
 	static std::vector<sf::Text*> m_vecText_UnitPlacementPanel;
 	static sf::Texture* m_ButtonUnitTexture;
 	static sf::Font* m_pFont;
-	static sf::RenderTexture* m_pSceneBackground;
+	static sf::RenderTexture* m_pPanelBackground;
 	static sf::Sprite* m_pSpriteBackground;
 	static unsigned int m_uSceneWidth;
 
-	static const CUnitEnums::TYPE m_UnitOnButton[3];
+	static const CUnitEnums::TYPE m_UnitOnButton[4];
 
 	static UIEnums::TURN m_eCurrentTurn;
 	static UIEnums::GAMESTATE m_eCurrentUIState;

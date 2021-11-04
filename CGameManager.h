@@ -33,9 +33,10 @@ public:
 	virtual bool LoadScene();
 	virtual void DisplayScene();
 	//====================================
-	//Scene management related
+	//UI management related
 	//====================================
 	virtual bool InitializeUI();
+	virtual void ProcessMouseClick();
 	virtual void DisplayUI();
 
 	virtual sf::RenderWindow* GetGameWindow() { return m_pGameWindow; }
@@ -60,6 +61,10 @@ private:
 	sf::Sprite* m_pSpriteBackground;
 	sf::Font* m_pFont;
 	sf::Vector2u m_v2uGameWindowSize_Current;
+
+	UIEnums::TURN m_eCurrentTurn;
+	UIEnums::GAMESTATE m_eCurrentState;
+	CUnitEnums::TYPE m_eCurrentUnitChosen;
 };
 
 #endif // !__CGAMEMANAGER_H__

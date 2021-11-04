@@ -22,12 +22,15 @@ public:
 
 	virtual bool ParseConfig(const std::string& _filePath);
 	virtual bool InitializeMap();
-	virtual CSceneEnums::TILETYPE GetTileType(sf::Vector2i );
+	virtual CSceneEnums::TILETYPE GetTileType(sf::Vector2f _input);
+	virtual CSceneEnums::TILETYPE GetTileType(unsigned int _inX, unsigned int _inY);
 	virtual int GetUnits_Player();
 	virtual int GetUnits_Opponent();
 	int* GetBaseColourArrayPointer() { return m_iBaseColour; }
-	unsigned int GetSceneWidth_Pixels() { return m_iMapColumns*m_iTileWidth; }
-	unsigned int GetSceneHeight_Pixels() { return m_iMapRows*m_iTileWidth; }
+	virtual unsigned int GetSceneWidth_Pixels() { return m_iMapColumns*m_iTileWidth; }
+	virtual unsigned int GetSceneHeight_Pixels() { return m_iMapRows*m_iTileWidth; }
+	virtual CTile* GetTile(sf::Vector2f _inPosition);
+	virtual CTile* GetTile(unsigned int _inX, unsigned int _inY);
 private:
 	//static std::string ParseLineGetLabel (const std::string& _inputLine, std::string& _lineSettingValues);
 	static bool ParseLineForMapSize(std::string& _inputLine, unsigned int& _inputMapRows, unsigned int& _inputMapColumns);
@@ -35,9 +38,9 @@ private:
 	static bool ConvertToTileType(std::string& _inputString, CSceneEnums::TILETYPE& _outType);
 	
 	const int m_iTileWidth = 32;
-	int m_iBaseColour[3];
-	int m_iUnitsRed[3];
-	int m_iUnitsBlue[3];
+	int m_iBaseColour[3] = { 0 };
+	int m_iUnitsRed[3] = { 0 };
+	int m_iUnitsBlue[3] = { 0 };
 
 	std::string m_strTileMapFilePath;
 	//18 rows x 26 columns

@@ -67,7 +67,7 @@
       <Filter>Source Files\Systems</Filter>
     </ClCompile>
     <ClCompile Include="CParseConfigCommon.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Systems</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -97,9 +97,6 @@
     </ClInclude>
     <ClInclude Include="CUnitManager.h">
       <Filter>Header Files\Systems</Filter>
-    </ClInclude>
-    <ClInclude Include="CSystemEnums.h">
-      <Filter>Source Files\Systems</Filter>
     </ClInclude>
     <ClInclude Include="CParseConfigCommon.h">
       <Filter>Header Files</Filter>

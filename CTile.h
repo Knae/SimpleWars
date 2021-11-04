@@ -19,8 +19,9 @@ public:
 	virtual void SetTileValue(unsigned int _input)			{ m_uiTileValue = _input; }
 	virtual unsigned int GetTileValue()						{ return m_uiTileValue; }
 	virtual void SetTileType(CSceneEnums::TILETYPE _input)	{ m_Type = _input; }
-	virtual void UnitEntersTile(CUnit* _inPUnit)			{ m_UnitOnTile = _inPUnit; }
-	virtual void UnitLeavesTile()							{ m_UnitOnTile = nullptr; }
+	virtual CSceneEnums::TILETYPE GetTileType() { return m_Type; }
+	virtual void UnitEntersTile(CUnit* _inPUnit); 
+	virtual void UnitLeavesTile();// 
 	virtual CUnit* GetUnitOnTile()							{ return m_UnitOnTile; }
 	virtual bool MovementCostToEnter(unsigned short& _movementCost);
 private:

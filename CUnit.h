@@ -10,21 +10,26 @@
 class CUnit
 {
 public:
-	CUnit(	CUnitEnums::TYPE _inUnits = CUnitEnums::TYPE::NONE, CUnitEnums::DIRECTION _inDirection = CUnitEnums::DIRECTION::NORTH,
-			float _tileSize = 32.0f,float _inHP = 0.0f, float _inMovement = 0.0f, float _inDamage = 0.0f, int _inRange = 0.0f);
+	CUnit(	CUnitEnums::TYPE _inUnits = CUnitEnums::TYPE::NONE,
+			int _tileSize = 32,float _inHP = 0.0f, float _inMovement = 0.0f, float _inDamage = 0.0f, int _inRange = 0.0f,
+			CUnitEnums::DIRECTION _inDirection = CUnitEnums::DIRECTION::NORTH );
 	~CUnit();
 
-	void Initialize(sf::Texture* _inTextureSource);
-	void SetHP(float& _inHP);
-	void SetMovement(float& _inMovement);
-	void SetDamageDealt(float& _inDamage);
-	void SetRange(int& _inRange);
+	//void Initialize(sf::Texture* _inTextureSource);
+	void Initialize(sf::Sprite* _inSpriteSource);
+	void SetHP(float& _inHP) { m_fHP = _inHP; }
+	void SetMovement(float& _inMovement) { m_fMovementPointsBase = _inMovement; }
+	void SetDamageDealt(float& _inDamage) { m_fDamage = _inDamage; }
+	void SetRange(int& _inRange) { m_iRange = _inRange; }
+	void SetFaction(CUnitEnums::FACTION _inFaction) { m_eFaction = _inFaction; }
 	void Update();
 	void Update(double& _inTimeElapsed);
 	float GetHP() { return m_fHP; }
 	float TakeDamage(float& _inDamage) { m_fHP -= _inDamage; return m_fHP; }
 	void Attack();
-	void MoveTo(sf::Vector2i _inTileLocation);
+	void MoveTo(sf::Vector2u _inTileLocation);
+	void MoveTo(sf::Vector2f _inPosition);
+	sf::Sprite* GetSprite() { return m_sprtUnitSprite; }
 	void Replenish();
 
 private:
@@ -40,12 +45,13 @@ private:
 	float m_fDamage;
 	float m_fTileSize;
 	int m_iRange;
+	CUnitEnums::FACTION m_eFaction;
 	const double m_dAnimeFrameTime = 200.0f;
 	double m_dAnimProgress = 0.0f;
 	
-	sf::Texture* m_texTextureSource;
+	//sf::Texture* m_texTextureSource;
 	sf::Sprite* m_sprtUnitSprite;
-	sf::Vector2i m_v2iCurrentTileLocation;
+	sf::Vector2u m_v2uCurrentTileLocation;
 
 	//const posiitions for frames in tilemap
 	const sf::IntRect m_AnimationFrameL = { 0, 0, 32, 32 };
