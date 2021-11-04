@@ -1,8 +1,8 @@
 #include "CScene.h"
 
-int CScene::m_iBaseColour[] = { 0, 0 ,0 };
-int CScene::m_iUnitsRed[] = { 0, 0 ,0 };
-int CScene::m_iUnitsBlue[] = { 0, 0 ,0 };
+//int CScene::m_iBaseColour[] = { 0, 0 ,0 };
+//int CScene::m_iUnitsRed[] = { 0, 0 ,0 };
+//int CScene::m_iUnitsBlue[] = { 0, 0 ,0 };
 
 CScene::CScene()
 {
@@ -21,7 +21,7 @@ CScene::~CScene()
 /// </summary>
 /// <param name="_filePath"></param>
 /// <returns></returns>
-bool CScene::LoadMapConfig(const std::string& _filePath)
+bool CScene::ParseConfig(const std::string& _filePath)
 {
 	std::fstream mapSettings;
 	std::string currentLine;
@@ -283,25 +283,26 @@ int CScene::GetUnits_Opponent()
 /// <summary>
 /// Processes the line provided. Returns the label at the beginning
 /// of the line and writes the values into arg2
+/// NOTE:*Seems like a common function. Create a base parser class?*
 /// </summary>
 /// <param name="_inputLine"></param>
 /// <param name="_lineSettingValues"></param>
 /// <returns></returns>
-std::string CScene::ParseLineGetLabel (const std::string& _inputLine, std::string& _lineSettingValues)
-{ 
-	std::size_t positionOfSymbol = _inputLine.find('=');
-	if (positionOfSymbol != std::string::npos)
-	{
-		std::string parsedLabel = _inputLine.substr(0, positionOfSymbol);
-		std::string parsedValue = _inputLine.substr(positionOfSymbol + 1, std::string::npos);
-		_lineSettingValues = parsedValue;
-		return parsedLabel;
-	}
-	else
-	{
-		return std::string();
-	}
-}
+//std::string CScene::ParseLineGetLabel (const std::string& _inputLine, std::string& _lineSettingValues)
+//{ 
+//	std::size_t positionOfSymbol = _inputLine.find('=');
+//	if (positionOfSymbol != std::string::npos)
+//	{
+//		std::string parsedLabel = _inputLine.substr(0, positionOfSymbol);
+//		std::string parsedValue = _inputLine.substr(positionOfSymbol + 1, std::string::npos);
+//		_lineSettingValues = parsedValue;
+//		return parsedLabel;
+//	}
+//	else
+//	{
+//		return std::string();
+//	}
+//}
 
 /// <summary>
 /// Read the line to the number of rows or columns

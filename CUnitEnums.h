@@ -11,9 +11,10 @@ class CUnitEnums
 public:
 	struct StatBonus_Add
 	{
+		float m_tfHPBonus;
 		float m_tfAtkBonus;
 		float m_tfMoveBonus;
-		float m_tfRangeBonus;
+		int m_tiRangeBonus;
 	};
 
 	struct StatBonus_Multiply
@@ -22,6 +23,18 @@ public:
 		float m_tfMoveBonus;
 		float m_tfRangeBonus;
 		float m_tfIncDamgeBonus;
+	};
+
+	struct UnitRecord
+	{
+		float m_tfHP;
+		float m_tfAtk;
+		float m_tfMove;
+		int m_tiRange;
+		float m_tiSpriteWidth;
+		float m_tiSpriteHeight;
+		float m_tiSpriteTop;
+		float m_tiSpriteLeft;
 	};
 
 	enum class TYPE
@@ -55,6 +68,14 @@ public:
 		NONE,
 		BLUE,
 		RED
+	};
+
+	enum class FACTION
+	{
+		NONE,
+		TALONS,
+		LYNXES,
+		URSINE
 	};
 };
 

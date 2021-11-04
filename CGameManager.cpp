@@ -10,6 +10,7 @@ CGameManager::CGameManager()
 	m_pSpriteBackground = nullptr;
 	m_pUIMgr = nullptr;
 	m_pSceneMgr = nullptr;
+	m_pUnitMgr = nullptr;
 
 }
 
@@ -34,9 +35,11 @@ bool CGameManager::IntializeGame()
 	if (!m_pFont->loadFromFile("font/OpenSans-Regular.ttf"))
 	{
 		//ERROR: unable to load font file
-		std::cout << "\nERROR: unable to load font file\n";
+		std::cout << "\nERROR: unable to load font file" << std::endl;
 		return false;
 	}
+
+	m_pUnitMgr->ParseConfig(m_strUnitConfig, m_strFactionConfig);
 
 	m_pGameWindow = new sf::RenderWindow
 						(
@@ -46,24 +49,21 @@ bool CGameManager::IntializeGame()
 
 	m_pGameWindow->setVerticalSyncEnabled(false);
 	m_pGameWindow->setFramerateLimit(30);
+	m_pUIMgr->IntializeUI(m_pGameWindow->getSize() , m_v2uGameWindowSize_Current.x - 192);
 	m_pGameWindow->clear();
 
-	m_pGameBackground = new sf::RenderTexture();
-	m_pGameBackground->create(m_kv2uGameWindowSize_Default.x, m_kv2uGameWindowSize_Default.y);
-	m_pGameBackground->clear(sf::Color::White);
-
-	m_pSpriteBackground = new sf::Sprite();
-	m_pSpriteBackground->setTexture(m_pGameBackground->getTexture(),true);
-
-	m_pGameBackground->display();
 	m_pGameWindow->display();
 
 	return true;
 }
 
-void CGameManager::SetPointersToOtherSystems(CUIManager* _inputUI, CSceneManager* _inputSceneMgr)
+void CGameManager::SetPointersToOtherSystems(	CUIManager* _inputUI,
+												CSceneManager* _inputSceneMgr,
+												CUnitManager* _inputUnit)
 {
+	m_pUIMgr = _inputUI;
 	m_pSceneMgr = _inputSceneMgr;
+	m_pUnitMgr = _inputUnit;
 }
 
 void CGameManager::DrawObject(sf::Drawable* _object)
@@ -72,7 +72,9 @@ void CGameManager::DrawObject(sf::Drawable* _object)
 
 void CGameManager::DisplayGameWorld()
 {
-	m_pGameWindow->draw( (*m_pSpriteBackground) );
+	m_pGameWindow -> clear(sf::Color::Black);
+	DisplayScene();
+	DisplayUI();
 	m_pGameWindow->display();
 }
 
@@ -90,12 +92,12 @@ bool CGameManager::LoadScene()
 	CSceneEnums::SCENETYPE sceneType = CSceneEnums::SCENETYPE::MOUNTAINGRASS;
 	if (CSceneManager::CreateScene(sceneType, m_strMountainVillageConfig))
 	{
-		std::cout << "\nSuccesfully loaded Mountain Village map.\n";
+		std::cout << "\nSuccesfully loaded Mountain Village map." << std::endl;
 		return true;
 	}
 	else
 	{
-		std::cout << "\nUnable to Mountain Village map.\n";
+		std::cout << "\nUnable to Mountain Village map." << std::endl;
 		return false;
 	}
 	
@@ -104,4 +106,23 @@ bool CGameManager::LoadScene()
 void CGameManager::DisplayScene()
 {
 	m_pSceneMgr->DisplayScene(*m_pGameWindow);
+}
+
+bool CGameManager::InitializeUI()
+{
+	if (m_pSceneMgr != nullptr)
+	{
+		return m_pUIMgr->IntializeUI(m_pGameWindow->getSize() , m_pSceneMgr->GetCurrentScene()->GetSceneWidth_Pixels());
+	}
+	else
+	{
+		std::cout << "/nScene Manager not yet set up!" << std::endl;
+		return false;
+	}
+
+}
+
+void CGameManager::DisplayUI()
+{
+	m_pUIMgr->DisplayUI(*m_pGameWindow);
 }

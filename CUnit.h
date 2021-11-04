@@ -48,9 +48,8 @@ private:
 	sf::Vector2i m_v2iCurrentTileLocation;
 
 	//const posiitions for frames in tilemap
-	const sf::IntRect m_AnimationIdleFrame = { 0, 0, 32, 32 };
-	const sf::IntRect m_AnimationMoveFrame[2] = { { 16, 0, 32, 32}, { 32, 0, 32, 32} };
-	const sf::IntRect m_AnimationAttackFrame[3] = { { 48, 0, 32, 32}, { 64, 0, 32, 32}, { 80, 0, 32, 32} };
+	const sf::IntRect m_AnimationFrameL = { 0, 0, 32, 32 };
+	const sf::IntRect m_AnimationFrameR = { 32, 0, 32, 32};
 };
 
 #endif // !__CUNITS_H__

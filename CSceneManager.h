@@ -27,6 +27,8 @@ private:
 
 	static CSceneManager m_SceneMgr;
 	static CScene* m_pCurrentManagedScene;
+	static sf::RenderTexture* m_pSceneBackground;
+	static sf::Sprite* m_pSpriteBackground;
 };
 
 #endif // !__CSCENEMANAGER_H__

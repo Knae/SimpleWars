@@ -66,6 +66,9 @@
     <ClCompile Include="CSceneManager.cpp">
       <Filter>Source Files\Systems</Filter>
     </ClCompile>
+    <ClCompile Include="CParseConfigCommon.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CScene.h">
@@ -96,6 +99,12 @@
       <Filter>Header Files\Systems</Filter>
     </ClInclude>
     <ClInclude Include="CSystemEnums.h">
+      <Filter>Source Files\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="CParseConfigCommon.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="UIEnums.h">
       <Filter>Source Files\Systems</Filter>
     </ClInclude>
   </ItemGroup>

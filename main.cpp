@@ -1,7 +1,5 @@
 #include <time.h>
 #include "CGameManager.h"
-#include "CSceneManager.h"
-#include "CUIManager.h"
 
 int main()
 {
@@ -13,9 +11,10 @@ int main()
 	CGameManager& m_GMRef = CGameManager::GetRef();
 	CSceneManager& m_SMRef = CSceneManager::GetRef();
 	CUIManager& m_UIMRef = CUIManager::GetRef();
+	CUnitManager& m_UnitMRef = CUnitManager::GetRef();
 
 	m_GMRef.IntializeGame();
-	m_GMRef.SetPointersToOtherSystems(&m_UIMRef, &m_SMRef);
+	m_GMRef.SetPointersToOtherSystems(&m_UIMRef, &m_SMRef, &m_UnitMRef);
 	m_GMRef.LoadScene();
 
 
@@ -34,7 +33,12 @@ int main()
 
 		}
 
-		m_GMRef.DisplayScene();
+		if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
+		{
+			sf::Vector2f mousePosition = m_GMRef.GetGameWindow()->mapPixelToCoords(sf::Mouse::getPosition( *(m_GMRef.GetGameWindow())) );
+			m_UIMRef.ProcessClick(mousePosition);
+		}
+
 		m_GMRef.DisplayGameWorld();
 	}
 

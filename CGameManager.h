@@ -7,6 +7,7 @@
 #include <iostream>
 #include "CUIManager.h"
 #include "CSceneManager.h"
+#include "CUnitManager.h"
 
 /// <summary>
 /// This will be the main class accessed by main
@@ -21,7 +22,7 @@ public:
 	//General functions
 	//====================================
 	virtual bool IntializeGame();
-	virtual void SetPointersToOtherSystems(CUIManager* _inputUI, CSceneManager* _inputScene);
+	virtual void SetPointersToOtherSystems(CUIManager* _inputUI, CSceneManager* _inputScene, CUnitManager* _inputUnit);
 	virtual void DrawObject(sf::Drawable* _object);
 	virtual void DisplayGameWorld();
 	virtual void DestroyGameWorld();
@@ -31,6 +32,11 @@ public:
 	//====================================
 	virtual bool LoadScene();
 	virtual void DisplayScene();
+	//====================================
+	//Scene management related
+	//====================================
+	virtual bool InitializeUI();
+	virtual void DisplayUI();
 
 	virtual sf::RenderWindow* GetGameWindow() { return m_pGameWindow; }
 
@@ -42,9 +48,12 @@ private:
 	const sf::Vector2u m_kv2uGameWindowSize_Default = sf::Vector2u(1024, 576);
 	//const static std::string m_strMountainVillageConfig;
 	const std::string m_strMountainVillageConfig= "configs/maps/MountainVillage.ini";
+	const std::string m_strUnitConfig = "configs/units.ini";
+	const std::string m_strFactionConfig = "configs/factions.ini";
 	
 	CUIManager* m_pUIMgr;
 	CSceneManager* m_pSceneMgr;
+	CUnitManager* m_pUnitMgr;
 
 	sf::RenderWindow* m_pGameWindow;
 	sf::RenderTexture* m_pGameBackground;

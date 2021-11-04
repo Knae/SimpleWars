@@ -1,16 +1,25 @@
 #include "CSceneManager.h"
 CSceneManager CSceneManager::m_SceneMgr;
 CScene* CSceneManager::m_pCurrentManagedScene;
+sf::RenderTexture* CSceneManager::m_pSceneBackground;
+sf::Sprite* CSceneManager::m_pSpriteBackground;
 
 CSceneManager::CSceneManager()
 {
 	m_pCurrentManagedScene = nullptr;
+	m_pSpriteBackground = nullptr;
+	m_pSceneBackground = nullptr;
 }
 
 CSceneManager::~CSceneManager()
 {
 	delete m_pCurrentManagedScene;
+	delete m_pSpriteBackground;
+	delete m_pSceneBackground;
+
 	m_pCurrentManagedScene = nullptr;
+	m_pSpriteBackground = nullptr;
+	m_pSceneBackground = nullptr;
 }
 
 /// <summary>
@@ -29,9 +38,34 @@ bool CSceneManager::CreateScene(CSceneEnums::SCENETYPE& _inputType,const std::st
 			delete m_pCurrentManagedScene;
 			m_pCurrentManagedScene = nullptr;
 		}
+
+		if (m_pSceneBackground != nullptr)
+		{
+			delete m_pSceneBackground;
+			m_pSceneBackground = nullptr;
+		}
+
+		if (m_pSpriteBackground != nullptr)
+		{
+			delete m_pSpriteBackground;
+			m_pSpriteBackground = nullptr;
+		}
+
 		m_pCurrentManagedScene = new CScene();
-		m_pCurrentManagedScene->LoadMapConfig(_inputConfigPath);
+		m_pCurrentManagedScene->ParseConfig(_inputConfigPath);
 		m_pCurrentManagedScene->InitializeMap();
+
+		//=============================================================================================================
+		//Needs to be a pointer because we're reading an array of 3 colour values.
+		int* sceneColourValues = m_pCurrentManagedScene->GetBaseColourArrayPointer();
+		sf::Color sceneBackgroundColor( *sceneColourValues, *(sceneColourValues + 1), *(sceneColourValues + 2));
+		//=============================================================================================================
+		m_pSceneBackground = new sf::RenderTexture();
+		m_pSceneBackground->create(m_pCurrentManagedScene->GetSceneWidth_Pixels(), m_pCurrentManagedScene->GetSceneHeight_Pixels());
+		m_pSceneBackground->clear(sceneBackgroundColor);
+
+		m_pSpriteBackground = new sf::Sprite();
+		m_pSpriteBackground->setTexture(m_pSceneBackground->getTexture(), true);
 		return true;
 	}
 	else
@@ -46,8 +80,6 @@ bool CSceneManager::CreateScene(CSceneEnums::SCENETYPE& _inputType,const std::st
 /// <param name="_targetWindow" - the SFML window it is to be displayed></param>
 void CSceneManager::DisplayScene(sf::RenderWindow& _targetWindow)
 {
-	int* sceneColourValues = m_pCurrentManagedScene->GetBaseColourArrayPointer();
-	sf::Color sceneBackground(*sceneColourValues, *(sceneColourValues + 1), *(sceneColourValues + 2));
-	_targetWindow.clear(sceneBackground);
+	_targetWindow.draw(*m_pSpriteBackground);
 	_targetWindow.draw(*m_pCurrentManagedScene);
 }
