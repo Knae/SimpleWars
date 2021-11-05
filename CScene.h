@@ -7,6 +7,7 @@
 #include <iostream>
 #include <map>
 #include "CSceneEnums.h"
+#include "CUnitEnums.h"
 #include "CTile.h"
 #include "CParseConfigCommon.h"
 
@@ -24,8 +25,7 @@ public:
 	virtual bool InitializeMap();
 	virtual CSceneEnums::TILETYPE GetTileType(sf::Vector2f _input);
 	virtual CSceneEnums::TILETYPE GetTileType(unsigned int _inX, unsigned int _inY);
-	virtual int GetUnits_Player();
-	virtual int GetUnits_Opponent();
+	virtual int GetUnitAmount(CUnitEnums::SIDE _inSide, CUnitEnums::TYPE _inType);
 	int* GetBaseColourArrayPointer() { return m_iBaseColour; }
 	virtual unsigned int GetSceneWidth_Pixels() { return m_iMapColumns*m_iTileWidth; }
 	virtual unsigned int GetSceneHeight_Pixels() { return m_iMapRows*m_iTileWidth; }
@@ -34,13 +34,14 @@ public:
 private:
 	//static std::string ParseLineGetLabel (const std::string& _inputLine, std::string& _lineSettingValues);
 	static bool ParseLineForMapSize(std::string& _inputLine, unsigned int& _inputMapRows, unsigned int& _inputMapColumns);
-	static bool ParseLineForUnits(std::string& _inputLine, int* _inputArrayPointer);
-	static bool ConvertToTileType(std::string& _inputString, CSceneEnums::TILETYPE& _outType);
+	static bool ParseLineForUnits(std::string& _inputLine, int& _outUnitAmount, CUnitEnums::TYPE& _outType);
 	
 	const int m_iTileWidth = 32;
 	int m_iBaseColour[3] = { 0 };
-	int m_iUnitsRed[3] = { 0 };
-	int m_iUnitsBlue[3] = { 0 };
+	//int m_iUnitsRed[3] = { 0 };
+	std::map<CUnitEnums::TYPE, int> m_iUnitsRed;
+	//int m_iUnitsBlue[3] = { 0 };
+	std::map<CUnitEnums::TYPE, int> m_iUnitsBlue;
 
 	std::string m_strTileMapFilePath;
 	//18 rows x 26 columns

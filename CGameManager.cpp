@@ -11,6 +11,9 @@ CGameManager::CGameManager()
 	m_pUIMgr = nullptr;
 	m_pSceneMgr = nullptr;
 	m_pUnitMgr = nullptr;
+	m_eCurrentTurn = UIEnums::TURN::NONE;
+	m_eCurrentState = UIEnums::GAMESTATE::NONE;
+	m_eCurrentUnitChosen = CUnitEnums::TYPE::NONE;
 
 }
 
@@ -48,6 +51,7 @@ bool CGameManager::IntializeGame()
 						);
 
 	m_eCurrentState = UIEnums::GAMESTATE::UNITPLACEMENT;
+	m_eCurrentTurn = UIEnums::TURN::BLUE;
 
 	m_pGameWindow->setVerticalSyncEnabled(false);
 	m_pGameWindow->setFramerateLimit(30);
@@ -157,9 +161,21 @@ void CGameManager::ProcessMouseClick()
 					if (clickedTile != nullptr && clickedTile->GetUnitOnTile() == nullptr &&
 						m_pSceneMgr->GetCurrentScene()->GetTileType(mousePosition)!= CSceneEnums::TILETYPE::MOUNTAIN)
 					{
-						CUnit* newUnit = m_pUnitMgr->CreateUnit(m_eCurrentUnitChosen, CUnitEnums::FACTION::TALONS, CUnitEnums::SIDE::BLUE);
+						CUnitEnums::SIDE controllingPlayer = (m_eCurrentTurn == UIEnums::TURN::BLUE) ? (CUnitEnums::SIDE::BLUE) : (CUnitEnums::SIDE::RED);
+						CUnit* newUnit = m_pUnitMgr->CreateUnit(m_eCurrentUnitChosen, CUnitEnums::FACTION::TALONS, controllingPlayer);
 						clickedTile->UnitEntersTile(newUnit);
 						newUnit->MoveTo(mousePosition);
+
+						//Update number of units placed
+						std::map<CUnitEnums::TYPE, int>::iterator element = m_iUnitPlaced.find(m_eCurrentUnitChosen);
+						if (element != m_iUnitPlaced.end())
+						{
+							(element->second)++;
+						}
+						else
+						{
+							m_iUnitPlaced.emplace(m_eCurrentUnitChosen,1);
+						}
 					}
 				}
 				break;

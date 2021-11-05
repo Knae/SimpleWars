@@ -33,7 +33,7 @@ private:
 	CUIManager(CUIManager const&) = delete;
 	void operator=(CUIManager const&) = delete;
 
-	static void ChangeMouseState();
+	static void ChangeState();
 
 	static const std::string m_strUnitButtonSpriteMap;// = "assets/spritemaps/UnitButtons.png";
 	static const std::string m_strEmblemSpriteMap;// = "assets/spritemaps/FactionEmblems.png";

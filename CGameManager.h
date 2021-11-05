@@ -65,6 +65,9 @@ private:
 	UIEnums::TURN m_eCurrentTurn;
 	UIEnums::GAMESTATE m_eCurrentState;
 	CUnitEnums::TYPE m_eCurrentUnitChosen;
+
+	//track number of units placed
+	std::map<CUnitEnums::TYPE, int> m_iUnitPlaced;
 };
 
 #endif // !__CGAMEMANAGER_H__

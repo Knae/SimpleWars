@@ -23,3 +23,91 @@ std::string CParseConfigCommon::ParseLineGetLabel(const std::string& _inputLine,
 		return std::string();
 	}
 }
+
+
+/// <summary>
+/// Parse the given string to get the corresponding tiletype
+/// </summary>
+/// <param name="_inputString"></param>
+/// <param name="_outType"></param>
+/// <returns></returns>
+bool CParseConfigCommon::ConvertToTileType(std::string& _inputString, CSceneEnums::TILETYPE& _outType)
+{
+	if (_inputString.compare("GRASS") == 0)
+	{
+		_outType = CSceneEnums::TILETYPE::GRASS;
+	}
+	else if (_inputString.compare("TALLGRASS") == 0)
+	{
+		_outType = CSceneEnums::TILETYPE::TALLGRASS;
+	}
+	else if (_inputString.compare("ROAD") == 0)
+	{
+		_outType = CSceneEnums::TILETYPE::ROAD;
+	}
+	else if (_inputString.compare("WATER") == 0)
+	{
+		_outType = CSceneEnums::TILETYPE::COAST;
+	}
+	else if (_inputString.compare("WATER") == 0)
+	{
+		_outType = CSceneEnums::TILETYPE::WATER;
+	}
+	else if (_inputString.compare("HILL") == 0)
+	{
+		_outType = CSceneEnums::TILETYPE::HILL;
+	}
+	else if (_inputString.compare("MOUNTAIN") == 0)
+	{
+		_outType = CSceneEnums::TILETYPE::MOUNTAIN;
+	}
+	else if (_inputString.compare("URBAN") == 0)
+	{
+		_outType = CSceneEnums::TILETYPE::URBAN;
+	}
+	else if (_inputString.compare("FORT") == 0)
+	{
+		_outType = CSceneEnums::TILETYPE::FORT;
+	}
+	else if (_inputString.compare("BASETILE") == 0)
+	{
+		_outType = CSceneEnums::TILETYPE::BASETILE;
+	}
+	else
+	{
+		//Unrecognised tile type name
+		std::cout << "\nWARN::Unreocignized/Unrecorded tile type" << std::endl;
+		return false;
+	}
+	return true;
+}
+
+/// <summary>
+/// Converts a given string to the corresponding unit type
+/// </summary>
+/// <param name="_inputString">String that to be converted to unit type</param>
+/// <param name="_outType">where the converted type will be stored. CUnitEnums::TYPE</param>
+/// <returns></returns>
+bool CParseConfigCommon::ConvertToUnitType(std::string& _inputString, CUnitEnums::TYPE& _outType)
+{
+	if (_inputString.compare("INFANTRY") == 0)
+	{
+		_outType = CUnitEnums::TYPE::INFANTRY;
+	}
+	else if (_inputString.compare("TANK") == 0)
+	{
+		_outType = CUnitEnums::TYPE::TANK;
+	}
+	else if (_inputString.compare("ARTILLERY") == 0)
+	{
+		_outType = CUnitEnums::TYPE::ARTILLERY;
+	}
+	else
+	{
+		//Unrecognised line
+		std::cout << "\nWARN::Unreocignized/Unrecorded unit type" << std::endl;
+		_outType = CUnitEnums::TYPE::NONE;
+		return false;
+	}
+	return true;
+}

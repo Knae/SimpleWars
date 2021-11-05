@@ -13,6 +13,11 @@ CScene::CScene()
 
 CScene::~CScene()
 {
+	if (m_MapTiles != nullptr)
+	{
+		delete m_MapTiles;
+		m_MapTiles = nullptr;
+	}
 }
 
 /// <summary>
@@ -133,12 +138,14 @@ bool CScene::ParseConfig(const std::string& _filePath)
 			{
 				//Getting blue units to place on map
 				std::cout << "\nReading Blue units on map\n";
-				int parsedUnitIndex = 0;
+				int parsedUnitAmount = 0;
+				CUnitEnums::TYPE parsedType = CUnitEnums::TYPE::NONE;
 
 				std::getline(mapSettings, currentLine);
 				while (currentLine.compare("</Units_Blue>") != 0)
 				{
-					ParseLineForUnits(currentLine, m_iUnitsBlue);
+					ParseLineForUnits(currentLine, parsedUnitAmount, parsedType);
+					m_iUnitsBlue.emplace(parsedType, parsedUnitAmount);
 
 					std::getline(mapSettings, currentLine);
 				}
@@ -147,27 +154,14 @@ bool CScene::ParseConfig(const std::string& _filePath)
 			{
 				//Getting Red units to place on map
 				std::cout << "\nReading Red units on map\n";
-				int parsedUnitIndex = 0;
+				int parsedUnitAmount = 0;
+				CUnitEnums::TYPE parsedType = CUnitEnums::TYPE::NONE;
 
 				std::getline(mapSettings, currentLine);
 				while (currentLine.compare("</Units_Red>") != 0)
 				{
-					ParseLineForUnits(currentLine, m_iUnitsRed);
-
-					std::getline(mapSettings, currentLine);
-				}
-			}
-			else if (currentLine.compare("<Units_Red>")==0)
-			{
-				//Getting Red units to place on map
-				std::cout << "\nReading Red units on map\n";
-				int parsedUnitIndex = 0;
-
-				std::getline(mapSettings, currentLine);
-				while (currentLine.compare("</Units_Red>") != 0)
-				{
-					ParseLineForUnits(currentLine, m_iUnitsRed);
-
+					ParseLineForUnits(currentLine, parsedUnitAmount, parsedType);
+					m_iUnitsRed.emplace(parsedType, parsedUnitAmount);
 					std::getline(mapSettings, currentLine);
 				}
 			}
@@ -194,7 +188,6 @@ bool CScene::ParseConfig(const std::string& _filePath)
 								m_iBaseColour[i] = std::stoi(lineValues.substr(markerFirstPosition, markerSecondPosition - markerFirstPosition));
 						}
 					}
-
 					std::getline(mapSettings, currentLine);
 				}
 			}
@@ -276,15 +269,30 @@ CSceneEnums::TILETYPE CScene::GetTileType(unsigned int _inX, unsigned int _inY)
 	return GetTile(_inX, _inY)->GetTileType();
 }
 
-int CScene::GetUnits_Player()
+int CScene::GetUnitAmount(CUnitEnums::SIDE _inSide, CUnitEnums::TYPE _inType)
 {
+	std::map<CUnitEnums::TYPE, int>::iterator element;
+
+	if (_inSide == CUnitEnums::SIDE::BLUE)
+	{
+		element = m_iUnitsBlue.find(_inType);
+		if(element!=m_iUnitsBlue.end())
+		{
+			return element->second;
+		}
+	}
+	else
+	{
+		element = m_iUnitsRed.find(_inType);
+		if (element != m_iUnitsBlue.end())
+		{
+			return element->second;
+		}
+	}
+
 	return 0;
 }
 
-int CScene::GetUnits_Opponent()
-{
-	return 0;
-}
 CTile* CScene::GetTile(sf::Vector2f _inPosition)
 {
 	unsigned int tilePositionX = (unsigned int)(_inPosition.x / m_iTileWidth);
@@ -347,12 +355,13 @@ bool CScene::ParseLineForMapSize(std::string& _inputLine, unsigned int& _inputMa
 
 }
 /// <summary>
-/// Parse line to get the number of units of that type
+/// Parse the line for the number of units of what type on this map
 /// </summary>
-/// <param name="_inputLine"></param>
-/// <param name="_inputArrayPointer"></param>
+/// <param name="_inputLine">The single line from the config file. string&/param>
+/// <param name="_outUnitAmount">Where the unit amount is returned. int&</param>
+/// <param name="_outType">Where the unit type is stored. CUnitEnums::TYPE&</param>
 /// <returns></returns>
-bool CScene::ParseLineForUnits(std::string& _inputLine, int* _inputArrayPointer)
+bool CScene::ParseLineForUnits(std::string& _inputLine, int& _outUnitAmount, CUnitEnums::TYPE& _outType)
 {
 	std::string lineLabel;
 	std::string lineValue;
@@ -360,82 +369,18 @@ bool CScene::ParseLineForUnits(std::string& _inputLine, int* _inputArrayPointer)
 
 	lineLabel = ParseLineGetLabel(_inputLine, lineValue);
 
-	if (lineLabel.compare("INFANTRY") == 0)
+	if (CParseConfigCommon::ConvertToUnitType(lineLabel, _outType))
 	{
-		parsedUnitIndex = 0;
-	}
-	else if (lineLabel.compare("TANK") == 0)
-	{
-		parsedUnitIndex = 1;
-	}
-	else if (lineLabel.compare("ARTILLERY") == 0)
-	{
-		parsedUnitIndex = 2;
+		_outUnitAmount = std::stoi(lineValue);
+		return true;
 	}
 	else
 	{
-		//Unrecognised line
+		_outUnitAmount = 0;
 		return false;
 	}
-	*(_inputArrayPointer+ parsedUnitIndex)= std::stoi(lineValue);
-	return true;
 }
 
-/// <summary>
-/// Parse the given string to get the corresponding tiletype
-/// </summary>
-/// <param name="_inputString"></param>
-/// <param name="_outType"></param>
-/// <returns></returns>
-bool CScene::ConvertToTileType(std::string& _inputString, CSceneEnums::TILETYPE& _outType)
-{
-	if (_inputString.compare("GRASS") == 0)
-	{
-		_outType = CSceneEnums::TILETYPE::GRASS;
-	}
-	else if (_inputString.compare("TALLGRASS") == 0)
-	{
-		_outType = CSceneEnums::TILETYPE::TALLGRASS;
-	}
-	else if (_inputString.compare("ROAD") == 0)
-	{
-		_outType = CSceneEnums::TILETYPE::ROAD;
-	}
-	else if (_inputString.compare("WATER") == 0)
-	{
-		_outType = CSceneEnums::TILETYPE::COAST;
-	}
-	else if (_inputString.compare("WATER") == 0)
-	{
-		_outType = CSceneEnums::TILETYPE::WATER;
-	}
-	else if (_inputString.compare("HILL") == 0)
-	{
-		_outType = CSceneEnums::TILETYPE::HILL;
-	}
-	else if (_inputString.compare("MOUNTAIN") == 0)
-	{
-		_outType = CSceneEnums::TILETYPE::MOUNTAIN;
-	}
-	else if (_inputString.compare("URBAN") == 0)
-	{
-		_outType = CSceneEnums::TILETYPE::URBAN;
-	}
-	else if (_inputString.compare("FORT") == 0)
-	{
-		_outType = CSceneEnums::TILETYPE::FORT;
-	}
-	else if (_inputString.compare("BASETILE") == 0)
-	{
-		_outType = CSceneEnums::TILETYPE::BASETILE;
-	}
-	else
-	{
-		//Unrecognised tile type name
-		return false;
-	}
-	return true;
-}
 
 /// <summary>
 /// Overriding the sfml default draw function to draw all the vertices

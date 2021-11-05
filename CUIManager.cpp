@@ -261,6 +261,7 @@ int CUIManager::ProcessClickInCtrlPanel(sf::Vector2f& _inCoords)
 void CUIManager::SetUpUnitPlacementPanel()
 {
 	sf::Sprite* currentButton = nullptr;
+	sf::Text* currentButtonText = nullptr;
 	sf::Text* currentText = nullptr;
 	sf::IntRect currentRect;
 	for (int i = 0; i < 4; i++)
@@ -273,9 +274,11 @@ void CUIManager::SetUpUnitPlacementPanel()
 		currentButton->setPosition( sf::Vector2f(m_uSceneWidth+16.0f,320.0f+(i*48)) );
 		m_vecButtons_UnitPlacementPanel.push_back(currentButton);
 	}
+
+
 	currentButton = nullptr;
 }
 
-void CUIManager::ChangeMouseState()
+void CUIManager::ChangeState()
 {
 }
