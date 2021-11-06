@@ -8,6 +8,7 @@
 #include "CUIManager.h"
 #include "CSceneManager.h"
 #include "CUnitManager.h"
+#include "CParseConfigCommon.h"
 
 /// <summary>
 /// This will be the main class accessed by main
@@ -22,6 +23,7 @@ public:
 	//General functions
 	//====================================
 	virtual bool IntializeGame();
+	virtual bool ChangeCurrentState(UIEnums::GAMESTATE _inState);
 	virtual void SetPointersToOtherSystems(CUIManager* _inputUI, CSceneManager* _inputScene, CUnitManager* _inputUnit);
 	virtual void DrawObject(sf::Drawable* _object);
 	virtual void DisplayGameWorld();
@@ -37,6 +39,7 @@ public:
 	//====================================
 	virtual bool InitializeUI();
 	virtual void ProcessMouseClick();
+	virtual void SetUIToUnitPlacement();
 	virtual void DisplayUI();
 
 	virtual sf::RenderWindow* GetGameWindow() { return m_pGameWindow; }
@@ -66,8 +69,8 @@ private:
 	UIEnums::GAMESTATE m_eCurrentState;
 	CUnitEnums::TYPE m_eCurrentUnitChosen;
 
-	//track number of units placed
-	std::map<CUnitEnums::TYPE, int> m_iUnitPlaced;
+	//track number of units to place
+	std::map<CUnitEnums::TYPE, int> m_iUnitsToPlaced;
 };
 
 #endif // !__CGAMEMANAGER_H__

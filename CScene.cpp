@@ -269,6 +269,13 @@ CSceneEnums::TILETYPE CScene::GetTileType(unsigned int _inX, unsigned int _inY)
 	return GetTile(_inX, _inY)->GetTileType();
 }
 
+/// <summary>
+/// Get the amount of units of a given type that the given side
+/// should have on this map
+/// </summary>
+/// <param name="_inSide">The side in question. CUnitEnums::SIDE</param>
+/// <param name="_inType">The unit type in question. CUnitEnums::TYPE</param>
+/// <returns></returns>
 int CScene::GetUnitAmount(CUnitEnums::SIDE _inSide, CUnitEnums::TYPE _inType)
 {
 	std::map<CUnitEnums::TYPE, int>::iterator element;
@@ -291,6 +298,32 @@ int CScene::GetUnitAmount(CUnitEnums::SIDE _inSide, CUnitEnums::TYPE _inType)
 	}
 
 	return 0;
+}
+
+/// <summary>
+/// Populate a given map container with the number units to be placed
+/// for a given faction
+/// </summary>
+/// <param name="_inSide">The side in question. CUnitEnums::SIDE</param>
+/// <param name="_inUnits">Pointer to the map container to populate. std::map<CUnitEnums::TYPE, int>*</param>
+/// 
+void CScene::GetUnitsToPlace(CUnitEnums::SIDE _inSide, std::map<CUnitEnums::TYPE, int>* _inUnits)
+{
+	if (_inSide == CUnitEnums::SIDE::BLUE)
+	{
+		//element = m_iUnitsBlue.find(_inType);
+		for(auto& element:m_iUnitsBlue)
+		{
+			(*_inUnits).emplace(element.first,element.second);
+		}
+	}
+	else
+	{
+		for (auto& element : m_iUnitsRed)
+		{
+			(*_inUnits).emplace(element.first, element.second);
+		}
+	}
 }
 
 CTile* CScene::GetTile(sf::Vector2f _inPosition)

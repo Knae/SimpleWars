@@ -19,6 +19,7 @@ public:
 	static bool IntializeUI(sf::Vector2u _inWindowSize, const unsigned int _inSceneWidth = 832);
 	static void UpdateUI();
 	static void DisplayUI(sf::RenderWindow& _inWindow);
+	static void ClearUIElements();
 	static bool ProcessClick(sf::Vector2f& _inCoords);
 	static int ProcessClickInCtrlPanel(sf::Vector2f& _inCoords);
 	static void SetUpUnitPlacementPanel();

@@ -24,7 +24,6 @@ std::string CParseConfigCommon::ParseLineGetLabel(const std::string& _inputLine,
 	}
 }
 
-
 /// <summary>
 /// Parse the given string to get the corresponding tiletype
 /// </summary>
@@ -110,4 +109,48 @@ bool CParseConfigCommon::ConvertToUnitType(std::string& _inputString, CUnitEnums
 		return false;
 	}
 	return true;
+}
+
+UIEnums::TURN CParseConfigCommon::Convert(CUnitEnums::SIDE _input)
+{
+	switch (_input)
+	{
+		case CUnitEnums::SIDE::BLUE:
+		{
+			return UIEnums::TURN::BLUE;
+			break;
+		}
+		case CUnitEnums::SIDE::RED:
+		{
+			return UIEnums::TURN::RED;
+			break;
+		}
+		default:
+		{
+			return UIEnums::TURN::NONE;
+			break;
+		}
+	}
+}
+
+CUnitEnums::SIDE CParseConfigCommon::Convert(UIEnums::TURN _input)
+{
+	switch (_input)
+	{
+		case UIEnums::TURN::BLUE:
+		{
+			return CUnitEnums::SIDE::BLUE;
+			break;
+		}
+		case UIEnums::TURN::RED:
+		{
+			return CUnitEnums::SIDE::RED;
+			break;
+		}
+		default:
+		{
+			return CUnitEnums::SIDE::NONE;
+			break;
+		}
+	}
 }

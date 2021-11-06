@@ -63,6 +63,34 @@ bool CGameManager::IntializeGame()
 	return true;
 }
 
+bool CGameManager::ChangeCurrentState(UIEnums::GAMESTATE _inState)
+{
+	m_eCurrentState = _inState;
+	switch (m_eCurrentState)
+	{
+		case UIEnums::GAMESTATE::MAPSELECTION:
+		{
+			break;
+		}
+		case UIEnums::GAMESTATE::UNITPLACEMENT:
+		{
+			m_eCurrentTurn = UIEnums::TURN::BLUE;
+			m_pSceneMgr->GetCurrentScene()->GetUnitsToPlace(CParseConfigCommon::Convert(m_eCurrentTurn), &m_iUnitsToPlaced);
+			SetUIToUnitPlacement();
+			break;
+		}
+		case UIEnums::GAMESTATE::GAMELOOP:
+		{
+			break;
+		}
+		default:
+		{
+			break;
+		}
+	}
+	return false;
+}
+
 void CGameManager::SetPointersToOtherSystems(	CUIManager* _inputUI,
 												CSceneManager* _inputSceneMgr,
 												CUnitManager* _inputUnit)
@@ -99,6 +127,7 @@ bool CGameManager::LoadScene()
 	if (CSceneManager::CreateScene(sceneType, m_strMountainVillageConfig))
 	{
 		std::cout << "\nSuccesfully loaded Mountain Village map." << std::endl;
+		ChangeCurrentState(UIEnums::GAMESTATE::UNITPLACEMENT);
 		return true;
 	}
 	else
@@ -106,7 +135,6 @@ bool CGameManager::LoadScene()
 		std::cout << "\nUnable to Mountain Village map." << std::endl;
 		return false;
 	}
-	
 }
 
 //Display the map and the units in it
@@ -157,24 +185,29 @@ void CGameManager::ProcessMouseClick()
 			{
 				if (m_eCurrentUnitChosen != CUnitEnums::TYPE::NONE)
 				{
-					CTile* clickedTile = m_pSceneMgr->GetTileInScene(mousePosition);
-					if (clickedTile != nullptr && clickedTile->GetUnitOnTile() == nullptr &&
-						m_pSceneMgr->GetCurrentScene()->GetTileType(mousePosition)!= CSceneEnums::TILETYPE::MOUNTAIN)
+					//Get the amount of this unit that has already been placed
+					std::map<CUnitEnums::TYPE, int>::iterator element = m_iUnitsToPlaced.find(m_eCurrentUnitChosen);
+					if (element == m_iUnitsToPlaced.end())
 					{
-						CUnitEnums::SIDE controllingPlayer = (m_eCurrentTurn == UIEnums::TURN::BLUE) ? (CUnitEnums::SIDE::BLUE) : (CUnitEnums::SIDE::RED);
-						CUnit* newUnit = m_pUnitMgr->CreateUnit(m_eCurrentUnitChosen, CUnitEnums::FACTION::TALONS, controllingPlayer);
-						clickedTile->UnitEntersTile(newUnit);
-						newUnit->MoveTo(mousePosition);
+						m_iUnitsToPlaced.emplace(m_eCurrentUnitChosen, 0);
+						element = m_iUnitsToPlaced.end()--;
+					}
+					int currentAmountPlaced = element->second;
+					CUnitEnums::SIDE controllingPlayer = (m_eCurrentTurn == UIEnums::TURN::BLUE) ? (CUnitEnums::SIDE::BLUE) : (CUnitEnums::SIDE::RED);
 
-						//Update number of units placed
-						std::map<CUnitEnums::TYPE, int>::iterator element = m_iUnitPlaced.find(m_eCurrentUnitChosen);
-						if (element != m_iUnitPlaced.end())
+					if (currentAmountPlaced > 0/*< m_pSceneMgr->GetCurrentScene()->GetUnitAmount(controllingPlayer, m_eCurrentUnitChosen)*/)
+					{
+						CTile* clickedTile = m_pSceneMgr->GetTileInScene(mousePosition);
+
+						if (clickedTile != nullptr && clickedTile->GetUnitOnTile() == nullptr &&
+							m_pSceneMgr->GetCurrentScene()->GetTileType(mousePosition) != CSceneEnums::TILETYPE::MOUNTAIN)
 						{
-							(element->second)++;
-						}
-						else
-						{
-							m_iUnitPlaced.emplace(m_eCurrentUnitChosen,1);
+							CUnit* newUnit = m_pUnitMgr->CreateUnit(m_eCurrentUnitChosen, CUnitEnums::FACTION::TALONS, controllingPlayer);
+							clickedTile->UnitEntersTile(newUnit);
+							newUnit->MoveTo(mousePosition);
+
+							//Update number of units placed
+							(element->second)--;
 						}
 					}
 				}
@@ -187,6 +220,10 @@ void CGameManager::ProcessMouseClick()
 		}
 	}
 
+}
+
+void CGameManager::SetUIToUnitPlacement()
+{
 }
 
 void CGameManager::DisplayUI()

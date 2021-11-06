@@ -40,6 +40,8 @@ CUIManager::CUIManager()
 
 CUIManager::~CUIManager()
 {
+	ClearUIElements();
+
 	delete m_pPanelBackground;
 	delete m_pSpriteBackground;
 	delete m_ButtonUnitTexture;
@@ -150,6 +152,25 @@ void CUIManager::DisplayUI(sf::RenderWindow& _inWindow)
 	for (auto& element : m_vecButtons_UnitPlacementPanel)
 	{
 		_inWindow.draw(*element);
+	}
+}
+
+/// <summary>
+/// Empty all vectors containing UI elements such as
+/// buttons and text
+/// </summary>
+void CUIManager::ClearUIElements()
+{
+	for (auto& element : m_vecButtons_UnitPlacementPanel)
+	{
+		delete element;
+		element = nullptr;
+	}
+
+	for (auto& element : m_vecText_UnitPlacementPanel)
+	{
+		delete element;
+		element = nullptr;
 	}
 }
 

@@ -98,10 +98,10 @@
     <ClInclude Include="CUnitManager.h">
       <Filter>Header Files\Systems</Filter>
     </ClInclude>
-    <ClInclude Include="UIEnums.h">
-      <Filter>Source Files\Systems</Filter>
-    </ClInclude>
     <ClInclude Include="CParseConfigCommon.h">
+      <Filter>Header Files\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="UIEnums.h">
       <Filter>Header Files\Systems</Filter>
     </ClInclude>
   </ItemGroup>
