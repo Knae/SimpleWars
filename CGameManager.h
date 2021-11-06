@@ -42,6 +42,7 @@ public:
 	virtual bool InitializeUI();
 	virtual void ProcessMouseClick();
 	virtual void SetUIToUnitPlacement();
+	virtual void SetUIToGameLoop();
 	virtual void DisplayUI();
 
 	virtual sf::RenderWindow* GetGameWindow() { return m_pGameWindow; }
@@ -69,7 +70,9 @@ private:
 
 	UIEnums::TURN m_eCurrentTurn;
 	UIEnums::GAMESTATE m_eCurrentState;
-	CUnitEnums::TYPE m_eCurrentUnitChosen;
+	UIEnums::MOUSESTATE m_eCurrentUIMouseState;
+	CUnitEnums::TYPE m_eCurrentTypeChosen;
+	CUnit* m_SelectedUnit;
 
 	//track number of units to place
 	std::map<CUnitEnums::TYPE, int> m_iUnitsToPlaced_B;

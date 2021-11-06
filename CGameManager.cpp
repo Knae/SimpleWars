@@ -12,10 +12,11 @@ CGameManager::CGameManager()
 	m_pSceneMgr = nullptr;
 	m_pUnitMgr = nullptr;
 	m_pUnitsToPlace = nullptr;
+	m_SelectedUnit = nullptr;
 	m_eCurrentTurn = UIEnums::TURN::NONE;
 	m_eCurrentState = UIEnums::GAMESTATE::NONE;
-	m_eCurrentUnitChosen = CUnitEnums::TYPE::NONE;
-
+	m_eCurrentUIMouseState = UIEnums::MOUSESTATE::NONE;
+	m_eCurrentTypeChosen = CUnitEnums::TYPE::NONE;
 }
 
 CGameManager::~CGameManager()
@@ -31,6 +32,8 @@ CGameManager::~CGameManager()
 
 	delete m_pSpriteBackground;
 	m_pSpriteBackground = nullptr;
+	
+	m_SelectedUnit = nullptr;
 }
 
 bool CGameManager::IntializeGame()
@@ -99,6 +102,8 @@ bool CGameManager::ChangeCurrentState(UIEnums::GAMESTATE _inState)
 		}
 		case UIEnums::GAMESTATE::GAMELOOP:
 		{
+			m_eCurrentTurn = UIEnums::TURN::BLUE;
+			SetUIToGameLoop();
 			break;
 		}
 		default:
@@ -130,13 +135,14 @@ void CGameManager::SwitchTurns()
 			}
 			else
 			{
-				m_eCurrentState = UIEnums::GAMESTATE::GAMELOOP;
+				ChangeCurrentState(UIEnums::GAMESTATE::GAMELOOP);
 			}
 
 			break;
 		}
 		case UIEnums::GAMESTATE::GAMELOOP:
 		{
+
 			break;
 		}
 		default:
@@ -213,6 +219,11 @@ bool CGameManager::InitializeUI()
 	}
 }
 
+/// <summary>
+/// Process what to do when a left click is registered.
+/// Depends on location of click and what state the game
+/// is currently running at.
+/// </summary>
 void CGameManager::ProcessMouseClick()
 {
 	sf::Vector2f mousePosition = m_pGameWindow->mapPixelToCoords(sf::Mouse::getPosition(*(m_pGameWindow)) );
@@ -222,11 +233,20 @@ void CGameManager::ProcessMouseClick()
 		{
 			case UIEnums::GAMESTATE::UNITPLACEMENT:
 			{	
-				m_eCurrentUnitChosen = m_pUIMgr->GetChosenUnit();
+				m_eCurrentTypeChosen = m_pUIMgr->GetChosenUnit();
+				break;
+			}
+			case UIEnums::GAMESTATE::GAMELOOP:
+			{
+				if (m_SelectedUnit != nullptr)
+				{
+					m_eCurrentUIMouseState = m_pUIMgr->GetCurrentState();
+				}
 				break;
 			}
 			default:
 			{
+				
 				break;
 			}
 		}
@@ -237,41 +257,73 @@ void CGameManager::ProcessMouseClick()
 		{
 			case UIEnums::GAMESTATE::UNITPLACEMENT:
 			{
-				if (m_eCurrentUnitChosen != CUnitEnums::TYPE::NONE)
+				if (m_eCurrentTypeChosen != CUnitEnums::TYPE::NONE)
 				{
 					//Get the amount of this unit that has already been placed
-					std::map<CUnitEnums::TYPE, int>::iterator element = m_pUnitsToPlace->find(m_eCurrentUnitChosen);
-					//Shouldn't need to worry about a not already in the list
+					std::map<CUnitEnums::TYPE, int>::iterator element = m_pUnitsToPlace->find(m_eCurrentTypeChosen);
+					//Shouldn't need to worry about a unit type not already in the list
 					/*if (element == m_pUnitsToPlace->end())
 					{
-						m_iUnitsToPlaced.emplace(m_eCurrentUnitChosen, 0);
+						m_iUnitsToPlaced.emplace(m_eCurrentTypeChosen, 0);
 						element = m_pUnitsToPlace->end()--;
 					}*/
 					int currentAmountPlaced = element->second;
 					CUnitEnums::SIDE controllingPlayer = (m_eCurrentTurn == UIEnums::TURN::BLUE) ? (CUnitEnums::SIDE::BLUE) : (CUnitEnums::SIDE::RED);
 
-					if (currentAmountPlaced > 0/*< m_pSceneMgr->GetCurrentScene()->GetUnitAmount(controllingPlayer, m_eCurrentUnitChosen)*/)
+					if (currentAmountPlaced > 0)
 					{
 						CTile* clickedTile = m_pSceneMgr->GetTileInScene(mousePosition);
 
 						if (clickedTile != nullptr && clickedTile->GetUnitOnTile() == nullptr &&
 							m_pSceneMgr->GetCurrentScene()->GetTileType(mousePosition) != CSceneEnums::TILETYPE::MOUNTAIN)
 						{
-							CUnit* newUnit = m_pUnitMgr->CreateUnit(m_eCurrentUnitChosen, CUnitEnums::FACTION::TALONS, controllingPlayer);
+							CUnit* newUnit = m_pUnitMgr->CreateUnit(m_eCurrentTypeChosen, CUnitEnums::FACTION::TALONS, controllingPlayer);
 							clickedTile->UnitEntersTile(newUnit);
 							newUnit->MoveTo(mousePosition);
 
 							//Update number of units placed
 							(element->second)--;
 
+							clickedTile = nullptr;
+							newUnit = nullptr;
 							//make player choose again what unit to place, to avoid accidental
 							//placement
-							m_pUIMgr->SetChosenUnitToNone();
-							m_eCurrentUnitChosen = CUnitEnums::TYPE::NONE;
+							//m_pUIMgr->SetChosenUnitToNone();
+							//m_eCurrentTypeChosen = CUnitEnums::TYPE::NONE;
 						}
 					}
 				}
 				break;
+			}
+			case UIEnums::GAMESTATE::GAMELOOP:
+			{
+				//Could move this to its own function
+				switch (m_eCurrentUIMouseState)
+				{
+					case UIEnums::MOUSESTATE::SELECT:
+					{
+						CTile* clickedTile = m_pSceneMgr->GetTileInScene(mousePosition);
+						if (clickedTile != nullptr)
+						{
+							m_SelectedUnit = clickedTile->GetUnitOnTile();
+						}
+
+						clickedTile = nullptr;
+						break;
+					}
+					case UIEnums::MOUSESTATE::MOVE:
+					{
+						break;
+					}
+					case UIEnums::MOUSESTATE::ATTACK:
+					{
+						break;
+					}
+					default:
+					{
+						break;
+					}
+				}
 			}
 			default:
 			{
@@ -298,6 +350,10 @@ void CGameManager::SetUIToUnitPlacement()
 	int* artilleryAmount = &(m_pUnitsToPlace->find(CUnitEnums::TYPE::ARTILLERY)->second);
 
 	m_pUIMgr->SetUpUnitPlacementPanel(infantryAmount, tankAmount, artilleryAmount);
+}
+
+void CGameManager::SetUIToGameLoop()
+{
 }
 
 void CGameManager::DisplayUI()

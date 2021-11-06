@@ -23,11 +23,12 @@ public:
 	static bool ProcessClick(sf::Vector2f& _inCoords);
 	static int	ProcessClickInCtrlPanel(sf::Vector2f& _inCoords);
 	static void SetUpUnitPlacementPanel(int* _inAmountA, int* _inAmountB, int* _inAmountC);
+	static void SetUpGameLoopPanel();
 	static bool GetIfTurnEndClicked()								{ return m_bEndTurn; }
 	static void SetCurrentGameState(UIEnums::GAMESTATE _inState)	{ m_eCurrentUIState = _inState; }
 	static void SetCurrentTurn(UIEnums::TURN _inTurn)				{ m_eCurrentTurn = _inTurn; m_bEndTurn = false; }
-	static void SetChosenUnitToNone()								{ m_eCurrentUnitChosen = CUnitEnums::TYPE::NONE; }
-	static CUnitEnums::TYPE GetChosenUnit()							{ return m_eCurrentUnitChosen; }
+	static void SetChosenUnitToNone()								{ m_eCurrentTypeChosen = CUnitEnums::TYPE::NONE; }
+	static CUnitEnums::TYPE GetChosenUnit()							{ return m_eCurrentTypeChosen; }
 	static UIEnums::MOUSESTATE GetCurrentState()					{ return m_eCurrentMouseState; }
 	static void SwitchTurnForUnitPlacment(int* _inAmountA, int* _inAmountB, int* _inAmountC);
 
@@ -51,6 +52,7 @@ private:
 	//const sf::IntRect m_TileSpriteReset = { 160, 0, 160, 32 };
 
 	static std::vector<sf::Sprite*> m_vecButtons_UnitPlacementPanel;
+	static std::vector<sf::Sprite*> m_vecOverlays;
 	static std::vector<sf::Text*> m_vecText_UnitPlacementPanel;
 	static std::vector<int*> m_vecText_DisplayVariables;
 	static sf::Texture* m_ButtonUnitTexture;
@@ -66,7 +68,7 @@ private:
 	static UIEnums::TURN m_eCurrentTurn;
 	static UIEnums::GAMESTATE m_eCurrentUIState;
 	static UIEnums::MOUSESTATE m_eCurrentMouseState;
-	static CUnitEnums::TYPE m_eCurrentUnitChosen;
+	static CUnitEnums::TYPE m_eCurrentTypeChosen;
 };
 
 #endif // !__CUIMANAGER_H__

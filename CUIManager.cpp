@@ -1,6 +1,7 @@
 #include "CUIManager.h"
 
 std::vector<sf::Sprite*> CUIManager::m_vecButtons_UnitPlacementPanel;
+std::vector<sf::Sprite*> CUIManager::m_vecOverlays;
 std::vector<sf::Text*> CUIManager::m_vecText_UnitPlacementPanel;
 std::vector<int*> CUIManager::m_vecText_DisplayVariables;
 sf::Texture* CUIManager::m_ButtonUnitTexture;
@@ -14,7 +15,7 @@ bool CUIManager::m_bEndTurn;
 UIEnums::TURN CUIManager::m_eCurrentTurn;
 UIEnums::GAMESTATE CUIManager::m_eCurrentUIState;
 UIEnums::MOUSESTATE CUIManager::m_eCurrentMouseState;
-CUnitEnums::TYPE CUIManager::m_eCurrentUnitChosen;
+CUnitEnums::TYPE CUIManager::m_eCurrentTypeChosen;
 
 const CUnitEnums::TYPE CUIManager::m_UnitOnButton[]= {	CUnitEnums::TYPE::INFANTRY,
 														CUnitEnums::TYPE::TANK,
@@ -38,6 +39,8 @@ CUIManager::CUIManager()
 	m_uSceneWidth = 0;
 	m_bEndTurn = false;
 	m_eCurrentTurn = UIEnums::TURN::BLUE;
+
+	//Is const realy a god idea? Maybe have this set from ini?
 	//m_strUnitButtonSpriteMap = "assets/spritemaps/UnitButtons.png";
 	//m_strEmblemSpriteMap = "assets/spritemaps/FactionEmblems.png";
 	//m_strGameButtonsSpriteMap = "assets/spritemaps/GameButtons.png";
@@ -140,7 +143,7 @@ void CUIManager::UpdateUI()
 			}
 
 			int offsetArray[3] = { 0 };
-			switch (m_eCurrentUnitChosen)
+			switch (m_eCurrentTypeChosen)
 			{
 				case CUnitEnums::TYPE::INFANTRY:
 				{
@@ -236,13 +239,17 @@ bool CUIManager::ProcessClick(sf::Vector2f& _inCoords)
 			{
 				if (buttonClicked != 3)
 				{
-					m_eCurrentUnitChosen = m_UnitOnButton[buttonClicked];
+					m_eCurrentTypeChosen = m_UnitOnButton[buttonClicked];
 				}
-				else
+				else if((*m_vecText_DisplayVariables[0] + *m_vecText_DisplayVariables[1] + *m_vecText_DisplayVariables[2]) == 0)
 				{
 					m_bEndTurn = true;
 				}
 
+				break;
+			}
+			case UIEnums::GAMESTATE::GAMELOOP:
+			{
 				break;
 			}
 			default:
@@ -381,6 +388,10 @@ void CUIManager::SetUpUnitPlacementPanel(int* _inAmountA, int* _inAmountB, int* 
 	currentButton = nullptr;
 	currentButtonText = nullptr;
 	currentText = nullptr;
+}
+
+void CUIManager::SetUpGameLoopPanel()
+{
 }
 
 void CUIManager::SwitchTurnForUnitPlacment(int* _inAmountA, int* _inAmountB, int* _inAmountC)
