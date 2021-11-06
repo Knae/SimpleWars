@@ -37,6 +37,9 @@
     <Filter Include="Header Files\UnitRelatedHeaders">
       <UniqueIdentifier>{d9b9d408-7457-4d6b-84a0-7da858021903}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Enums">
+      <UniqueIdentifier>{371308fb-dff4-4169-b05e-02d22d707e94}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -74,9 +77,6 @@
     <ClInclude Include="CScene.h">
       <Filter>Header Files\SceneRelatedHeaders</Filter>
     </ClInclude>
-    <ClInclude Include="CSceneEnums.h">
-      <Filter>Header Files\SceneRelatedHeaders</Filter>
-    </ClInclude>
     <ClInclude Include="CUIManager.h">
       <Filter>Header Files\Systems</Filter>
     </ClInclude>
@@ -89,9 +89,6 @@
     <ClInclude Include="CUnit.h">
       <Filter>Header Files\UnitRelatedHeaders</Filter>
     </ClInclude>
-    <ClInclude Include="CUnitEnums.h">
-      <Filter>Header Files\UnitRelatedHeaders</Filter>
-    </ClInclude>
     <ClInclude Include="CSceneManager.h">
       <Filter>Header Files\Systems</Filter>
     </ClInclude>
@@ -101,8 +98,14 @@
     <ClInclude Include="CParseConfigCommon.h">
       <Filter>Header Files\Systems</Filter>
     </ClInclude>
+    <ClInclude Include="CUnitEnums.h">
+      <Filter>Header Files\Enums</Filter>
+    </ClInclude>
     <ClInclude Include="UIEnums.h">
-      <Filter>Header Files\Systems</Filter>
+      <Filter>Header Files\Enums</Filter>
+    </ClInclude>
+    <ClInclude Include="CSceneEnums.h">
+      <Filter>Header Files\Enums</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

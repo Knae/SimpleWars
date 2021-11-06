@@ -23,7 +23,9 @@ public:
 	//General functions
 	//====================================
 	virtual bool IntializeGame();
+	virtual bool CheckManagers();
 	virtual bool ChangeCurrentState(UIEnums::GAMESTATE _inState);
+	virtual void SwitchTurns();
 	virtual void SetPointersToOtherSystems(CUIManager* _inputUI, CSceneManager* _inputScene, CUnitManager* _inputUnit);
 	virtual void DrawObject(sf::Drawable* _object);
 	virtual void DisplayGameWorld();
@@ -70,7 +72,9 @@ private:
 	CUnitEnums::TYPE m_eCurrentUnitChosen;
 
 	//track number of units to place
-	std::map<CUnitEnums::TYPE, int> m_iUnitsToPlaced;
+	std::map<CUnitEnums::TYPE, int> m_iUnitsToPlaced_B;
+	std::map<CUnitEnums::TYPE, int> m_iUnitsToPlaced_R;
+	std::map<CUnitEnums::TYPE, int>* m_pUnitsToPlace;
 };
 
 #endif // !__CGAMEMANAGER_H__

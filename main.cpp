@@ -35,8 +35,6 @@ int main()
 
 		if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
 		{
-			/*sf::Vector2f mousePosition = m_GMRef.GetGameWindow()->mapPixelToCoords(sf::Mouse::getPosition( *(m_GMRef.GetGameWindow())) );
-			m_UIMRef.ProcessClick(mousePosition);*/
 			m_GMRef.ProcessMouseClick();
 		}
 

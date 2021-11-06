@@ -11,6 +11,7 @@ CGameManager::CGameManager()
 	m_pUIMgr = nullptr;
 	m_pSceneMgr = nullptr;
 	m_pUnitMgr = nullptr;
+	m_pUnitsToPlace = nullptr;
 	m_eCurrentTurn = UIEnums::TURN::NONE;
 	m_eCurrentState = UIEnums::GAMESTATE::NONE;
 	m_eCurrentUnitChosen = CUnitEnums::TYPE::NONE;
@@ -50,12 +51,12 @@ bool CGameManager::IntializeGame()
 							"Simple Wars"
 						);
 
-	m_eCurrentState = UIEnums::GAMESTATE::UNITPLACEMENT;
-	m_eCurrentTurn = UIEnums::TURN::BLUE;
+	m_eCurrentState = UIEnums::GAMESTATE::NONE;
+	m_eCurrentTurn = UIEnums::TURN::NONE;
 
 	m_pGameWindow->setVerticalSyncEnabled(false);
 	m_pGameWindow->setFramerateLimit(30);
-	m_pUIMgr->IntializeUI(m_pGameWindow->getSize() , m_v2uGameWindowSize_Current.x - 192);
+	m_pUIMgr->IntializeUI(m_pGameWindow->getSize() , m_pFont,m_v2uGameWindowSize_Current.x - 192);
 	m_pGameWindow->clear();
 
 	m_pGameWindow->display();
@@ -63,6 +64,21 @@ bool CGameManager::IntializeGame()
 	return true;
 }
 
+bool CGameManager::CheckManagers()
+{
+	if (m_pUIMgr->GetIfTurnEndClicked())
+	{
+		SwitchTurns();
+		m_pUIMgr->SetCurrentTurn(m_eCurrentTurn);
+	}
+	return false;
+}
+
+/// <summary>
+/// Change the current game state to the given state
+/// </summary>
+/// <param name="_inState">Game state to change to. UIEnums::GAMESTATE</param>
+/// <returns></returns>
 bool CGameManager::ChangeCurrentState(UIEnums::GAMESTATE _inState)
 {
 	m_eCurrentState = _inState;
@@ -74,8 +90,10 @@ bool CGameManager::ChangeCurrentState(UIEnums::GAMESTATE _inState)
 		}
 		case UIEnums::GAMESTATE::UNITPLACEMENT:
 		{
+			//Set up for the first player to place units
 			m_eCurrentTurn = UIEnums::TURN::BLUE;
-			m_pSceneMgr->GetCurrentScene()->GetUnitsToPlace(CParseConfigCommon::Convert(m_eCurrentTurn), &m_iUnitsToPlaced);
+			m_pSceneMgr->GetCurrentScene()->GetUnitsToPlace(&m_iUnitsToPlaced_B, &m_iUnitsToPlaced_R);
+			m_pUnitsToPlace = &m_iUnitsToPlaced_B;
 			SetUIToUnitPlacement();
 			break;
 		}
@@ -89,6 +107,43 @@ bool CGameManager::ChangeCurrentState(UIEnums::GAMESTATE _inState)
 		}
 	}
 	return false;
+}
+
+void CGameManager::SwitchTurns()
+{
+	switch (m_eCurrentState)
+	{
+		case UIEnums::GAMESTATE::MAPSELECTION:
+		{
+			break;
+		}
+		case UIEnums::GAMESTATE::UNITPLACEMENT:
+		{
+			if (m_eCurrentTurn == UIEnums::TURN::BLUE)
+			{
+				m_pUnitsToPlace = &m_iUnitsToPlaced_R;
+				m_eCurrentTurn = UIEnums::TURN::RED;
+				int* infantryAmount = &(m_pUnitsToPlace->find(CUnitEnums::TYPE::INFANTRY)->second);
+				int* tankAmount = &(m_pUnitsToPlace->find(CUnitEnums::TYPE::TANK)->second);
+				int* artilleryAmount = &(m_pUnitsToPlace->find(CUnitEnums::TYPE::ARTILLERY)->second);
+				m_pUIMgr->SwitchTurnForUnitPlacment(infantryAmount, tankAmount, artilleryAmount);
+			}
+			else
+			{
+				m_eCurrentState = UIEnums::GAMESTATE::GAMELOOP;
+			}
+
+			break;
+		}
+		case UIEnums::GAMESTATE::GAMELOOP:
+		{
+			break;
+		}
+		default:
+		{
+			break;
+		}
+	}
 }
 
 void CGameManager::SetPointersToOtherSystems(	CUIManager* _inputUI,
@@ -107,6 +162,7 @@ void CGameManager::DrawObject(sf::Drawable* _object)
 void CGameManager::DisplayGameWorld()
 {
 	m_pGameWindow -> clear(sf::Color::Black);
+	CheckManagers();
 	DisplayScene();
 	DisplayUI();
 	m_pGameWindow->display();
@@ -148,14 +204,13 @@ bool CGameManager::InitializeUI()
 {
 	if (m_pSceneMgr != nullptr)
 	{
-		return m_pUIMgr->IntializeUI(m_pGameWindow->getSize() , m_pSceneMgr->GetCurrentScene()->GetSceneWidth_Pixels());
+		return m_pUIMgr->IntializeUI(m_pGameWindow->getSize() , m_pFont, m_pSceneMgr->GetCurrentScene()->GetSceneWidth_Pixels());
 	}
 	else
 	{
 		std::cout << "/nScene Manager not yet set up!" << std::endl;
 		return false;
 	}
-
 }
 
 void CGameManager::ProcessMouseClick()
@@ -163,7 +218,6 @@ void CGameManager::ProcessMouseClick()
 	sf::Vector2f mousePosition = m_pGameWindow->mapPixelToCoords(sf::Mouse::getPosition(*(m_pGameWindow)) );
 	if (m_pUIMgr->ProcessClick(mousePosition))
 	{
-		//m_eCurrentState = m_pUIMgr->GetCurrentState();
 		switch (m_eCurrentState)
 		{
 			case UIEnums::GAMESTATE::UNITPLACEMENT:
@@ -186,12 +240,13 @@ void CGameManager::ProcessMouseClick()
 				if (m_eCurrentUnitChosen != CUnitEnums::TYPE::NONE)
 				{
 					//Get the amount of this unit that has already been placed
-					std::map<CUnitEnums::TYPE, int>::iterator element = m_iUnitsToPlaced.find(m_eCurrentUnitChosen);
-					if (element == m_iUnitsToPlaced.end())
+					std::map<CUnitEnums::TYPE, int>::iterator element = m_pUnitsToPlace->find(m_eCurrentUnitChosen);
+					//Shouldn't need to worry about a not already in the list
+					/*if (element == m_pUnitsToPlace->end())
 					{
 						m_iUnitsToPlaced.emplace(m_eCurrentUnitChosen, 0);
-						element = m_iUnitsToPlaced.end()--;
-					}
+						element = m_pUnitsToPlace->end()--;
+					}*/
 					int currentAmountPlaced = element->second;
 					CUnitEnums::SIDE controllingPlayer = (m_eCurrentTurn == UIEnums::TURN::BLUE) ? (CUnitEnums::SIDE::BLUE) : (CUnitEnums::SIDE::RED);
 
@@ -208,6 +263,11 @@ void CGameManager::ProcessMouseClick()
 
 							//Update number of units placed
 							(element->second)--;
+
+							//make player choose again what unit to place, to avoid accidental
+							//placement
+							m_pUIMgr->SetChosenUnitToNone();
+							m_eCurrentUnitChosen = CUnitEnums::TYPE::NONE;
 						}
 					}
 				}
@@ -222,8 +282,22 @@ void CGameManager::ProcessMouseClick()
 
 }
 
+/// <summary>
+/// Tell UI manager to set up the side panel
+/// for placing units.
+/// This HAS TO BE DONE LAST.
+/// Otherwise the UI manager can't get the right numbers to display
+/// </summary>
 void CGameManager::SetUIToUnitPlacement()
 {
+	m_pUIMgr->ClearUIElements();
+	//For now there are only 3 buttons to place,
+	//Infantry, tanks and artillery in that order
+	int* infantryAmount = &(m_pUnitsToPlace->find(CUnitEnums::TYPE::INFANTRY)->second);
+	int* tankAmount = &(m_pUnitsToPlace->find(CUnitEnums::TYPE::TANK)->second);
+	int* artilleryAmount = &(m_pUnitsToPlace->find(CUnitEnums::TYPE::ARTILLERY)->second);
+
+	m_pUIMgr->SetUpUnitPlacementPanel(infantryAmount, tankAmount, artilleryAmount);
 }
 
 void CGameManager::DisplayUI()

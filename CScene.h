@@ -26,7 +26,7 @@ public:
 	virtual CSceneEnums::TILETYPE GetTileType(sf::Vector2f _input);
 	virtual CSceneEnums::TILETYPE GetTileType(unsigned int _inX, unsigned int _inY);
 	virtual int GetUnitAmount(CUnitEnums::SIDE _inSide, CUnitEnums::TYPE _inType);
-	virtual void GetUnitsToPlace(CUnitEnums::SIDE _inSide, std::map<CUnitEnums::TYPE, int>* _inUnits);
+	virtual void GetUnitsToPlace(std::map<CUnitEnums::TYPE, int>* _inUnitsB, std::map<CUnitEnums::TYPE, int>* _inUnitsR);
 	int* GetBaseColourArrayPointer() { return m_iBaseColour; }
 	virtual unsigned int GetSceneWidth_Pixels() { return m_iMapColumns*m_iTileWidth; }
 	virtual unsigned int GetSceneHeight_Pixels() { return m_iMapRows*m_iTileWidth; }

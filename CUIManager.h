@@ -16,32 +16,35 @@ public:
 	~CUIManager();
 	static CUIManager& GetRef() { static CUIManager m_UIMgr; return m_UIMgr; }
 
-	static bool IntializeUI(sf::Vector2u _inWindowSize, const unsigned int _inSceneWidth = 832);
+	static bool IntializeUI(sf::Vector2u _inWindowSize, sf::Font* _inFont, const unsigned int _inSceneWidth = 832);
 	static void UpdateUI();
 	static void DisplayUI(sf::RenderWindow& _inWindow);
 	static void ClearUIElements();
 	static bool ProcessClick(sf::Vector2f& _inCoords);
-	static int ProcessClickInCtrlPanel(sf::Vector2f& _inCoords);
-	static void SetUpUnitPlacementPanel();
-	static void SetCurrentGameState(UIEnums::GAMESTATE _inState) { m_eCurrentUIState = _inState; }
-	static void SetCurrentTurn(UIEnums::TURN _inTurn) { m_eCurrentTurn = _inTurn; }
-	static void SetChosenUnitToNone() { m_eCurrentUnitChosen = CUnitEnums::TYPE::NONE; }
-	static CUnitEnums::TYPE GetChosenUnit() { return m_eCurrentUnitChosen; }
-	static UIEnums::MOUSESTATE GetCurrentState() {return m_eCurrentMouseState;}
+	static int	ProcessClickInCtrlPanel(sf::Vector2f& _inCoords);
+	static void SetUpUnitPlacementPanel(int* _inAmountA, int* _inAmountB, int* _inAmountC);
+	static bool GetIfTurnEndClicked()								{ return m_bEndTurn; }
+	static void SetCurrentGameState(UIEnums::GAMESTATE _inState)	{ m_eCurrentUIState = _inState; }
+	static void SetCurrentTurn(UIEnums::TURN _inTurn)				{ m_eCurrentTurn = _inTurn; m_bEndTurn = false; }
+	static void SetChosenUnitToNone()								{ m_eCurrentUnitChosen = CUnitEnums::TYPE::NONE; }
+	static CUnitEnums::TYPE GetChosenUnit()							{ return m_eCurrentUnitChosen; }
+	static UIEnums::MOUSESTATE GetCurrentState()					{ return m_eCurrentMouseState; }
+	static void SwitchTurnForUnitPlacment(int* _inAmountA, int* _inAmountB, int* _inAmountC);
 
 private:
 	CUIManager();
 	CUIManager(CUIManager const&) = delete;
 	void operator=(CUIManager const&) = delete;
 
-	static void ChangeState();
+	static void ChangeState(UIEnums::GAMESTATE _input) { m_eCurrentUIState = _input; }
 
-	static const std::string m_strUnitButtonSpriteMap;// = "assets/spritemaps/UnitButtons.png";
-	static const std::string m_strEmblemSpriteMap;// = "assets/spritemaps/FactionEmblems.png";
-	static const std::string m_strGameButtonsSpriteMap;// = "assets/spritemaps/GameButtons.png";
-	static const std::string m_strTileSelectorSpriteMap;// = "assets/spritemaps/tileSelection.png";
-	static const sf::IntRect m_ButtonUnitRect_Blue;// = { 0, 0, 32, 32 };
-	static const sf::IntRect m_ButtonUnitRect_Red;// = { 0, 32, 32, 32 };
+	static const std::string m_strUnitButtonSpriteMap;
+	static const std::string m_strEmblemSpriteMap;
+	static const std::string m_strGameButtonsSpriteMap;
+	static const std::string m_strTileSelectorSpriteMap;
+	static const std::string m_strFinishButtonSprite;
+	static const sf::IntRect m_ButtonUnitRect_Blue;
+	static const sf::IntRect m_ButtonUnitRect_Red;
 	//const sf::IntRect m_TileSpriteStart = { 96, 0, 32, 32 };
 	//const sf::IntRect m_TileSpriteFinish = { 128, 0, 32, 32 };
 	//const sf::IntRect m_TileSpriteStartAlg = { 0, 0, 160, 32 };
@@ -49,11 +52,14 @@ private:
 
 	static std::vector<sf::Sprite*> m_vecButtons_UnitPlacementPanel;
 	static std::vector<sf::Text*> m_vecText_UnitPlacementPanel;
+	static std::vector<int*> m_vecText_DisplayVariables;
 	static sf::Texture* m_ButtonUnitTexture;
+	static sf::Texture* m_ButtonFinish;
 	static sf::Font* m_pFont;
 	static sf::RenderTexture* m_pPanelBackground;
 	static sf::Sprite* m_pSpriteBackground;
 	static unsigned int m_uSceneWidth;
+	static bool m_bEndTurn;
 
 	static const CUnitEnums::TYPE m_UnitOnButton[4];
 

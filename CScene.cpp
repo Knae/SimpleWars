@@ -301,28 +301,22 @@ int CScene::GetUnitAmount(CUnitEnums::SIDE _inSide, CUnitEnums::TYPE _inType)
 }
 
 /// <summary>
-/// Populate a given map container with the number units to be placed
-/// for a given faction
+///  Populate the given map containers with the number units to be placed
+///  for the player side
 /// </summary>
-/// <param name="_inSide">The side in question. CUnitEnums::SIDE</param>
-/// <param name="_inUnits">Pointer to the map container to populate. std::map<CUnitEnums::TYPE, int>*</param>
-/// 
-void CScene::GetUnitsToPlace(CUnitEnums::SIDE _inSide, std::map<CUnitEnums::TYPE, int>* _inUnits)
+/// <param name="_inUnitsB">pointer to the container for Blue units. std::map<CUnitEnums::TYPE, int>*</param>
+/// <param name="_inUnitsR">pointer to the container for Red units. std::map<CUnitEnums::TYPE, int>*</param>
+void CScene::GetUnitsToPlace(std::map<CUnitEnums::TYPE, int>* _inUnitsB, std::map<CUnitEnums::TYPE, int>* _inUnitsR)
 {
-	if (_inSide == CUnitEnums::SIDE::BLUE)
-	{
 		//element = m_iUnitsBlue.find(_inType);
-		for(auto& element:m_iUnitsBlue)
-		{
-			(*_inUnits).emplace(element.first,element.second);
-		}
-	}
-	else
+	for(auto& element:m_iUnitsBlue)
 	{
-		for (auto& element : m_iUnitsRed)
-		{
-			(*_inUnits).emplace(element.first, element.second);
-		}
+		(*_inUnitsB).emplace(element.first,element.second);
+	}
+	
+	for (auto& element : m_iUnitsRed)
+	{
+		(*_inUnitsR).emplace(element.first, element.second);
 	}
 }
 
