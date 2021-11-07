@@ -19,7 +19,7 @@ public:
 	virtual void SetTileValue(unsigned int _input)			{ m_uiTileValue = _input; }
 	virtual unsigned int GetTileValue()						{ return m_uiTileValue; }
 	virtual void SetTileType(CSceneEnums::TILETYPE _input)	{ m_Type = _input; }
-	virtual CSceneEnums::TILETYPE GetTileType() { return m_Type; }
+	virtual CSceneEnums::TILETYPE GetTileType()				{ return m_Type; }
 	virtual void UnitEntersTile(CUnit* _inPUnit); 
 	virtual void UnitLeavesTile();// 
 	virtual CUnit* GetUnitOnTile()							{ return m_UnitOnTile; }

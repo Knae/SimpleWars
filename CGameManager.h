@@ -8,6 +8,7 @@
 #include "CUIManager.h"
 #include "CSceneManager.h"
 #include "CUnitManager.h"
+#include "COverlayManager.h"
 #include "CParseConfigCommon.h"
 
 /// <summary>
@@ -26,7 +27,12 @@ public:
 	virtual bool UpdateManagers(double& _inElapsedTime);
 	virtual bool ChangeCurrentState(UIEnums::GAMESTATE _inState);
 	virtual void SwitchTurns();
-	virtual void SetPointersToOtherSystems(CUIManager* _inputUI, CSceneManager* _inputScene, CUnitManager* _inputUnit);
+	virtual void SetPointersToOtherSystems(
+							CUIManager* _inputUI,
+							CSceneManager* _inputScene,
+							CUnitManager* _inputUnit,
+							COverlayManager* _inputOverlay
+						);
 	virtual void DrawObject(sf::Drawable* _object);
 	virtual void DisplayGameWorld();
 	virtual void DestroyGameWorld();
@@ -61,6 +67,7 @@ private:
 	CUIManager* m_pUIMgr;
 	CSceneManager* m_pSceneMgr;
 	CUnitManager* m_pUnitMgr;
+	COverlayManager* m_pOverlayMgr;
 
 	sf::RenderWindow* m_pGameWindow;
 	sf::RenderTexture* m_pGameBackground;

@@ -72,6 +72,9 @@
     <ClCompile Include="CParseConfigCommon.cpp">
       <Filter>Source Files\Systems</Filter>
     </ClCompile>
+    <ClCompile Include="COverlayManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CScene.h">
@@ -106,6 +109,9 @@
     </ClInclude>
     <ClInclude Include="CSceneEnums.h">
       <Filter>Header Files\Enums</Filter>
+    </ClInclude>
+    <ClInclude Include="COverlayManager.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -11,6 +11,7 @@ CGameManager::CGameManager()
 	m_pUIMgr = nullptr;
 	m_pSceneMgr = nullptr;
 	m_pUnitMgr = nullptr;
+	m_pOverlayMgr = nullptr;
 	m_pUnitsToPlace = nullptr;
 	m_SelectedUnit = nullptr;
 	m_eCurrentTurn = UIEnums::TURN::NONE;
@@ -33,6 +34,10 @@ CGameManager::~CGameManager()
 	delete m_pSpriteBackground;
 	m_pSpriteBackground = nullptr;
 	
+	m_pUIMgr = nullptr;
+	m_pSceneMgr = nullptr;
+	m_pUnitMgr = nullptr;
+	m_pOverlayMgr = nullptr;
 	m_SelectedUnit = nullptr;
 }
 
@@ -46,7 +51,7 @@ bool CGameManager::IntializeGame()
 		return false;
 	}
 
-	m_pUnitMgr->ParseConfig(m_strUnitConfig, m_strFactionConfig);
+	CUnitManager::ParseConfig(m_strUnitConfig, m_strFactionConfig);
 
 	m_pGameWindow = new sf::RenderWindow
 						(
@@ -59,7 +64,7 @@ bool CGameManager::IntializeGame()
 
 	m_pGameWindow->setVerticalSyncEnabled(false);
 	m_pGameWindow->setFramerateLimit(30);
-	m_pUIMgr->IntializeUI(m_pGameWindow->getSize() , m_pFont,m_v2uGameWindowSize_Current.x - 192);
+	CUIManager::IntializeUI(m_pGameWindow->getSize() , m_pFont,m_v2uGameWindowSize_Current.x - 192);
 	m_pGameWindow->clear();
 
 	m_pGameWindow->display();
@@ -69,14 +74,14 @@ bool CGameManager::IntializeGame()
 
 bool CGameManager::UpdateManagers(double& _inElapsedTime)
 {
-	m_pUnitMgr->Update(_inElapsedTime);
+	CUnitManager::Update(_inElapsedTime);
 
-	if (m_pUIMgr->GetIfTurnEndClicked())
+	if (CUIManager::GetIfTurnEndClicked())
 	{
 		SwitchTurns();
-		m_pUIMgr->SetCurrentTurn(m_eCurrentTurn);
+		CUIManager::SetCurrentTurn(m_eCurrentTurn);
 	}
-	m_eCurrentUIMouseState = m_pUIMgr->GetCurrentState();
+	m_eCurrentUIMouseState = CUIManager::GetCurrentState();
 	return false;
 }
 
@@ -134,7 +139,7 @@ void CGameManager::SwitchTurns()
 				int* infantryAmount = &(m_pUnitsToPlace->find(CUnitEnums::TYPE::INFANTRY)->second);
 				int* tankAmount = &(m_pUnitsToPlace->find(CUnitEnums::TYPE::TANK)->second);
 				int* artilleryAmount = &(m_pUnitsToPlace->find(CUnitEnums::TYPE::ARTILLERY)->second);
-				m_pUIMgr->SwitchTurnForUnitPlacment(infantryAmount, tankAmount, artilleryAmount);
+				CUIManager::SwitchTurnForUnitPlacment(infantryAmount, tankAmount, artilleryAmount);
 			}
 			else
 			{
@@ -157,13 +162,26 @@ void CGameManager::SwitchTurns()
 	}
 }
 
+/// <summary>
+/// Assigns the pointers to the other managers
+/// *Realized too late that this should have been ref inputs, not
+/// pointers. And also i'm confused between setting up 
+/// singletons and static classes......C'est la vie
+/// </summary>
+/// <param name="_inputUI"></param>
+/// <param name="_inputSceneMgr"></param>
+/// <param name="_inputUnit"></param>
+/// <param name="_inputOverlay"></param>
 void CGameManager::SetPointersToOtherSystems(	CUIManager* _inputUI,
+
 												CSceneManager* _inputSceneMgr,
-												CUnitManager* _inputUnit)
+												CUnitManager* _inputUnit,
+												COverlayManager* _inputOverlay)
 {
 	m_pUIMgr = _inputUI;
 	m_pSceneMgr = _inputSceneMgr;
 	m_pUnitMgr = _inputUnit;
+	m_pOverlayMgr = _inputOverlay;
 }
 
 void CGameManager::DrawObject(sf::Drawable* _object)
@@ -194,6 +212,7 @@ bool CGameManager::LoadScene()
 	{
 		std::cout << "\nSuccesfully loaded Mountain Village map." << std::endl;
 		ChangeCurrentState(UIEnums::GAMESTATE::UNITPLACEMENT);
+		m_pOverlayMgr->InitializeOverlays(m_strUnitConfig, CSceneManager::GetTileSize() );
 		return true;
 	}
 	else
@@ -206,15 +225,15 @@ bool CGameManager::LoadScene()
 //Display the map and the units in it
 void CGameManager::DisplayScene()
 {
-	m_pSceneMgr->DisplayScene(*m_pGameWindow);
-	m_pUnitMgr->DisplayUnits(*m_pGameWindow);
+	CSceneManager::DisplayScene(*m_pGameWindow);
+	CUnitManager::DisplayUnits(*m_pGameWindow);
 }
 
 bool CGameManager::InitializeUI()
 {
 	if (m_pSceneMgr != nullptr)
 	{
-		return m_pUIMgr->IntializeUI(m_pGameWindow->getSize() , m_pFont, m_pSceneMgr->GetCurrentScene()->GetSceneWidth_Pixels());
+		return CUIManager::IntializeUI(m_pGameWindow->getSize() , m_pFont, m_pSceneMgr->GetCurrentScene()->GetSceneWidth_Pixels());
 	}
 	else
 	{
@@ -231,20 +250,20 @@ bool CGameManager::InitializeUI()
 void CGameManager::ProcessMouseClick()
 {
 	sf::Vector2f mousePosition = m_pGameWindow->mapPixelToCoords(sf::Mouse::getPosition(*(m_pGameWindow)) );
-	if (m_pUIMgr->ProcessClick(mousePosition))
+	if (CUIManager::ProcessClick(mousePosition))
 	{
 		switch (m_eCurrentState)
 		{
 			case UIEnums::GAMESTATE::UNITPLACEMENT:
 			{	
-				m_eCurrentTypeChosen = m_pUIMgr->GetChosenUnit();
+				m_eCurrentTypeChosen = CUIManager::GetChosenUnit();
 				break;
 			}
 			case UIEnums::GAMESTATE::GAMELOOP:
 			{
 				if (m_SelectedUnit != nullptr)
 				{
-					m_eCurrentUIMouseState = m_pUIMgr->GetCurrentState();
+					m_eCurrentUIMouseState = CUIManager::GetCurrentState();
 				}
 				break;
 			}
@@ -281,7 +300,7 @@ void CGameManager::ProcessMouseClick()
 						if (clickedTile != nullptr && clickedTile->GetUnitOnTile() == nullptr &&
 							m_pSceneMgr->GetCurrentScene()->GetTileType(mousePosition) != CSceneEnums::TILETYPE::MOUNTAIN)
 						{
-							CUnit* newUnit = m_pUnitMgr->CreateUnit(m_eCurrentTypeChosen, CUnitEnums::FACTION::TALONS, controllingPlayer);
+							CUnit* newUnit = CUnitManager::CreateUnit(m_eCurrentTypeChosen, CUnitEnums::FACTION::TALONS, controllingPlayer);
 							clickedTile->UnitEntersTile(newUnit);
 							newUnit->SetLocation(mousePosition);
 
@@ -312,7 +331,7 @@ void CGameManager::ProcessMouseClick()
 							m_SelectedUnit = clickedTile->GetUnitOnTile();
 							if (m_SelectedUnit != nullptr)
 							{
-								m_pUIMgr->UpdateInfoDisplay(clickedTile->GetTileType(),
+								CUIManager::UpdateInfoDisplay(clickedTile->GetTileType(),
 															m_SelectedUnit->GetSide(),
 															m_SelectedUnit->GetType(),
 															m_SelectedUnit->GetFaction()
@@ -332,7 +351,7 @@ void CGameManager::ProcessMouseClick()
 						if (m_SelectedUnit != nullptr)
 						{
 							CTile* currentTileUnitOccupies = m_pSceneMgr->GetTileInScene(m_SelectedUnit->GetSprite()->getPosition());
-							if (m_pUnitMgr->MoveUnit(m_SelectedUnit, mousePosition))
+							if (CUnitManager::MoveUnit(m_SelectedUnit, mousePosition))
 							{
 								currentTileUnitOccupies->UnitLeavesTile();
 								CTile* clickedTile = m_pSceneMgr->GetTileInScene(mousePosition);
@@ -379,15 +398,15 @@ void CGameManager::SetUIToUnitPlacement()
 	int* tankAmount = &(m_pUnitsToPlace->find(CUnitEnums::TYPE::TANK)->second);
 	int* artilleryAmount = &(m_pUnitsToPlace->find(CUnitEnums::TYPE::ARTILLERY)->second);
 
-	m_pUIMgr->SetUpUnitPlacementPanel(infantryAmount, tankAmount, artilleryAmount);
+	CUIManager::SetUpUnitPlacementPanel(infantryAmount, tankAmount, artilleryAmount);
 }
 
 void CGameManager::SetUIToGameLoop()
 {
-	m_pUIMgr->SetUpGameLoopPanel();
+	CUIManager::SetUpGameLoopPanel();
 }
 
 void CGameManager::DisplayUI()
 {
-	m_pUIMgr->DisplayUI(*m_pGameWindow);
+	CUIManager::DisplayUI(*m_pGameWindow);
 }

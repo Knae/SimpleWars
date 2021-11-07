@@ -30,6 +30,7 @@ public:
 	int* GetBaseColourArrayPointer() { return m_iBaseColour; }
 	virtual unsigned int GetSceneWidth_Pixels() { return m_iMapColumns*m_iTileWidth; }
 	virtual unsigned int GetSceneHeight_Pixels() { return m_iMapRows*m_iTileWidth; }
+	virtual unsigned int GetTileWidth() { return m_iTileWidth; }
 	virtual CTile* GetTile(sf::Vector2f _inPosition);
 	virtual CTile* GetTile(unsigned int _inX, unsigned int _inY);
 private:
@@ -37,7 +38,7 @@ private:
 	static bool ParseLineForMapSize(std::string& _inputLine, unsigned int& _inputMapRows, unsigned int& _inputMapColumns);
 	static bool ParseLineForUnits(std::string& _inputLine, int& _outUnitAmount, CUnitEnums::TYPE& _outType);
 	
-	const int m_iTileWidth = 32;
+	const unsigned int m_iTileWidth = 32;
 	int m_iBaseColour[3] = { 0 };
 	//int m_iUnitsRed[3] = { 0 };
 	std::map<CUnitEnums::TYPE, int> m_iUnitsRed;
