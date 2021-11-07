@@ -7,6 +7,7 @@
 #include "UIEnums.h"
 #include "CUnitEnums.h"
 #include "CSceneEnums.h"
+#include "CParseConfigCommon.h"
 /// <summary>
 /// Manager class that is responsible for creating and managing
 /// the UI
@@ -78,6 +79,7 @@ private:
 	static sf::RenderTexture* m_pPanelBackground;
 	static sf::Sprite* m_pSpriteBackground;
 	static unsigned int m_uSceneWidth;
+	static bool m_bUnitControllable;
 	static bool m_bEndTurn;
 
 	static const CUnitEnums::TYPE m_UnitOnButton[4];
@@ -86,6 +88,7 @@ private:
 	static UIEnums::GAMESTATE m_eCurrentUIState;
 	static UIEnums::MOUSESTATE m_eCurrentMouseState;
 	static CUnitEnums::TYPE m_eCurrentTypeChosen;
+	static CUnitEnums::SIDE m_eCurrentUnitSide;
 };
 
 #endif // !__CUIMANAGER_H__

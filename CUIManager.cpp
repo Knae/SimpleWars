@@ -12,12 +12,14 @@ sf::Font* CUIManager::m_pFont;
 sf::RenderTexture* CUIManager::m_pPanelBackground;
 sf::Sprite* CUIManager::m_pSpriteBackground;
 unsigned int CUIManager::m_uSceneWidth;
+bool CUIManager::m_bUnitControllable;
 bool CUIManager::m_bEndTurn;
 
 UIEnums::TURN CUIManager::m_eCurrentTurn;
 UIEnums::GAMESTATE CUIManager::m_eCurrentUIState;
 UIEnums::MOUSESTATE CUIManager::m_eCurrentMouseState;
 CUnitEnums::TYPE CUIManager::m_eCurrentTypeChosen;
+CUnitEnums::SIDE CUIManager::m_eCurrentUnitSide;
 
 const CUnitEnums::TYPE CUIManager::m_UnitOnButton[]= {	CUnitEnums::TYPE::INFANTRY,
 														CUnitEnums::TYPE::TANK,
@@ -43,8 +45,10 @@ CUIManager::CUIManager()
 	m_ButtonsGameLoop = nullptr;
 	m_pFont = nullptr;
 	m_uSceneWidth = 0;
+	m_bUnitControllable = false;
 	m_bEndTurn = false;
 	m_eCurrentTurn = UIEnums::TURN::BLUE;
+	m_eCurrentUnitSide = CUnitEnums::SIDE::NONE;
 
 	//Is const realy a god idea? Maybe have this set from ini?
 	//m_strUnitButtonSpriteMap = "assets/spritemaps/UnitButtons.png";
@@ -216,7 +220,7 @@ void CUIManager::UpdateUI()
 		case UIEnums::GAMESTATE::GAMELOOP:
 		{
 			int offsetArray[2] = { 0 };
-			sf::IntRect currentRect = m_ButtonGameLoop;
+			sf::IntRect currentRect(0, 0, 0, 0);
 			switch (m_eCurrentMouseState)
 			{
 				case UIEnums::MOUSESTATE::MOVE:
@@ -233,12 +237,18 @@ void CUIManager::UpdateUI()
 				case UIEnums::MOUSESTATE::SELECT:
 				default:
 				{
+					if (!m_bUnitControllable)
+					{
+						offsetArray[0] = 64;
+						offsetArray[1] = 64;
+					}
 					break;
 				}
 			}
 
 			for (int i = 0; i < 2; i++)
 			{
+				currentRect = m_ButtonGameLoop;
 				currentRect.left += (i * 64);
 				currentRect.top += offsetArray[i];
 				m_vecButtons_ControlPanel[i]->setTextureRect(currentRect);
@@ -337,16 +347,19 @@ bool CUIManager::ProcessClick(sf::Vector2f& _inCoords)
 					{
 						case 0:
 						{
-							m_eCurrentMouseState = (m_eCurrentMouseState == UIEnums::MOUSESTATE::ATTACK) ? UIEnums::MOUSESTATE::SELECT : UIEnums::MOUSESTATE::ATTACK;
+							m_eCurrentMouseState = (/*m_eCurrentMouseState == UIEnums::MOUSESTATE::SELECT && */m_bUnitControllable) ?
+																					UIEnums::MOUSESTATE::ATTACK : UIEnums::MOUSESTATE::SELECT;
 							break;
 						}
 						case 1:
 						{
-							m_eCurrentMouseState = (m_eCurrentMouseState == UIEnums::MOUSESTATE::MOVE) ? UIEnums::MOUSESTATE::SELECT : UIEnums::MOUSESTATE::MOVE;
+							m_eCurrentMouseState = (/*m_eCurrentMouseState == UIEnums::MOUSESTATE::SELECT && */m_bUnitControllable) ?
+																					UIEnums::MOUSESTATE::MOVE : UIEnums::MOUSESTATE::SELECT;
 							break;
 						}
 						case 2:
 						{
+							m_bEndTurn = true;
 							break;
 						}
 						case 3:
@@ -355,6 +368,7 @@ bool CUIManager::ProcessClick(sf::Vector2f& _inCoords)
 						}
 						default:
 						{
+							m_eCurrentMouseState = UIEnums::MOUSESTATE::SELECT;
 							break; 
 						}
 					}
@@ -468,6 +482,7 @@ void CUIManager::SetUpUnitPlacementPanel(int* _inAmountA, int* _inAmountB, int* 
 /// 6 = Faction
 /// 7 = Terrain
 /// 
+/// 'buttons' 4-7 are info displays
 /// </summary>
 void CUIManager::SetUpGameLoopPanel()
 {
@@ -538,8 +553,30 @@ void CUIManager::SetUpGameLoopPanel()
 	currentText = nullptr;
 }
 
+/// <summary>
+/// Updates the top section of the control panel with info on the
+/// selected unit. UIManager also records relevant info like the 
+/// unit's controlling player (side).
+/// Inputs are expected to be based on the tile the unit is on.
+/// </summary>
+/// <param name="_inTerrain">Tile type. CSceneEnums::TILETYPE</param>
+/// <param name="_inSide">Controlling player. CUnitEnums::SIDE</param>
+/// <param name="_inType">Unit Type. CUnitEnums::TYPE</param>
+/// <param name="_inFaction">Faction. CUnitEnums::FACTION</param>
+/// <returns></returns>
 bool CUIManager::UpdateInfoDisplay(CSceneEnums::TILETYPE _inTerrain, CUnitEnums::SIDE _inSide, CUnitEnums::TYPE _inType, CUnitEnums::FACTION _inFaction)
 {
+	m_eCurrentUnitSide = _inSide;
+
+	if (m_eCurrentUnitSide == CParseConfigCommon::Convert(m_eCurrentTurn))
+	{
+		m_bUnitControllable = true;
+	}
+	else
+	{
+		m_bUnitControllable = false;
+	}
+
 	if (_inType != CUnitEnums::TYPE::NONE)
 	{
 		m_vecButtons_ControlPanel[4]->setTexture(*m_ButtonUnitTexture);

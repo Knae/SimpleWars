@@ -27,16 +27,15 @@ int main()
 			{
 				m_GMRef.DestroyGameWorld();
 			}
+			/*else if (sf::Mouse::isButtonPressed(sf::Mouse::Left))*/
+			else if (gameEvents.type == sf::Event::MouseButtonReleased && gameEvents.mouseButton.button == sf::Mouse::Button::Left)
+			{
+				m_GMRef.ProcessMouseClick();
+			}
 			else
 			{
 
 			}
-
-		}
-
-		if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
-		{
-			m_GMRef.ProcessMouseClick();
 		}
 		
 		double elapsedTime = (m_TimeCountUp.restart()).asMilliseconds();

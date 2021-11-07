@@ -145,7 +145,9 @@ void CGameManager::SwitchTurns()
 		}
 		case UIEnums::GAMESTATE::GAMELOOP:
 		{
-
+			m_eCurrentTurn = ((m_eCurrentTurn == UIEnums::TURN::BLUE)?
+							UIEnums::TURN::RED : 
+							UIEnums::TURN::BLUE);
 			break;
 		}
 		default:
