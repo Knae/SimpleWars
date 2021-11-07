@@ -23,7 +23,7 @@ public:
 	//General functions
 	//====================================
 	virtual bool IntializeGame();
-	virtual bool CheckManagers();
+	virtual bool UpdateManagers(double& _inElapsedTime);
 	virtual bool ChangeCurrentState(UIEnums::GAMESTATE _inState);
 	virtual void SwitchTurns();
 	virtual void SetPointersToOtherSystems(CUIManager* _inputUI, CSceneManager* _inputScene, CUnitManager* _inputUnit);

@@ -6,6 +6,7 @@
 #include <string>
 #include "UIEnums.h"
 #include "CUnitEnums.h"
+#include "CSceneEnums.h"
 /// <summary>
 /// Manager class that is responsible for creating and managing
 /// the UI
@@ -24,7 +25,19 @@ public:
 	static int	ProcessClickInCtrlPanel(sf::Vector2f& _inCoords);
 	static void SetUpUnitPlacementPanel(int* _inAmountA, int* _inAmountB, int* _inAmountC);
 	static void SetUpGameLoopPanel();
+	static bool UpdateInfoDisplay(
+		CSceneEnums::TILETYPE _inTerrain,
+		CUnitEnums::SIDE _inSide = CUnitEnums::SIDE::NONE,
+		CUnitEnums::TYPE _inType = CUnitEnums::TYPE::NONE,
+		CUnitEnums::FACTION _inFaction = CUnitEnums::FACTION::NONE);
 	static bool GetIfTurnEndClicked()								{ return m_bEndTurn; }
+	/// <summary>
+	/// Set the current state the UI manager is at
+	/// DOES NOT CHANGE THE UI. Changing the UI setup needs
+	/// to be done manually because of the different informatioin
+	/// required depending on the state.
+	/// </summary>
+	/// <param name="_inState"></param>
 	static void SetCurrentGameState(UIEnums::GAMESTATE _inState)	{ m_eCurrentUIState = _inState; }
 	static void SetCurrentTurn(UIEnums::TURN _inTurn)				{ m_eCurrentTurn = _inTurn; m_bEndTurn = false; }
 	static void SetChosenUnitToNone()								{ m_eCurrentTypeChosen = CUnitEnums::TYPE::NONE; }
@@ -40,22 +53,26 @@ private:
 	static void ChangeState(UIEnums::GAMESTATE _input) { m_eCurrentUIState = _input; }
 
 	static const std::string m_strUnitButtonSpriteMap;
+	static const std::string m_strEmptyUnitSprite;
 	static const std::string m_strEmblemSpriteMap;
 	static const std::string m_strGameButtonsSpriteMap;
 	static const std::string m_strTileSelectorSpriteMap;
 	static const std::string m_strFinishButtonSprite;
 	static const sf::IntRect m_ButtonUnitRect_Blue;
 	static const sf::IntRect m_ButtonUnitRect_Red;
+	static const sf::IntRect m_ButtonGameLoop;
 	//const sf::IntRect m_TileSpriteStart = { 96, 0, 32, 32 };
 	//const sf::IntRect m_TileSpriteFinish = { 128, 0, 32, 32 };
 	//const sf::IntRect m_TileSpriteStartAlg = { 0, 0, 160, 32 };
 	//const sf::IntRect m_TileSpriteReset = { 160, 0, 160, 32 };
 
-	static std::vector<sf::Sprite*> m_vecButtons_UnitPlacementPanel;
+	static std::vector<sf::Sprite*> m_vecButtons_ControlPanel;
 	static std::vector<sf::Sprite*> m_vecOverlays;
 	static std::vector<sf::Text*> m_vecText_UnitPlacementPanel;
 	static std::vector<int*> m_vecText_DisplayVariables;
 	static sf::Texture* m_ButtonUnitTexture;
+	static sf::Texture* m_EmptyUnitPortrait;
+	static sf::Texture* m_ButtonsGameLoop;
 	static sf::Texture* m_ButtonFinish;
 	static sf::Font* m_pFont;
 	static sf::RenderTexture* m_pPanelBackground;

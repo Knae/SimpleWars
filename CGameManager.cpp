@@ -67,13 +67,16 @@ bool CGameManager::IntializeGame()
 	return true;
 }
 
-bool CGameManager::CheckManagers()
+bool CGameManager::UpdateManagers(double& _inElapsedTime)
 {
+	m_pUnitMgr->Update(_inElapsedTime);
+
 	if (m_pUIMgr->GetIfTurnEndClicked())
 	{
 		SwitchTurns();
 		m_pUIMgr->SetCurrentTurn(m_eCurrentTurn);
 	}
+	m_eCurrentUIMouseState = m_pUIMgr->GetCurrentState();
 	return false;
 }
 
@@ -168,7 +171,6 @@ void CGameManager::DrawObject(sf::Drawable* _object)
 void CGameManager::DisplayGameWorld()
 {
 	m_pGameWindow -> clear(sf::Color::Black);
-	CheckManagers();
 	DisplayScene();
 	DisplayUI();
 	m_pGameWindow->display();
@@ -279,7 +281,7 @@ void CGameManager::ProcessMouseClick()
 						{
 							CUnit* newUnit = m_pUnitMgr->CreateUnit(m_eCurrentTypeChosen, CUnitEnums::FACTION::TALONS, controllingPlayer);
 							clickedTile->UnitEntersTile(newUnit);
-							newUnit->MoveTo(mousePosition);
+							newUnit->SetLocation(mousePosition);
 
 							//Update number of units placed
 							(element->second)--;
@@ -306,6 +308,18 @@ void CGameManager::ProcessMouseClick()
 						if (clickedTile != nullptr)
 						{
 							m_SelectedUnit = clickedTile->GetUnitOnTile();
+							if (m_SelectedUnit != nullptr)
+							{
+								m_pUIMgr->UpdateInfoDisplay(clickedTile->GetTileType(),
+															m_SelectedUnit->GetSide(),
+															m_SelectedUnit->GetType(),
+															m_SelectedUnit->GetFaction()
+															);
+							}	
+						}
+						else
+						{
+
 						}
 
 						clickedTile = nullptr;
@@ -313,6 +327,20 @@ void CGameManager::ProcessMouseClick()
 					}
 					case UIEnums::MOUSESTATE::MOVE:
 					{
+						if (m_SelectedUnit != nullptr)
+						{
+							CTile* currentTileUnitOccupies = m_pSceneMgr->GetTileInScene(m_SelectedUnit->GetSprite()->getPosition());
+							if (m_pUnitMgr->MoveUnit(m_SelectedUnit, mousePosition))
+							{
+								currentTileUnitOccupies->UnitLeavesTile();
+								CTile* clickedTile = m_pSceneMgr->GetTileInScene(mousePosition);
+								clickedTile->UnitEntersTile(m_SelectedUnit);
+								//m_SelectedUnit = nullptr;
+								//m_pUIMgr->SetChosenUnitToNone();
+							}
+							
+							
+						}
 						break;
 					}
 					case UIEnums::MOUSESTATE::ATTACK:
@@ -342,7 +370,7 @@ void CGameManager::ProcessMouseClick()
 /// </summary>
 void CGameManager::SetUIToUnitPlacement()
 {
-	m_pUIMgr->ClearUIElements();
+	//m_pUIMgr->ClearUIElements();
 	//For now there are only 3 buttons to place,
 	//Infantry, tanks and artillery in that order
 	int* infantryAmount = &(m_pUnitsToPlace->find(CUnitEnums::TYPE::INFANTRY)->second);
@@ -354,6 +382,7 @@ void CGameManager::SetUIToUnitPlacement()
 
 void CGameManager::SetUIToGameLoop()
 {
+	m_pUIMgr->SetUpGameLoopPanel();
 }
 
 void CGameManager::DisplayUI()

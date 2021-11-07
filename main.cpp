@@ -17,6 +17,7 @@ int main()
 	m_GMRef.SetPointersToOtherSystems(&m_UIMRef, &m_SMRef, &m_UnitMRef);
 	m_GMRef.LoadScene();
 
+	m_TimeCountUp.restart();
 
 	while (m_GMRef.GetGameWindow() -> isOpen())
 	{
@@ -37,7 +38,9 @@ int main()
 		{
 			m_GMRef.ProcessMouseClick();
 		}
-
+		
+		double elapsedTime = (m_TimeCountUp.restart()).asMilliseconds();
+		m_GMRef.UpdateManagers(elapsedTime);
 		m_GMRef.DisplayGameWorld();
 	}
 

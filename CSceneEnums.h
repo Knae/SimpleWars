@@ -28,14 +28,6 @@ public:
 		FORT,
 		BASETILE
 	};
-
-	enum class UNITTYPE
-	{
-		NONE,
-		INFANTRY,
-		TANK,
-		ARTILLERY
-	};
 };
 
 #endif // !__CSCENEENUMS_H__

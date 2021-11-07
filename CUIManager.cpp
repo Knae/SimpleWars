@@ -1,10 +1,12 @@
 #include "CUIManager.h"
 
-std::vector<sf::Sprite*> CUIManager::m_vecButtons_UnitPlacementPanel;
+std::vector<sf::Sprite*> CUIManager::m_vecButtons_ControlPanel;
 std::vector<sf::Sprite*> CUIManager::m_vecOverlays;
 std::vector<sf::Text*> CUIManager::m_vecText_UnitPlacementPanel;
 std::vector<int*> CUIManager::m_vecText_DisplayVariables;
 sf::Texture* CUIManager::m_ButtonUnitTexture;
+sf::Texture* CUIManager::m_EmptyUnitPortrait;
+sf::Texture* CUIManager::m_ButtonsGameLoop;
 sf::Texture* CUIManager::m_ButtonFinish;
 sf::Font* CUIManager::m_pFont;
 sf::RenderTexture* CUIManager::m_pPanelBackground;
@@ -23,18 +25,22 @@ const CUnitEnums::TYPE CUIManager::m_UnitOnButton[]= {	CUnitEnums::TYPE::INFANTR
 														CUnitEnums::TYPE::NONE };
 
 const std::string CUIManager::m_strUnitButtonSpriteMap("assets/spritemaps/UnitButtons.png");
+const std::string CUIManager::m_strEmptyUnitSprite("assets/spritemaps/EmptyUnit.png");
 const std::string CUIManager::m_strEmblemSpriteMap("assets/spritemaps/FactionEmblems.png");
 const std::string CUIManager::m_strGameButtonsSpriteMap("assets/spritemaps/GameButtons.png");
 const std::string CUIManager::m_strTileSelectorSpriteMap("assets/spritemaps/tileSelection.png");
 const std::string CUIManager::m_strFinishButtonSprite("assets/spritemaps/FinishButton.png");
 const sf::IntRect CUIManager::m_ButtonUnitRect_Blue({ 0, 0, 32, 32 });
 const sf::IntRect CUIManager::m_ButtonUnitRect_Red({ 0, 32, 32, 32 });
+const sf::IntRect CUIManager::m_ButtonGameLoop({ 0, 0, 64, 32 });
 
 CUIManager::CUIManager()
 {
 	m_pPanelBackground = nullptr;
 	m_pSpriteBackground = nullptr;
 	m_ButtonUnitTexture = nullptr;
+	m_EmptyUnitPortrait = nullptr;
+	m_ButtonsGameLoop = nullptr;
 	m_pFont = nullptr;
 	m_uSceneWidth = 0;
 	m_bEndTurn = false;
@@ -56,11 +62,15 @@ CUIManager::~CUIManager()
 	delete m_pPanelBackground;
 	delete m_pSpriteBackground;
 	delete m_ButtonUnitTexture;
+	delete m_EmptyUnitPortrait;
+	delete m_ButtonsGameLoop;
 	delete m_ButtonFinish;
 
 	m_pPanelBackground = nullptr;
 	m_pSpriteBackground = nullptr;
 	m_ButtonUnitTexture = nullptr;
+	m_EmptyUnitPortrait = nullptr;
+	m_ButtonsGameLoop = nullptr;
 	m_ButtonFinish = nullptr;
 }
 
@@ -90,6 +100,18 @@ bool CUIManager::IntializeUI(sf::Vector2u _inWindowSize, sf::Font* _inFont, cons
 		m_ButtonFinish = nullptr;
 	}
 
+	if (m_ButtonsGameLoop != nullptr )
+	{
+		delete m_ButtonsGameLoop;
+		m_ButtonsGameLoop = nullptr;
+	}
+
+	if (m_EmptyUnitPortrait != nullptr)
+	{
+		delete m_EmptyUnitPortrait;
+		m_EmptyUnitPortrait = nullptr;
+	}
+
 	m_ButtonUnitTexture = new sf::Texture;
 	if (!m_ButtonUnitTexture->loadFromFile(m_strUnitButtonSpriteMap))
 	{
@@ -97,8 +119,22 @@ bool CUIManager::IntializeUI(sf::Vector2u _inWindowSize, sf::Font* _inFont, cons
 		return false;
 	}
 
+	m_EmptyUnitPortrait = new sf::Texture;
+	if (!m_EmptyUnitPortrait->loadFromFile(m_strEmptyUnitSprite))
+	{
+		//std::cout << "\nUnable to initialize textures for unit buttons.\n" << std::endl;
+		return false;
+	}
+
 	m_ButtonFinish = new sf::Texture;
 	if (!m_ButtonFinish->loadFromFile(m_strFinishButtonSprite))
+	{
+		//std::cout << "\nUnable to initialize textures for unit buttons.\n" << std::endl;
+		return false;
+	}
+	
+	m_ButtonsGameLoop = new sf::Texture;
+	if (!m_ButtonsGameLoop->loadFromFile(m_strGameButtonsSpriteMap))
 	{
 		//std::cout << "\nUnable to initialize textures for unit buttons.\n" << std::endl;
 		return false;
@@ -118,25 +154,28 @@ bool CUIManager::IntializeUI(sf::Vector2u _inWindowSize, sf::Font* _inFont, cons
 	return true;
 }
 
+/// <summary>
+/// Update the visual elements in the control panel.
+/// </summary>
 void CUIManager::UpdateUI()
 {
+	if (m_eCurrentTurn == UIEnums::TURN::BLUE)
+	{
+		m_pPanelBackground->clear(sf::Color::Blue);
+	}
+	else if (m_eCurrentTurn == UIEnums::TURN::RED)
+	{
+		m_pPanelBackground->clear(sf::Color::Red);
+	}
+	else
+	{
+		m_pPanelBackground->clear(sf::Color::Black);
+	}
+
 	switch (m_eCurrentUIState)
 	{
 		case UIEnums::GAMESTATE::UNITPLACEMENT:
 		{
-			if (m_eCurrentTurn == UIEnums::TURN::BLUE)
-			{
-				m_pPanelBackground->clear(sf::Color::Blue);
-			}
-			else if (m_eCurrentTurn == UIEnums::TURN::RED)
-			{
-				m_pPanelBackground->clear(sf::Color::Red);
-			}
-			else
-			{
-				m_pPanelBackground->clear(sf::Color::Black);
-			}
-
 			for (unsigned short i = 0; i < 3; i++)
 			{
 				m_vecText_UnitPlacementPanel[i]->setString(std::to_string(*m_vecText_DisplayVariables[i]) + " unit(s) left\nto place");
@@ -170,7 +209,39 @@ void CUIManager::UpdateUI()
 			{
 				currentRect = (m_eCurrentTurn==UIEnums::TURN::BLUE)?m_ButtonUnitRect_Blue: m_ButtonUnitRect_Red;
 				currentRect.left += (i * 32) + offsetArray[i];
-				m_vecButtons_UnitPlacementPanel[i]->setTextureRect(currentRect);
+				m_vecButtons_ControlPanel[i]->setTextureRect(currentRect);
+			}
+			break;
+		}
+		case UIEnums::GAMESTATE::GAMELOOP:
+		{
+			int offsetArray[2] = { 0 };
+			sf::IntRect currentRect = m_ButtonGameLoop;
+			switch (m_eCurrentMouseState)
+			{
+				case UIEnums::MOUSESTATE::MOVE:
+				{
+					offsetArray[1] = 32;
+					break;
+				}
+				case UIEnums::MOUSESTATE::ATTACK:
+				{
+					offsetArray[0] = 32;
+					break;
+				}
+				case UIEnums::MOUSESTATE::NONE:
+				case UIEnums::MOUSESTATE::SELECT:
+				default:
+				{
+					break;
+				}
+			}
+
+			for (int i = 0; i < 2; i++)
+			{
+				currentRect.left += (i * 64);
+				currentRect.top += offsetArray[i];
+				m_vecButtons_ControlPanel[i]->setTextureRect(currentRect);
 			}
 			break;
 		}
@@ -190,7 +261,7 @@ void CUIManager::DisplayUI(sf::RenderWindow& _inWindow)
 	/// TODO: CHECK HERE!
 	/// </summary>
 	/// <param name="_inWindow"></param>
-	for (auto& element : m_vecButtons_UnitPlacementPanel)
+	for (auto& element : m_vecButtons_ControlPanel)
 	{
 		_inWindow.draw(*element);
 	}
@@ -207,7 +278,7 @@ void CUIManager::DisplayUI(sf::RenderWindow& _inWindow)
 /// </summary>
 void CUIManager::ClearUIElements()
 {
-	for (auto& element : m_vecButtons_UnitPlacementPanel)
+	for (auto& element : m_vecButtons_ControlPanel)
 	{
 		delete element;
 		element = nullptr;
@@ -218,6 +289,16 @@ void CUIManager::ClearUIElements()
 		delete element;
 		element = nullptr;
 	}
+
+	for (auto& element : m_vecOverlays)
+	{
+		delete element;
+		element = nullptr;
+	}
+
+	m_vecButtons_ControlPanel.clear();
+	m_vecText_UnitPlacementPanel.clear();
+	m_vecOverlays.clear();
 }
 
 /// <summary>
@@ -250,7 +331,34 @@ bool CUIManager::ProcessClick(sf::Vector2f& _inCoords)
 			}
 			case UIEnums::GAMESTATE::GAMELOOP:
 			{
-				break;
+				if (buttonClicked < 4)
+				{
+					switch (buttonClicked)
+					{
+						case 0:
+						{
+							m_eCurrentMouseState = (m_eCurrentMouseState == UIEnums::MOUSESTATE::ATTACK) ? UIEnums::MOUSESTATE::SELECT : UIEnums::MOUSESTATE::ATTACK;
+							break;
+						}
+						case 1:
+						{
+							m_eCurrentMouseState = (m_eCurrentMouseState == UIEnums::MOUSESTATE::MOVE) ? UIEnums::MOUSESTATE::SELECT : UIEnums::MOUSESTATE::MOVE;
+							break;
+						}
+						case 2:
+						{
+							break;
+						}
+						case 3:
+						{
+							break;
+						}
+						default:
+						{
+							break; 
+						}
+					}
+				}
 			}
 			default:
 			{
@@ -263,60 +371,15 @@ bool CUIManager::ProcessClick(sf::Vector2f& _inCoords)
 	{
 		return false;
 	}
-	//else if (m_eCurrentMouseState != MOUSESTATE::NONE)
-	//{
-	//	std::cout << "\nAttempting to retrieve sprite in position [" << std::to_string(mousePosition.x) << "][" << std::to_string(mousePosition.y) << "] !\n" << std::endl;
-	//	sf::Sprite* clickeSprite = m_pSceneMgr->GetTileSprite(mousePosition);
-
-	//	switch (m_eCurrentMouseState)
-	//	{
-	//		case CWindowBuilder::MOUSESTATE::START:
-	//		{
-	//			if (!m_pSceneMgr->ChangeTileState(mousePosition, CTile::STATE::START))
-	//			{
-	//				std::cout << "\n----Failed to change tile state to START!.\n" << std::endl;
-	//			}
-	//			break;
-	//		}
-	//		case CWindowBuilder::MOUSESTATE::FINISH:
-	//		{
-	//			if (!m_pSceneMgr->ChangeTileState(mousePosition, CTile::STATE::FINISH))
-	//			{
-	//				std::cout << "\n----Failed to change tile state to FINISH!.\n" << std::endl;
-	//			}
-	//			break;
-	//		}
-	//		case CWindowBuilder::MOUSESTATE::OBSTACLE:
-	//		{
-	//			if (!m_pSceneMgr->ChangeTileState(mousePosition, CTile::STATE::OBSTACLE))
-	//			{
-	//				std::cout << "\n----Failed to change tile state to OBSTACLE!.\n" << std::endl;
-	//			}
-	//			break;
-	//		}
-	//		case CWindowBuilder::MOUSESTATE::NEUTRAL:
-	//		{
-	//			if (!m_pSceneMgr->ChangeTileState(mousePosition, CTile::STATE::STANDARD))
-	//			{
-	//				std::cout << "\n----Failed to change tile state to NEUTRAL!.\n" << std::endl;
-	//			}
-	//			break;
-	//		}
-	//		default:
-	//		{
-	//			break;
-	//		}
-	//	}
-	//}
 	return true;
 }
 
 int CUIManager::ProcessClickInCtrlPanel(sf::Vector2f& _inCoords)
 {
-	for (unsigned int i = 0; i < m_vecButtons_UnitPlacementPanel.size(); i++)
+	for (unsigned short i = 0; i < m_vecButtons_ControlPanel.size(); i++)
 	{
 
-		if ((m_vecButtons_UnitPlacementPanel[i])->getGlobalBounds().contains(_inCoords))
+		if ((m_vecButtons_ControlPanel[i])->getGlobalBounds().contains(_inCoords))
 		{
 
 			return i;
@@ -339,16 +402,18 @@ int CUIManager::ProcessClickInCtrlPanel(sf::Vector2f& _inCoords)
 /// </summary>
 void CUIManager::SetUpUnitPlacementPanel(int* _inAmountA, int* _inAmountB, int* _inAmountC)
 {
+	ClearUIElements();
 	sf::Sprite* currentButton = nullptr;
 	sf::Text* currentButtonText = nullptr;
 	sf::Text* currentText = nullptr;
 	sf::IntRect currentRect;
 
+	m_vecText_DisplayVariables.clear();
 	m_vecText_DisplayVariables.push_back(_inAmountA);
 	m_vecText_DisplayVariables.push_back(_inAmountB);
 	m_vecText_DisplayVariables.push_back(_inAmountC);
 
-	for (int i = 0; i < 3; i++)
+	for (unsigned short  i = 0; i < 3; i++)
 	{
 		currentButton = new sf::Sprite;
 		currentButton->setTexture(*m_ButtonUnitTexture);
@@ -356,7 +421,7 @@ void CUIManager::SetUpUnitPlacementPanel(int* _inAmountA, int* _inAmountB, int* 
 		currentRect.left += (i * 32);
 		currentButton->setTextureRect(currentRect);
 		currentButton->setPosition( sf::Vector2f(m_uSceneWidth+16.0f,288.0f+(i*48)) );
-		m_vecButtons_UnitPlacementPanel.push_back(currentButton);
+		m_vecButtons_ControlPanel.push_back(currentButton);
 
 		currentButtonText = new sf::Text( std::to_string(*m_vecText_DisplayVariables[i]) + " unit(s) left\nto place", *m_pFont );
 		currentButtonText->setFillColor(sf::Color::White);
@@ -369,7 +434,7 @@ void CUIManager::SetUpUnitPlacementPanel(int* _inAmountA, int* _inAmountB, int* 
 	currentButton->setTexture(*m_ButtonFinish);
 	currentRect = m_ButtonUnitRect_Blue; 
 	currentButton->setPosition(sf::Vector2f(m_uSceneWidth + 48.0f, 432));
-	m_vecButtons_UnitPlacementPanel.push_back(currentButton);
+	m_vecButtons_ControlPanel.push_back(currentButton);
 
 	currentText = new sf::Text("Blue Player",*m_pFont);
 	currentText->setFillColor(sf::Color::White);
@@ -384,14 +449,151 @@ void CUIManager::SetUpUnitPlacementPanel(int* _inAmountA, int* _inAmountB, int* 
 	m_vecText_UnitPlacementPanel.push_back(currentText);
 
 	m_eCurrentUIState = UIEnums::GAMESTATE::UNITPLACEMENT;
+	m_eCurrentTurn = UIEnums::TURN::BLUE;
 
 	currentButton = nullptr;
 	currentButtonText = nullptr;
 	currentText = nullptr;
 }
 
+/// <summary>
+/// Create buttons for game loop panel
+/// According to current sprite sheet:
+/// 0 = Attack
+/// 1 = Move
+/// 2 = End Turn
+/// 3 = Forfeit
+/// 4 = Selected unit portrait
+/// 5 = Selected unit stats
+/// 6 = Faction
+/// 7 = Terrain
+/// 
+/// </summary>
 void CUIManager::SetUpGameLoopPanel()
 {
+	ClearUIElements();
+	sf::Sprite* currentButton = nullptr;
+	sf::Text* currentText = nullptr;
+	sf::IntRect currentRect;
+
+	m_vecText_DisplayVariables.clear();
+
+	for (unsigned short  i = 0; i < 2; i++)
+	{
+		currentButton = new sf::Sprite;
+		currentButton->setTexture(*m_ButtonsGameLoop);
+		currentRect = m_ButtonGameLoop;
+		currentRect.left += (i * 64);
+		currentButton->setTextureRect(currentRect);
+		currentButton->setPosition(sf::Vector2f(m_uSceneWidth + 32.0f +(i*64.0f), 256.0f));
+		m_vecButtons_ControlPanel.push_back(currentButton);
+	}
+
+	for (unsigned short  i = 0; i < 2; i++)
+	{
+		currentButton = new sf::Sprite;
+		currentButton->setTexture(*m_ButtonsGameLoop);
+		currentRect = m_ButtonGameLoop;
+		currentRect.left += 128 + (i * 64);
+		currentButton->setTextureRect(currentRect);
+		currentButton->setPosition(sf::Vector2f(m_uSceneWidth + (i * 128.0f), 304.0f));
+		m_vecButtons_ControlPanel.push_back(currentButton);
+	}
+
+	currentButton = new sf::Sprite;
+	currentButton->setTexture(*m_EmptyUnitPortrait);
+	currentRect = m_ButtonUnitRect_Blue;
+	currentButton->setTextureRect(currentRect);
+	currentButton->setScale(3.0f,3.0f);
+	currentButton->setPosition(sf::Vector2f((float)(m_uSceneWidth) , 0.0f));
+	m_vecButtons_ControlPanel.push_back(currentButton);
+
+	currentButton = new sf::Sprite;
+	currentButton->setTexture(*m_EmptyUnitPortrait);
+	currentRect = m_ButtonUnitRect_Blue;
+	currentButton->setTextureRect(currentRect);
+	currentButton->setPosition(sf::Vector2f((float)(m_uSceneWidth), 96.0f));
+	m_vecButtons_ControlPanel.push_back(currentButton);
+
+	currentButton = new sf::Sprite;
+	currentButton->setTexture(*m_EmptyUnitPortrait);
+	currentRect = m_ButtonUnitRect_Blue;
+	currentButton->setTextureRect(currentRect);
+	currentButton->setPosition(sf::Vector2f((float)(m_uSceneWidth+96.0f), 0.0f));
+	m_vecButtons_ControlPanel.push_back(currentButton);
+
+	currentButton = new sf::Sprite;
+	currentButton->setTexture(*m_EmptyUnitPortrait);
+	currentRect = m_ButtonUnitRect_Blue;
+	currentButton->setTextureRect(currentRect);
+	currentButton->setPosition(sf::Vector2f((float)(m_uSceneWidth+96.0f), 96.0f));
+	m_vecButtons_ControlPanel.push_back(currentButton);
+
+
+	m_eCurrentUIState = UIEnums::GAMESTATE::GAMELOOP;
+	m_eCurrentTurn = UIEnums::TURN::BLUE;
+	m_eCurrentMouseState = UIEnums::MOUSESTATE::SELECT;
+
+	currentButton = nullptr;
+	currentText = nullptr;
+}
+
+bool CUIManager::UpdateInfoDisplay(CSceneEnums::TILETYPE _inTerrain, CUnitEnums::SIDE _inSide, CUnitEnums::TYPE _inType, CUnitEnums::FACTION _inFaction)
+{
+	if (_inType != CUnitEnums::TYPE::NONE)
+	{
+		m_vecButtons_ControlPanel[4]->setTexture(*m_ButtonUnitTexture);
+		sf::IntRect currentRect;
+
+		switch (_inSide)
+		{
+			case CUnitEnums::SIDE::BLUE:
+			{
+				currentRect = m_ButtonUnitRect_Blue;
+				break;
+			}
+			case CUnitEnums::SIDE::RED:
+			{
+				currentRect = m_ButtonUnitRect_Red;
+				break;
+			}
+			default:
+			{
+				break;
+			}
+		}
+		
+		switch (_inType)
+		{
+			case CUnitEnums::TYPE::INFANTRY:
+			{
+				break;
+			}
+			case CUnitEnums::TYPE::TANK:
+			{
+				currentRect.left += 32;
+				break;
+			}
+			case CUnitEnums::TYPE::ARTILLERY:
+			{
+				currentRect.left += 64;
+				break;
+			}
+			default:
+			{
+				break;
+			}
+		}
+		m_vecButtons_ControlPanel[4]->setTextureRect(currentRect);
+	}
+	else
+	{
+		m_vecButtons_ControlPanel[4]->setTexture(*m_EmptyUnitPortrait);
+		m_vecButtons_ControlPanel[4]->setTextureRect( m_ButtonUnitRect_Blue);
+	}
+	
+
+	return true;
 }
 
 void CUIManager::SwitchTurnForUnitPlacment(int* _inAmountA, int* _inAmountB, int* _inAmountC)
@@ -400,7 +602,7 @@ void CUIManager::SwitchTurnForUnitPlacment(int* _inAmountA, int* _inAmountB, int
 
 	for (unsigned short i = 0; i < 3; i++)
 	{
-		m_vecButtons_UnitPlacementPanel[i]->setTextureRect(m_ButtonUnitRect_Red);
+		m_vecButtons_ControlPanel[i]->setTextureRect(m_ButtonUnitRect_Red);
 	}
 	m_vecText_DisplayVariables.clear();
 	m_vecText_DisplayVariables.push_back(_inAmountA);

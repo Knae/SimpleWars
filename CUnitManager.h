@@ -22,9 +22,11 @@ public:
 	static void ParseConfig(const std::string& _inFilePath, const std::string& _inFactionConfigPath);
 	static void DisplayUnits(sf::RenderWindow& _inWindow);
 	static CUnit* CreateUnit(CUnitEnums::TYPE _inType, CUnitEnums::FACTION _inFaction, CUnitEnums::SIDE _inSide);
-	static bool MoveUnit();
+	static bool MoveUnit(CUnit* _inUnit, sf::Vector2u _inPosition);
+	static bool MoveUnit(CUnit* _inUnit, sf::Vector2f _inPosition);
 	static bool Attack(CUnit* _inAttackinUnit, CUnit* _inDefendingPlayer);
 	static void ClearUnits();
+	static void Update(double& _inElapsedTime);
 	static bool CheckIfAnyUnitsLeft(CUnitEnums::SIDE _inSide);
 
 private:

@@ -272,6 +272,7 @@ CUnit* CUnitManager::CreateUnit(CUnitEnums::TYPE _inType,CUnitEnums::FACTION _in
 	CUnitEnums::UnitRecord* newUnitStats = (*mapIter).second;
 	CUnit* newUnit = new CUnit(	
 		_inType,
+		_inSide,
 		newUnitStats->m_tiSpriteHeight,
 		newUnitStats->m_tfHP,
 		newUnitStats->m_tfMove,
@@ -304,10 +305,40 @@ CUnit* CUnitManager::CreateUnit(CUnitEnums::TYPE _inType,CUnitEnums::FACTION _in
 	return newUnit;
 }
 
-
-bool CUnitManager::MoveUnit()
+/// <summary>
+/// Move units. Checks if the new location is 
+/// one tile away. Otherwise, unit location is not changed.
+/// Actual movement is done thorugh update calls to the UnitManager
+/// </summary>
+/// <param name="_inUnit">Pointer to unit being moved. CUnit*</param>
+/// <param name="_inPosition">New position to move to. sf::Vector2u</param>
+/// <returns>whether the unit will be moved or not</returns>
+bool CUnitManager::MoveUnit(CUnit* _inUnit, sf::Vector2u _inPosition)
 {
-	return false;
+	sf::Vector2i distanceToCurrentTile(0, 0);
+	sf::Vector2u unitPosition = _inUnit->GetCurrentTile();
+	distanceToCurrentTile.x = abs(int(_inPosition.x) - (int)(unitPosition.x));
+	distanceToCurrentTile.y = abs(int(_inPosition.y) - (int)(unitPosition.y));
+
+	if ((distanceToCurrentTile.x + distanceToCurrentTile.y) == 1)
+	{
+		_inUnit->MoveTo(_inPosition);
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+bool CUnitManager::MoveUnit(CUnit* _inUnit, sf::Vector2f _inPosition)
+{
+	sf::IntRect unitSpriteRect = _inUnit->GetSprite()->getTextureRect();
+	int m_fTileSize = unitSpriteRect.width;
+	sf::Vector2u tilePosition(	(unsigned int)(_inPosition.x / m_fTileSize),
+								(unsigned int)(_inPosition.y / m_fTileSize));
+	
+	return MoveUnit(_inUnit, tilePosition);
 }
 
 bool CUnitManager::Attack(CUnit* _inAttackinUnit, CUnit* _inDefendingPlayer)
@@ -334,6 +365,19 @@ void CUnitManager::ClearUnits()
 
 	m_CurrentUnits_Blue.clear();
 	m_CurrentUnits_Red.clear();
+}
+
+void CUnitManager::Update(double& _inElapsedTime)
+{
+	for (auto& element : m_CurrentUnits_Blue)
+	{
+		element->Update(_inElapsedTime);
+	}
+
+	for (auto& element : m_CurrentUnits_Red)
+	{
+		element->Update(_inElapsedTime);
+	}
 }
 
 bool CUnitManager::CheckIfAnyUnitsLeft(CUnitEnums::SIDE _inSide)
