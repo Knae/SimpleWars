@@ -155,6 +155,7 @@
     <ClCompile Include="CUIManager.cpp" />
     <ClCompile Include="CUnit.cpp" />
     <ClCompile Include="CUnitManager.cpp" />
+    <ClCompile Include="CVFXManager.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -169,6 +170,7 @@
     <ClInclude Include="CUnit.h" />
     <ClInclude Include="CUnitEnums.h" />
     <ClInclude Include="CUnitManager.h" />
+    <ClInclude Include="CVFXManager.h" />
     <ClInclude Include="UIEnums.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -18,6 +18,8 @@ CGameManager::CGameManager()
 	m_eCurrentState = UIEnums::GAMESTATE::NONE;
 	m_eCurrentUIMouseState = UIEnums::MOUSESTATE::NONE;
 	m_eCurrentTypeChosen = CUnitEnums::TYPE::NONE;
+	m_bAttackOverlayShown = false;
+	m_bExecutingActions = false;
 }
 
 CGameManager::~CGameManager()
@@ -249,40 +251,57 @@ bool CGameManager::InitializeUI()
 /// Process what to do when a left click is registered.
 /// Depends on location of click and what state the game
 /// is currently running at.
+/// Only does something if no actions are being executed
 /// </summary>
 void CGameManager::ProcessMouseClick()
 {
-	sf::Vector2f mousePosition = m_pGameWindow->mapPixelToCoords(sf::Mouse::getPosition(*(m_pGameWindow)) );
-	if (CUIManager::ProcessClick(mousePosition))
+	if (!m_bExecutingActions)
 	{
-		switch (m_eCurrentState)
+		sf::Vector2f mousePosition = m_pGameWindow->mapPixelToCoords(sf::Mouse::getPosition(*(m_pGameWindow)) );
+		if (CUIManager::ProcessClick(mousePosition))
 		{
-			case UIEnums::GAMESTATE::UNITPLACEMENT:
-			{	
-				m_eCurrentTypeChosen = CUIManager::GetChosenUnit();
-				break;
-			}
-			case UIEnums::GAMESTATE::GAMELOOP:
+			switch (m_eCurrentState)
 			{
-				if (m_SelectedUnit != nullptr)
+				case UIEnums::GAMESTATE::UNITPLACEMENT:
+				{	
+					m_eCurrentTypeChosen = CUIManager::GetChosenUnit();
+					break;
+				}
+				case UIEnums::GAMESTATE::GAMELOOP:
 				{
-					m_eCurrentUIMouseState = CUIManager::GetCurrentState();
-					if (m_eCurrentUIMouseState == UIEnums::MOUSESTATE::ATTACK && !m_bAttackOverlayShown)
+					if (m_SelectedUnit != nullptr)
 					{
-						sf::Vector2u currentUnitPosition = m_SelectedUnit->GetCurrentTile();
-						COverlayManager::CreateRangeOverlay(currentUnitPosition, m_SelectedUnit->GetRange());
-						COverlayManager::ShowAttackSelector(mousePosition);
-						COverlayManager::HideMoveSelector();
-						m_bAttackOverlayShown = true;
+						m_eCurrentUIMouseState = CUIManager::GetCurrentState();
+						if (m_eCurrentUIMouseState == UIEnums::MOUSESTATE::ATTACK && !m_bAttackOverlayShown)
+						{
+							sf::Vector2u currentUnitPosition = m_SelectedUnit->GetCurrentTile();
+							COverlayManager::CreateRangeOverlay(currentUnitPosition, m_SelectedUnit->GetRange());
+							COverlayManager::ShowAttackSelector(mousePosition);
+							COverlayManager::HideMoveSelector();
+							m_bAttackOverlayShown = true;
+						}
+						else if(m_eCurrentUIMouseState == UIEnums::MOUSESTATE::MOVE)
+						{
+							if (m_bAttackOverlayShown)
+							{
+								COverlayManager::ClearRangeOverlay();
+								COverlayManager::HideAttackSelector();
+								m_bAttackOverlayShown = false;
+							}
+							COverlayManager::ShowMoveSelector(mousePosition);
+						}
+						else if (m_eCurrentUIMouseState == UIEnums::MOUSESTATE::SELECT)
+						{
+							if (m_bAttackOverlayShown)
+							{
+								COverlayManager::ClearRangeOverlay();
+								m_bAttackOverlayShown = false;
+							}
+							COverlayManager::HideAttackSelector();
+							COverlayManager::HideMoveSelector();
+						}
 					}
-					else if(m_eCurrentUIMouseState == UIEnums::MOUSESTATE::MOVE && m_bAttackOverlayShown)
-					{
-						COverlayManager::ClearRangeOverlay();
-						COverlayManager::HideAttackSelector();
-						COverlayManager::ShowMoveSelector(mousePosition);
-						m_bAttackOverlayShown = false;
-					}
-					else if (m_eCurrentUIMouseState == UIEnums::MOUSESTATE::SELECT)
+					else
 					{
 						if (m_bAttackOverlayShown)
 						{
@@ -292,128 +311,122 @@ void CGameManager::ProcessMouseClick()
 						COverlayManager::HideAttackSelector();
 						COverlayManager::HideMoveSelector();
 					}
+					break;
 				}
-				else
+				default:
 				{
-					if (m_bAttackOverlayShown)
-					{
-						COverlayManager::ClearRangeOverlay();
-						m_bAttackOverlayShown = false;
-					}
-					COverlayManager::HideAttackSelector();
-					COverlayManager::HideMoveSelector();
-				}
-				break;
-			}
-			default:
-			{
 				
-				break;
+					break;
+				}
 			}
 		}
-	}
-	else
-	{
-		switch (m_eCurrentState)
+		else
 		{
-			case UIEnums::GAMESTATE::UNITPLACEMENT:
+			switch (m_eCurrentState)
 			{
-				if (m_eCurrentTypeChosen != CUnitEnums::TYPE::NONE)
+				case UIEnums::GAMESTATE::UNITPLACEMENT:
 				{
-					//Get the amount of this unit that has already been placed
-					std::map<CUnitEnums::TYPE, int>::iterator element = m_pUnitsToPlace->find(m_eCurrentTypeChosen);
-
-					int currentAmountPlaced = element->second;
-					CUnitEnums::SIDE controllingPlayer = (m_eCurrentTurn == UIEnums::TURN::BLUE) ? (CUnitEnums::SIDE::BLUE) : (CUnitEnums::SIDE::RED);
-
-					if (currentAmountPlaced > 0)
+					if (m_eCurrentTypeChosen != CUnitEnums::TYPE::NONE)
 					{
-						CTile* clickedTile = m_pSceneMgr->GetTileInScene(mousePosition);
+						//Get the amount of this unit that has already been placed
+						std::map<CUnitEnums::TYPE, int>::iterator element = m_pUnitsToPlace->find(m_eCurrentTypeChosen);
 
-						if (clickedTile != nullptr && clickedTile->GetUnitOnTile() == nullptr &&
-							m_pSceneMgr->GetCurrentScene()->GetTileType(mousePosition) != CSceneEnums::TILETYPE::MOUNTAIN)
+						int currentAmountPlaced = element->second;
+						CUnitEnums::SIDE controllingPlayer = (m_eCurrentTurn == UIEnums::TURN::BLUE) ? (CUnitEnums::SIDE::BLUE) : (CUnitEnums::SIDE::RED);
+
+						if (currentAmountPlaced > 0)
 						{
-							CUnit* newUnit = CUnitManager::CreateUnit(m_eCurrentTypeChosen, CUnitEnums::FACTION::TALONS, controllingPlayer);
-							clickedTile->UnitEntersTile(newUnit);
-							newUnit->SetLocation(mousePosition);
+							CTile* clickedTile = m_pSceneMgr->GetTileInScene(mousePosition);
 
-							//Update number of units placed
-							(element->second)--;
+							if (clickedTile != nullptr && clickedTile->GetUnitOnTile() == nullptr &&
+								m_pSceneMgr->GetCurrentScene()->GetTileType(mousePosition) != CSceneEnums::TILETYPE::MOUNTAIN)
+							{
+								CUnit* newUnit = CUnitManager::CreateUnit(m_eCurrentTypeChosen, CUnitEnums::FACTION::TALONS, controllingPlayer);
+								clickedTile->UnitEntersTile(newUnit);
+								newUnit->SetLocation(mousePosition);
+
+								//Update number of units placed
+								(element->second)--;
+
+								clickedTile = nullptr;
+								newUnit = nullptr;
+							}
+						}
+					}
+					break;
+				}
+				case UIEnums::GAMESTATE::GAMELOOP:
+				{
+					//Could move this to its own function
+					switch (m_eCurrentUIMouseState)
+					{
+						case UIEnums::MOUSESTATE::SELECT:
+						{
+							CTile* clickedTile = m_pSceneMgr->GetTileInScene(mousePosition);
+							if (clickedTile != nullptr)
+							{
+								m_SelectedUnit = clickedTile->GetUnitOnTile();
+								if (m_SelectedUnit != nullptr)
+								{
+									sf::Vector2u unitTilePosition = m_SelectedUnit->GetCurrentTile();								
+									COverlayManager::ShowUnitSelector(unitTilePosition);
+									CUIManager::UpdateInfoDisplay(clickedTile->GetTileType(),
+																m_SelectedUnit->GetSide(),
+																m_SelectedUnit->GetType(),
+																m_SelectedUnit->GetFaction()
+																);
+								}	
+							}
+							else
+							{
+								COverlayManager::HideUnitSelector();
+							}
 
 							clickedTile = nullptr;
-							newUnit = nullptr;
+							break;
 						}
-					}
-				}
-				break;
-			}
-			case UIEnums::GAMESTATE::GAMELOOP:
-			{
-				//Could move this to its own function
-				switch (m_eCurrentUIMouseState)
-				{
-					case UIEnums::MOUSESTATE::SELECT:
-					{
-						CTile* clickedTile = m_pSceneMgr->GetTileInScene(mousePosition);
-						if (clickedTile != nullptr)
+						case UIEnums::MOUSESTATE::MOVE:
 						{
-							m_SelectedUnit = clickedTile->GetUnitOnTile();
 							if (m_SelectedUnit != nullptr)
 							{
-								sf::Vector2u unitTilePosition = m_SelectedUnit->GetCurrentTile();
-								COverlayManager::ShowUnitSelector(unitTilePosition);
-								CUIManager::UpdateInfoDisplay(clickedTile->GetTileType(),
-															m_SelectedUnit->GetSide(),
-															m_SelectedUnit->GetType(),
-															m_SelectedUnit->GetFaction()
-															);
-							}	
-						}
-						else
-						{
-							COverlayManager::HideUnitSelector();
-						}
-
-						clickedTile = nullptr;
-						break;
-					}
-					case UIEnums::MOUSESTATE::MOVE:
-					{
-						if (m_SelectedUnit != nullptr)
-						{
-							CTile* currentTileUnitOccupies = m_pSceneMgr->GetTileInScene(m_SelectedUnit->GetSprite()->getPosition());
-							if (CUnitManager::MoveUnit(m_SelectedUnit, mousePosition))
-							{
-								currentTileUnitOccupies->UnitLeavesTile();
-								CTile* clickedTile = m_pSceneMgr->GetTileInScene(mousePosition);
-								clickedTile->UnitEntersTile(m_SelectedUnit);
-								//m_SelectedUnit = nullptr;
-								//m_pUIMgr->SetChosenUnitToNone();
+								CTile* targetTile = m_pSceneMgr->GetTileInScene(mousePosition);
+								if (targetTile->GetUnitOnTile()== nullptr)
+								{
+									CTile* currentTileUnitOccupies = m_pSceneMgr->GetTileInScene(m_SelectedUnit->GetSprite()->getPosition());
+									if (CUnitManager::MoveUnit(m_SelectedUnit, mousePosition))
+									{
+										sf::Vector2u unitNewPosition = m_SelectedUnit->GetCurrentTile();
+										COverlayManager::ShowUnitSelector(unitNewPosition);
+										currentTileUnitOccupies->UnitLeavesTile();
+										CTile* clickedTile = m_pSceneMgr->GetTileInScene(mousePosition);
+										clickedTile->UnitEntersTile(m_SelectedUnit);
+									}
+									currentTileUnitOccupies = nullptr;
+								}
+								targetTile = nullptr;
 							}
-							
-							
+							break;
 						}
-						break;
-					}
-					case UIEnums::MOUSESTATE::ATTACK:
-					{
-						sf::Vector2u currentUnitPosition = m_SelectedUnit->GetCurrentTile();
-						if (COverlayManager::IsInRange(currentUnitPosition,mousePosition,m_SelectedUnit->GetRange()))
+						case UIEnums::MOUSESTATE::ATTACK:
 						{
-							//target in range
-							std::cout << "\nAttack possible" << std::endl;
+							sf::Vector2u currentUnitPosition = m_SelectedUnit->GetCurrentTile();
+							if (COverlayManager::IsInRange(currentUnitPosition,mousePosition,m_SelectedUnit->GetRange()))
+							{
+								//target in range
+								std::cout << "\nAttack possible" << std::endl;
+							}
+							break;
 						}
-						break;
-					}
-					default:
-					{
-						break;
+						default:
+						{
+							break;
+						}
 					}
 				}
-			}
-			default:
-			{
-				break;
+				default:
+				{
+					break;
+				}
 			}
 		}
 	}

@@ -75,6 +75,9 @@
     <ClCompile Include="COverlayManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="CVFXManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CScene.h">
@@ -111,6 +114,9 @@
       <Filter>Header Files\Enums</Filter>
     </ClInclude>
     <ClInclude Include="COverlayManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CVFXManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
