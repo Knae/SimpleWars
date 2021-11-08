@@ -34,20 +34,15 @@ public:
 	virtual CTile* GetTile(sf::Vector2f _inPosition);
 	virtual CTile* GetTile(unsigned int _inX, unsigned int _inY);
 private:
-	//static std::string ParseLineGetLabel (const std::string& _inputLine, std::string& _lineSettingValues);
 	static bool ParseLineForMapSize(std::string& _inputLine, unsigned int& _inputMapRows, unsigned int& _inputMapColumns);
 	static bool ParseLineForUnits(std::string& _inputLine, int& _outUnitAmount, CUnitEnums::TYPE& _outType);
 	
 	const unsigned int m_iTileWidth = 32;
 	int m_iBaseColour[3] = { 0 };
-	//int m_iUnitsRed[3] = { 0 };
 	std::map<CUnitEnums::TYPE, int> m_iUnitsRed;
-	//int m_iUnitsBlue[3] = { 0 };
 	std::map<CUnitEnums::TYPE, int> m_iUnitsBlue;
 
 	std::string m_strTileMapFilePath;
-	//18 rows x 26 columns
-	//CTile m_MapTile[18][26];
 	std::vector<std::vector<CTile>>* m_MapTiles;
 	unsigned int m_iMapColumns;
 	unsigned int m_iMapRows;

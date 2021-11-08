@@ -163,6 +163,15 @@ bool CUIManager::IntializeUI(sf::Vector2u _inWindowSize, sf::Font* _inFont, cons
 /// </summary>
 void CUIManager::UpdateUI()
 {
+	if (m_eCurrentUnitSide == CParseConfigCommon::Convert(m_eCurrentTurn))
+	{
+		m_bUnitControllable = true;
+	}
+	else
+	{
+		m_bUnitControllable = false;
+	}
+
 	if (m_eCurrentTurn == UIEnums::TURN::BLUE)
 	{
 		m_pPanelBackground->clear(sf::Color::Blue);
@@ -345,16 +354,15 @@ bool CUIManager::ProcessClick(sf::Vector2f& _inCoords)
 				{
 					switch (buttonClicked)
 					{
+						//This is assumming Controllable is only set when there's a selected unit
 						case 0:
 						{
-							m_eCurrentMouseState = (/*m_eCurrentMouseState == UIEnums::MOUSESTATE::SELECT && */m_bUnitControllable) ?
-																					UIEnums::MOUSESTATE::ATTACK : UIEnums::MOUSESTATE::SELECT;
+							m_eCurrentMouseState = (m_bUnitControllable) ? UIEnums::MOUSESTATE::ATTACK : UIEnums::MOUSESTATE::SELECT;
 							break;
 						}
 						case 1:
 						{
-							m_eCurrentMouseState = (/*m_eCurrentMouseState == UIEnums::MOUSESTATE::SELECT && */m_bUnitControllable) ?
-																					UIEnums::MOUSESTATE::MOVE : UIEnums::MOUSESTATE::SELECT;
+							m_eCurrentMouseState = (m_bUnitControllable) ? UIEnums::MOUSESTATE::MOVE : UIEnums::MOUSESTATE::SELECT;
 							break;
 						}
 						case 2:
@@ -568,14 +576,14 @@ bool CUIManager::UpdateInfoDisplay(CSceneEnums::TILETYPE _inTerrain, CUnitEnums:
 {
 	m_eCurrentUnitSide = _inSide;
 
-	if (m_eCurrentUnitSide == CParseConfigCommon::Convert(m_eCurrentTurn))
-	{
-		m_bUnitControllable = true;
-	}
-	else
-	{
-		m_bUnitControllable = false;
-	}
+	//if (m_eCurrentUnitSide == CParseConfigCommon::Convert(m_eCurrentTurn))
+	//{
+	//	m_bUnitControllable = true;
+	//}
+	//else
+	//{
+	//	m_bUnitControllable = false;
+	//}
 
 	if (_inType != CUnitEnums::TYPE::NONE)
 	{

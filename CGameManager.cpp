@@ -225,8 +225,11 @@ bool CGameManager::LoadScene()
 //Display the map and the units in it
 void CGameManager::DisplayScene()
 {
+	sf::Vector2f mousePosition = m_pGameWindow->mapPixelToCoords(sf::Mouse::getPosition(*(m_pGameWindow)));
+
 	CSceneManager::DisplayScene(*m_pGameWindow);
 	CUnitManager::DisplayUnits(*m_pGameWindow);
+	COverlayManager::DisplayOverlays(*m_pGameWindow, mousePosition);
 }
 
 bool CGameManager::InitializeUI()
@@ -264,6 +267,41 @@ void CGameManager::ProcessMouseClick()
 				if (m_SelectedUnit != nullptr)
 				{
 					m_eCurrentUIMouseState = CUIManager::GetCurrentState();
+					if (m_eCurrentUIMouseState == UIEnums::MOUSESTATE::ATTACK && !m_bAttackOverlayShown)
+					{
+						sf::Vector2u currentUnitPosition = m_SelectedUnit->GetCurrentTile();
+						COverlayManager::CreateRangeOverlay(currentUnitPosition, m_SelectedUnit->GetRange());
+						COverlayManager::ShowAttackSelector(mousePosition);
+						COverlayManager::HideMoveSelector();
+						m_bAttackOverlayShown = true;
+					}
+					else if(m_eCurrentUIMouseState == UIEnums::MOUSESTATE::MOVE && m_bAttackOverlayShown)
+					{
+						COverlayManager::ClearRangeOverlay();
+						COverlayManager::HideAttackSelector();
+						COverlayManager::ShowMoveSelector(mousePosition);
+						m_bAttackOverlayShown = false;
+					}
+					else if (m_eCurrentUIMouseState == UIEnums::MOUSESTATE::SELECT)
+					{
+						if (m_bAttackOverlayShown)
+						{
+							COverlayManager::ClearRangeOverlay();
+							m_bAttackOverlayShown = false;
+						}
+						COverlayManager::HideAttackSelector();
+						COverlayManager::HideMoveSelector();
+					}
+				}
+				else
+				{
+					if (m_bAttackOverlayShown)
+					{
+						COverlayManager::ClearRangeOverlay();
+						m_bAttackOverlayShown = false;
+					}
+					COverlayManager::HideAttackSelector();
+					COverlayManager::HideMoveSelector();
 				}
 				break;
 			}
@@ -284,12 +322,7 @@ void CGameManager::ProcessMouseClick()
 				{
 					//Get the amount of this unit that has already been placed
 					std::map<CUnitEnums::TYPE, int>::iterator element = m_pUnitsToPlace->find(m_eCurrentTypeChosen);
-					//Shouldn't need to worry about a unit type not already in the list
-					/*if (element == m_pUnitsToPlace->end())
-					{
-						m_iUnitsToPlaced.emplace(m_eCurrentTypeChosen, 0);
-						element = m_pUnitsToPlace->end()--;
-					}*/
+
 					int currentAmountPlaced = element->second;
 					CUnitEnums::SIDE controllingPlayer = (m_eCurrentTurn == UIEnums::TURN::BLUE) ? (CUnitEnums::SIDE::BLUE) : (CUnitEnums::SIDE::RED);
 
@@ -309,10 +342,6 @@ void CGameManager::ProcessMouseClick()
 
 							clickedTile = nullptr;
 							newUnit = nullptr;
-							//make player choose again what unit to place, to avoid accidental
-							//placement
-							//m_pUIMgr->SetChosenUnitToNone();
-							//m_eCurrentTypeChosen = CUnitEnums::TYPE::NONE;
 						}
 					}
 				}
@@ -331,6 +360,8 @@ void CGameManager::ProcessMouseClick()
 							m_SelectedUnit = clickedTile->GetUnitOnTile();
 							if (m_SelectedUnit != nullptr)
 							{
+								sf::Vector2u unitTilePosition = m_SelectedUnit->GetCurrentTile();
+								COverlayManager::ShowUnitSelector(unitTilePosition);
 								CUIManager::UpdateInfoDisplay(clickedTile->GetTileType(),
 															m_SelectedUnit->GetSide(),
 															m_SelectedUnit->GetType(),
@@ -340,7 +371,7 @@ void CGameManager::ProcessMouseClick()
 						}
 						else
 						{
-
+							COverlayManager::HideUnitSelector();
 						}
 
 						clickedTile = nullptr;
@@ -366,6 +397,12 @@ void CGameManager::ProcessMouseClick()
 					}
 					case UIEnums::MOUSESTATE::ATTACK:
 					{
+						sf::Vector2u currentUnitPosition = m_SelectedUnit->GetCurrentTile();
+						if (COverlayManager::IsInRange(currentUnitPosition,mousePosition,m_SelectedUnit->GetRange()))
+						{
+							//target in range
+							std::cout << "\nAttack possible" << std::endl;
+						}
 						break;
 					}
 					default:
@@ -380,7 +417,6 @@ void CGameManager::ProcessMouseClick()
 			}
 		}
 	}
-
 }
 
 /// <summary>

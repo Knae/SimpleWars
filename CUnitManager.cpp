@@ -317,8 +317,8 @@ bool CUnitManager::MoveUnit(CUnit* _inUnit, sf::Vector2u _inPosition)
 {
 	sf::Vector2i distanceToCurrentTile(0, 0);
 	sf::Vector2u unitPosition = _inUnit->GetCurrentTile();
-	distanceToCurrentTile.x = abs(int(_inPosition.x) - (int)(unitPosition.x));
-	distanceToCurrentTile.y = abs(int(_inPosition.y) - (int)(unitPosition.y));
+	distanceToCurrentTile.x = abs((int)(_inPosition.x - unitPosition.x));
+	distanceToCurrentTile.y = abs((int)(_inPosition.y - unitPosition.y));
 
 	if ((distanceToCurrentTile.x + distanceToCurrentTile.y) == 1)
 	{

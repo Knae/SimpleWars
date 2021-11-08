@@ -1,9 +1,5 @@
 #include "CScene.h"
 
-//int CScene::m_iBaseColour[] = { 0, 0 ,0 };
-//int CScene::m_iUnitsRed[] = { 0, 0 ,0 };
-//int CScene::m_iUnitsBlue[] = { 0, 0 ,0 };
-
 CScene::CScene()
 {
 	m_MapTileMap = new sf::Texture();

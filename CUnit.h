@@ -33,6 +33,7 @@ public:
 	CUnitEnums::FACTION GetFaction()	{ return m_eFaction; }
 	CUnitEnums::SIDE GetSide()			{ return m_eControllingPlayer; }
 	CUnitEnums::TYPE GetType()			{ return m_eUnitType; }
+	int GetRange() { return m_iRange; }
 
 	void Update();
 	void Update(double& _inTimeElapsed);

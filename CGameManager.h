@@ -74,6 +74,7 @@ private:
 	sf::Sprite* m_pSpriteBackground;
 	sf::Font* m_pFont;
 	sf::Vector2u m_v2uGameWindowSize_Current;
+	bool m_bAttackOverlayShown;
 
 	UIEnums::TURN m_eCurrentTurn;
 	UIEnums::GAMESTATE m_eCurrentState;

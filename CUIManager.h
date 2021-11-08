@@ -81,6 +81,7 @@ private:
 	static unsigned int m_uSceneWidth;
 	static bool m_bUnitControllable;
 	static bool m_bEndTurn;
+	//static bool m_bToggleRange;
 
 	static const CUnitEnums::TYPE m_UnitOnButton[4];
 
