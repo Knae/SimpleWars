@@ -118,6 +118,7 @@ void CUnit::MoveTo(sf::Vector2f _inPosition)
 void CUnit::Replenish()
 {
 	m_fMovementPoints = m_fMovementPointsBase;
+	m_eCurrentState = CUnitEnums::STATE::IDLE;
 }
 
 void CUnit::ExplodeInFlamingGlory()

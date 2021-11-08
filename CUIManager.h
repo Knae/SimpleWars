@@ -62,10 +62,6 @@ private:
 	static const sf::IntRect m_ButtonUnitRect_Blue;
 	static const sf::IntRect m_ButtonUnitRect_Red;
 	static const sf::IntRect m_ButtonGameLoop;
-	//const sf::IntRect m_TileSpriteStart = { 96, 0, 32, 32 };
-	//const sf::IntRect m_TileSpriteFinish = { 128, 0, 32, 32 };
-	//const sf::IntRect m_TileSpriteStartAlg = { 0, 0, 160, 32 };
-	//const sf::IntRect m_TileSpriteReset = { 160, 0, 160, 32 };
 
 	static std::vector<sf::Sprite*> m_vecButtons_ControlPanel;
 	static std::vector<sf::Sprite*> m_vecOverlays;
@@ -81,7 +77,6 @@ private:
 	static unsigned int m_uSceneWidth;
 	static bool m_bUnitControllable;
 	static bool m_bEndTurn;
-	//static bool m_bToggleRange;
 
 	static const CUnitEnums::TYPE m_UnitOnButton[4];
 

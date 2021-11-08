@@ -49,14 +49,6 @@ CUIManager::CUIManager()
 	m_bEndTurn = false;
 	m_eCurrentTurn = UIEnums::TURN::BLUE;
 	m_eCurrentUnitSide = CUnitEnums::SIDE::NONE;
-
-	//Is const realy a god idea? Maybe have this set from ini?
-	//m_strUnitButtonSpriteMap = "assets/spritemaps/UnitButtons.png";
-	//m_strEmblemSpriteMap = "assets/spritemaps/FactionEmblems.png";
-	//m_strGameButtonsSpriteMap = "assets/spritemaps/GameButtons.png";
-	//m_strTileSelectorSpriteMap = "assets/spritemaps/tileSelection.png";
-	//m_ButtonUnitRect_Blue = { 0, 0, 32, 32 };
-	//m_ButtonUnitRect_Red = { 0, 32, 32, 32 };
 }
 
 CUIManager::~CUIManager()

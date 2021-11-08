@@ -30,19 +30,24 @@ public:
 		_outMovePoints = m_fMovementPoints;
 	}
 	sf::Vector2u GetCurrentTile()		{ return m_v2uCurrentTileLocation; }
+	CUnitEnums::STATE GetState()		{ return m_eCurrentState; }
 	CUnitEnums::FACTION GetFaction()	{ return m_eFaction; }
 	CUnitEnums::SIDE GetSide()			{ return m_eControllingPlayer; }
 	CUnitEnums::TYPE GetType()			{ return m_eUnitType; }
-	int GetRange() { return m_iRange; }
+	int GetRange()						{ return m_iRange; }
 
 	void Update();
 	void Update(double& _inTimeElapsed);
-	float GetHP() { return m_fHP; }
-	float TakeDamage(float& _inDamage) { m_fHP -= _inDamage; return m_fHP; }
+	float GetHP()						{ return m_fHP; }
 	void Attack();
 	void MoveTo(sf::Vector2u _inTileLocation);
 	void MoveTo(sf::Vector2f _inPosition);
-	sf::Sprite* GetSprite() { return m_sprtUnitSprite; }
+	sf::Sprite* GetSprite()				{ return m_sprtUnitSprite; }
+	float TakeDamage(float& _inDamage)				{ m_fHP -= _inDamage; return m_fHP; }
+	void IncrementMovementPoints(float _inPoints)	{ m_fMovementPoints += _inPoints; }
+	void IncrementDamageDealt(float _inAmount)		{ m_fDamage += _inAmount; }
+	void IncrementRange(int _inAmount)				{ m_iRange += _inAmount; }
+	//void ChangeFaction();
 	void Replenish();
 
 private:
