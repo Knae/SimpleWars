@@ -18,6 +18,7 @@ public:
 		MAPSELECTION,
 		UNITPLACEMENT,
 		GAMELOOP,
+		GAMEEND
 	};
 
 	enum class MOUSESTATE

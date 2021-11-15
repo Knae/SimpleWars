@@ -2,7 +2,7 @@
 
 CGameManager::CGameManager()
 {
-	m_GameWindowSize_Current = m_kv2uGameWindowSize_Default;
+	m_GameWindowSize_Current = m_GameWindowSize_Default;
 
 	m_pGameWindow = nullptr;
 	m_pFont = nullptr;
@@ -78,7 +78,29 @@ bool CGameManager::UpdateManagers(double& _inElapsedTime)
 {
 	CUnitManager::Update(_inElapsedTime);
 
-	if (CUIManager::GetIfTurnEndClicked())
+	if (CUIManager::GetIfForfeitChosen)
+	{
+		switch (m_eCurrentTurn)
+		{
+			case CUIEnums::TURN::BLUE:
+			{
+				CUIManager::VictoryAchieved(CUIEnums::TURN::RED);
+				break;
+			}
+			case CUIEnums::TURN::RED:
+			{
+				CUIManager::VictoryAchieved(CUIEnums::TURN::BLUE);
+				break;
+			}
+			default:
+			case CUIEnums::TURN::NONE:
+			{
+				break;
+			}
+		}
+		m_eCurrentState = CUIEnums::GAMESTATE::GAMEEND;
+	}
+	else if (CUIManager::GetIfTurnEndClicked())
 	{
 		SwitchTurns();
 		CUIManager::SetCurrentTurn(m_eCurrentTurn);
@@ -89,6 +111,8 @@ bool CGameManager::UpdateManagers(double& _inElapsedTime)
 		//GameEnds
 		std::cout << "\nAll Enemy units  have died!" << std::endl;
 		m_bExecutingActions = false;
+		CUIManager::VictoryAchieved(m_eCurrentTurn);
+		m_eCurrentState = CUIEnums::GAMESTATE::GAMEEND;
 	}
 
 	m_eCurrentUIMouseState = CUIManager::GetMouseCurrentState();

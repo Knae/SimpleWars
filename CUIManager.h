@@ -32,6 +32,9 @@ public:
 		CUnitEnums::TYPE _inType = CUnitEnums::TYPE::NONE,
 		CUnitEnums::FACTION _inFaction = CUnitEnums::FACTION::NONE);
 	static bool GetIfTurnEndClicked()								{ return m_bEndTurn; }
+	static bool GetIfForfeitChosen()								{ return m_bForfeitChosen; }
+	static void VictoryAchieved(CUIEnums::TURN _inSide);
+	static void HideVictoryMessage() { m_bDisplayVictory = false; }
 	/// <summary>
 	/// Set the current state the UI manager is at
 	/// DOES NOT CHANGE THE UI. Changing the UI setup needs
@@ -44,7 +47,7 @@ public:
 	static void SetCurrentTurn(CUIEnums::TURN _inTurn)				{ m_eCurrentTurn = _inTurn; m_bEndTurn = false; }
 	static void SetChosenUnitToNone()								{ m_eCurrentTypeChosen = CUnitEnums::TYPE::NONE; }
 	static CUnitEnums::TYPE GetChosenUnit()							{ return m_eCurrentTypeChosen; }
-	static CUIEnums::MOUSESTATE GetMouseCurrentState()					{ return m_eCurrentMouseState; }
+	static CUIEnums::MOUSESTATE GetMouseCurrentState()				{ return m_eCurrentMouseState; }
 	static void SetCurrentUnitHasNoMovePoints(bool _inHasNoPoints)	{ m_bUnitHasNoMovePoints = _inHasNoPoints; }
 	static void SetCurrentUnitHasAttacked(bool _inHasAttacked)		{ m_bUnitHasAttacked = _inHasAttacked; }
 	static void SwitchTurnForUnitPlacment(int* _inAmountA, int* _inAmountB, int* _inAmountC);
@@ -70,18 +73,24 @@ private:
 	static std::vector<sf::Sprite*> m_vecOverlays;
 	static std::vector<sf::Text*> m_vecText_UnitPlacementPanel;
 	static std::vector<int*> m_vecText_DisplayVariables;
+	static sf::RenderTexture* m_pPanelBackground;
 	static sf::Texture* m_pButtonUnitTexture;
 	static sf::Texture* m_pEmptyUnitPortrait;
 	static sf::Texture* m_pButtonsGameLoop;
 	static sf::Texture* m_pButtonFinish;
-	static sf::Font* m_pFont;
-	static sf::RenderTexture* m_pPanelBackground;
 	static sf::Sprite* m_pSpriteBackground;
+	static sf::Font* m_pFont;
+	static sf::Texture m_VictoryTexture;
+	static sf::Sprite m_VictorySprite;
+	static sf::IntRect m_VictoryRect_Blue;
+	static sf::IntRect m_VictoryRect_Red;
 	static unsigned int m_uSceneWidth;
 	static bool m_bUnitControllable;
 	static bool m_bUnitHasNoMovePoints;
 	static bool m_bUnitHasAttacked;
 	static bool m_bEndTurn;
+	static bool m_bForfeitChosen;
+	static bool m_bDisplayVictory;
 
 	static const CUnitEnums::TYPE m_eUnitOnButton[4];
 

@@ -34,9 +34,9 @@ private:
 	COverlayManager();
 
 	static std::vector<sf::Sprite*> m_vecOverlayTileSelector;
+	static std::map<std::string, sf::IntRect> m_mapSpriteRect;
 
 	static std::string m_strTileSelector;
-	static std::map<std::string, sf::IntRect> m_mapSpriteRect;
 	static sf::Texture* m_pOverlayTexture;
 	static int m_iTileSize;
 	static bool m_bShowAttackSelector;

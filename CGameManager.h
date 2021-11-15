@@ -60,11 +60,11 @@ private:
 	CGameManager(CGameManager const&) = delete;
 	void operator=(CGameManager const&) = delete;
 
-	const sf::Vector2u m_kv2uGameWindowSize_Default = sf::Vector2u(1024, 576);
-	//const static std::string m_strMountainVillageConfig;
+	const sf::Vector2u m_GameWindowSize_Default = sf::Vector2u(1024, 576);
 	const std::string m_strMountainVillageConfig= "configs/maps/MountainVillage.ini";
-	const std::string m_strUnitConfig = "configs/units.ini";
+	const std::string m_strUnitConfig = "configs/units/BaseSettings.ini";
 	const std::string m_strFactionConfig = "configs/factions.ini";
+
 	
 	CUIManager* m_pUIMgr;
 	CSceneManager* m_pSceneMgr;

@@ -4,18 +4,24 @@ std::vector<sf::Sprite*> CUIManager::m_vecButtons_ControlPanel;
 std::vector<sf::Sprite*> CUIManager::m_vecOverlays;
 std::vector<sf::Text*> CUIManager::m_vecText_UnitPlacementPanel;
 std::vector<int*> CUIManager::m_vecText_DisplayVariables;
+sf::RenderTexture* CUIManager::m_pPanelBackground;
 sf::Texture* CUIManager::m_pButtonUnitTexture;
 sf::Texture* CUIManager::m_pEmptyUnitPortrait;
 sf::Texture* CUIManager::m_pButtonsGameLoop;
 sf::Texture* CUIManager::m_pButtonFinish;
 sf::Font* CUIManager::m_pFont;
-sf::RenderTexture* CUIManager::m_pPanelBackground;
 sf::Sprite* CUIManager::m_pSpriteBackground;
+sf::Texture CUIManager::m_VictoryTexture;
+sf::Sprite CUIManager::m_VictorySprite;
+sf::IntRect CUIManager::m_VictoryRect_Blue;
+sf::IntRect CUIManager::m_VictoryRect_Red;
 unsigned int CUIManager::m_uSceneWidth;
 bool CUIManager::m_bUnitControllable;
-bool CUIManager::m_bEndTurn;
 bool CUIManager::m_bUnitHasNoMovePoints;
 bool CUIManager::m_bUnitHasAttacked;
+bool CUIManager::m_bEndTurn;
+bool CUIManager::m_bForfeitChosen;
+bool CUIManager::m_bDisplayVictory;
 
 CUIEnums::TURN CUIManager::m_eCurrentTurn;
 CUIEnums::GAMESTATE CUIManager::m_eCurrentUIState;
@@ -51,6 +57,7 @@ CUIManager::CUIManager()
 	m_bUnitHasNoMovePoints = false;
 	m_bUnitHasAttacked = false;
 	m_bEndTurn = false;
+	m_bDisplayVictory = false;
 	m_eCurrentTurn = CUIEnums::TURN::BLUE;
 	m_eCurrentUnitSide = CUnitEnums::SIDE::NONE;
 }
@@ -139,6 +146,17 @@ bool CUIManager::IntializeUI(sf::Vector2u _inWindowSize, sf::Font* _inFont, cons
 		//std::cout << "\nUnable to initialize textures for unit buttons.\n" << std::endl;
 		return false;
 	}
+
+	if (m_VictoryTexture.loadFromFile("assets/spritemaps/DisplaysVictory.png"))
+	{
+		//std::cout << "\nUnable to initialize textures victory display.\n" << std::endl;
+		return false;
+	}
+	m_VictoryRect_Blue = sf::IntRect(0, 0, 640, 192);
+	m_VictoryRect_Red = sf::IntRect(640, 0, 640, 192);
+	m_VictorySprite.setTexture(m_VictoryTexture);
+	m_VictorySprite.setTextureRect(m_VictoryRect_Blue);
+	m_VictorySprite.setPosition(sf::Vector2f(96.0f,96.0f));
 
 	m_uSceneWidth = _inSceneWidth;
 	m_pPanelBackground = new sf::RenderTexture();
@@ -293,6 +311,11 @@ void CUIManager::DisplayUI(sf::RenderWindow& _inWindow)
 	{
 		_inWindow.draw(*element);
 	}
+	
+	if (m_bDisplayVictory)
+	{
+		_inWindow.draw(m_VictorySprite);
+	}
 }
 
 /// <summary>
@@ -377,6 +400,8 @@ bool CUIManager::ProcessClick(sf::Vector2f& _inCoords)
 						}
 						case 3:
 						{
+							m_bForfeitChosen = true;
+							m_eCurrentUIState = CUIEnums::GAMESTATE::GAMEEND;
 							break;
 						}
 						default:
@@ -644,6 +669,30 @@ bool CUIManager::UpdateInfoDisplay(CSceneEnums::TILETYPE _inTerrain, CUnitEnums:
 	
 
 	return true;
+}
+
+void CUIManager::VictoryAchieved(CUIEnums::TURN _inSide)
+{
+	switch (_inSide)	
+	{
+
+		case CUIEnums::TURN::BLUE:
+		{
+			m_VictorySprite.setTextureRect(m_VictoryRect_Blue);
+			break;
+		}
+		case CUIEnums::TURN::RED:
+		{
+			m_VictorySprite.setTextureRect(m_VictoryRect_Red);
+			break;
+		}
+		default:
+		case CUIEnums::TURN::NONE:
+		{
+			break;
+		}
+	}
+	m_bDisplayVictory = true;
 }
 
 void CUIManager::SwitchTurnForUnitPlacment(int* _inAmountA, int* _inAmountB, int* _inAmountC)
