@@ -4,7 +4,7 @@
 
 #include<SFML/Graphics.hpp>
 #include <string>
-#include "UIEnums.h"
+#include "CUIEnums.h"
 #include "CUnitEnums.h"
 #include "CSceneEnums.h"
 #include "CParseConfigCommon.h"
@@ -39,11 +39,14 @@ public:
 	/// required depending on the state.
 	/// </summary>
 	/// <param name="_inState"></param>
-	static void SetCurrentGameState(UIEnums::GAMESTATE _inState)	{ m_eCurrentUIState = _inState; }
-	static void SetCurrentTurn(UIEnums::TURN _inTurn)				{ m_eCurrentTurn = _inTurn; m_bEndTurn = false; }
+	static void SetCurrentGameState(CUIEnums::GAMESTATE _inState)	{ m_eCurrentUIState = _inState; }
+	static void SetCurrentMouseState(CUIEnums::MOUSESTATE _inState) { m_eCurrentMouseState = _inState; }
+	static void SetCurrentTurn(CUIEnums::TURN _inTurn)				{ m_eCurrentTurn = _inTurn; m_bEndTurn = false; }
 	static void SetChosenUnitToNone()								{ m_eCurrentTypeChosen = CUnitEnums::TYPE::NONE; }
 	static CUnitEnums::TYPE GetChosenUnit()							{ return m_eCurrentTypeChosen; }
-	static UIEnums::MOUSESTATE GetCurrentState()					{ return m_eCurrentMouseState; }
+	static CUIEnums::MOUSESTATE GetMouseCurrentState()					{ return m_eCurrentMouseState; }
+	static void SetCurrentUnitHasNoMovePoints(bool _inHasNoPoints)	{ m_bUnitHasNoMovePoints = _inHasNoPoints; }
+	static void SetCurrentUnitHasAttacked(bool _inHasAttacked)		{ m_bUnitHasAttacked = _inHasAttacked; }
 	static void SwitchTurnForUnitPlacment(int* _inAmountA, int* _inAmountB, int* _inAmountC);
 
 private:
@@ -51,7 +54,7 @@ private:
 	CUIManager(CUIManager const&) = delete;
 	void operator=(CUIManager const&) = delete;
 
-	static void ChangeState(UIEnums::GAMESTATE _input) { m_eCurrentUIState = _input; }
+	static void ChangeState(CUIEnums::GAMESTATE _input) { m_eCurrentUIState = _input; }
 
 	static const std::string m_strUnitButtonSpriteMap;
 	static const std::string m_strEmptyUnitSprite;
@@ -67,22 +70,24 @@ private:
 	static std::vector<sf::Sprite*> m_vecOverlays;
 	static std::vector<sf::Text*> m_vecText_UnitPlacementPanel;
 	static std::vector<int*> m_vecText_DisplayVariables;
-	static sf::Texture* m_ButtonUnitTexture;
-	static sf::Texture* m_EmptyUnitPortrait;
-	static sf::Texture* m_ButtonsGameLoop;
-	static sf::Texture* m_ButtonFinish;
+	static sf::Texture* m_pButtonUnitTexture;
+	static sf::Texture* m_pEmptyUnitPortrait;
+	static sf::Texture* m_pButtonsGameLoop;
+	static sf::Texture* m_pButtonFinish;
 	static sf::Font* m_pFont;
 	static sf::RenderTexture* m_pPanelBackground;
 	static sf::Sprite* m_pSpriteBackground;
 	static unsigned int m_uSceneWidth;
 	static bool m_bUnitControllable;
+	static bool m_bUnitHasNoMovePoints;
+	static bool m_bUnitHasAttacked;
 	static bool m_bEndTurn;
 
-	static const CUnitEnums::TYPE m_UnitOnButton[4];
+	static const CUnitEnums::TYPE m_eUnitOnButton[4];
 
-	static UIEnums::TURN m_eCurrentTurn;
-	static UIEnums::GAMESTATE m_eCurrentUIState;
-	static UIEnums::MOUSESTATE m_eCurrentMouseState;
+	static CUIEnums::TURN m_eCurrentTurn;
+	static CUIEnums::GAMESTATE m_eCurrentUIState;
+	static CUIEnums::MOUSESTATE m_eCurrentMouseState;
 	static CUnitEnums::TYPE m_eCurrentTypeChosen;
 	static CUnitEnums::SIDE m_eCurrentUnitSide;
 };

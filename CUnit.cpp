@@ -6,24 +6,24 @@ CUnit::CUnit(	CUnitEnums::TYPE _inUnits, CUnitEnums::SIDE _inSIDE,
 {
 	m_eUnitType = _inUnits;
 	m_fHP = _inHP;
-	m_fMovementPointsBase = _inMovement;
-	m_fMovementPoints = m_fMovementPointsBase;
+	m_fMovementPoints_Base = _inMovement;
+	m_fMovementPoints = m_fMovementPoints_Base;
 	m_fDamage = _inDamage;
 	m_iRange = _inRange;
 	m_fTileSize = (float)(_tileSize);
 	m_eCurrentState = CUnitEnums::STATE::NONE;
 	m_eCurrentDirection = _inDirection;
 	m_eControllingPlayer = _inSIDE;
-	m_sprtUnitSprite = nullptr;
+	m_UnitSprite = nullptr;
 	m_eFaction = CUnitEnums::FACTION::TALONS;
 }
 
 CUnit::~CUnit()
 {
-	if (m_sprtUnitSprite != nullptr)
+	if (m_UnitSprite != nullptr)
 	{
-		delete m_sprtUnitSprite;
-		m_sprtUnitSprite = nullptr;
+		delete m_UnitSprite;
+		m_UnitSprite = nullptr;
 	}
 }
 
@@ -31,17 +31,17 @@ CUnit::~CUnit()
 void CUnit::Initialize(sf::Sprite* _inSpriteSource)
 {
 	//m_texTextureSource = _inTextureSource;
-	m_sprtUnitSprite = _inSpriteSource;
-	//m_sprtUnitSprite->setTexture(*m_texTextureSource);
-	m_fMovementPoints = m_fMovementPointsBase;
+	m_UnitSprite = _inSpriteSource;
+	//m_UnitSprite->setTexture(*m_texTextureSource);
+	m_fMovementPoints = m_fMovementPoints_Base;
 }
 
 void CUnit::SetLocation(sf::Vector2f _inPosition)
 {
 	sf::Vector2u tilePosition(	(unsigned int)(_inPosition.x / m_fTileSize),
 								(unsigned int)(_inPosition.y / m_fTileSize));
-	m_v2uCurrentTileLocation = tilePosition;
-	m_sprtUnitSprite->setPosition(tilePosition.x * m_fTileSize, tilePosition.y * m_fTileSize);
+	m_CurrentTileLocation = tilePosition;
+	m_UnitSprite->setPosition(tilePosition.x * m_fTileSize, tilePosition.y * m_fTileSize);
 }
 
 /// <summary>
@@ -58,12 +58,12 @@ void CUnit::Update()
 		}
 		case CUnitEnums::STATE::MOVE:
 		{
-			sf::Vector2f recordedTileLocation = sf::Vector2f(m_v2uCurrentTileLocation.x * m_fTileSize, m_v2uCurrentTileLocation.y*m_fTileSize);
-			if (m_sprtUnitSprite->getPosition() != recordedTileLocation)
+			sf::Vector2f recordedTileLocation = sf::Vector2f(m_CurrentTileLocation.x * m_fTileSize, m_CurrentTileLocation.y*m_fTileSize);
+			if (m_UnitSprite->getPosition() != recordedTileLocation)
 			{
-				sf::Vector2f spriteLocation = m_sprtUnitSprite->getPosition();
+				sf::Vector2f spriteLocation = m_UnitSprite->getPosition();
 				spriteLocation = LerpMovement(spriteLocation,recordedTileLocation,0.5f);
-				m_sprtUnitSprite->setPosition(spriteLocation);
+				m_UnitSprite->setPosition(spriteLocation);
 			}
 			else
 			{
@@ -101,24 +101,38 @@ void CUnit::Attack()
 	m_eCurrentState = CUnitEnums::STATE::ATTACK;
 }
 
+/// <summary>
+/// Set this unit to enter the given tile index
+/// </summary>
+/// <param name="_inTileLocation">Tile location in terms on index, given in Vector2u form</param>
 void CUnit::MoveTo(sf::Vector2u _inTileLocation)
 {
-	m_v2uCurrentTileLocation = _inTileLocation;
+	m_CurrentTileLocation = _inTileLocation;
 	m_eCurrentState = CUnitEnums::STATE::MOVE;
-	//m_sprtUnitSprite->setPosition(_inTileLocation.x* m_fTileSize, _inTileLocation.y* m_fTileSize);
+	IncrementMovementPoints(-1.0f);
 }
 
+/// <summary>
+/// Convert the given float position to tile index form before passing it
+/// to MoveTo(Vector2u) to "Set this unit to enter the given tile index"
+/// </summary>
+/// <param name="_inPosition">mouse/pixel location=, given in Vector2f form</param>
 void CUnit::MoveTo(sf::Vector2f _inPosition)
 {
 	sf::Vector2u tilePosition(	(unsigned int)(_inPosition.x / m_fTileSize),
 								(unsigned int)(_inPosition.y / m_fTileSize));
 	MoveTo(tilePosition);
+
 }
 
 void CUnit::Replenish()
 {
-	m_fMovementPoints = m_fMovementPointsBase;
-	m_eCurrentState = CUnitEnums::STATE::IDLE;
+	if (m_eCurrentState != CUnitEnums::STATE::DESTROYED)
+	{
+		m_fMovementPoints = m_fMovementPoints_Base;
+		m_bHasAttacked = false;
+		m_eCurrentState = CUnitEnums::STATE::IDLE;
+	}
 }
 
 void CUnit::ExplodeInFlamingGlory()

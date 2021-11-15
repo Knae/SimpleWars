@@ -1,32 +1,32 @@
 #include "CUnitManager.h"
 
-std::vector<CUnit*> CUnitManager::m_CurrentUnits_Blue;
-std::vector<CUnit*> CUnitManager::m_CurrentUnits_Red;
-std::string CUnitManager::m_UnitTexturePath_Blue;
-std::string CUnitManager::m_UnitTexturePath_Red;
-sf::Texture* CUnitManager::m_UnitTexture_Blue;
-sf::Texture* CUnitManager::m_UnitTexture_Red;
-std::map<CUnitEnums::TYPE, CUnitEnums::UnitRecord*> CUnitManager::m_UnitStats;
-std::map<CUnitEnums::FACTION, CUnitEnums::StatBonus_Add*> CUnitManager::m_FactionsBonuses;
+std::vector<CUnit*> CUnitManager::m_vecCurrentUnits_Blue;
+std::vector<CUnit*> CUnitManager::m_vecCurrentUnits_Red;
+std::string CUnitManager::m_strUnitTexturePath_Blue;
+std::string CUnitManager::m_strUnitTexturePath_Red;
+sf::Texture* CUnitManager::m_pUnitTexture_Blue;
+sf::Texture* CUnitManager::m_pUnitTexture_Red;
+std::map<CUnitEnums::TYPE, CUnitEnums::UnitRecord*> CUnitManager::m_mapUnitStats;
+std::map<CUnitEnums::FACTION, CUnitEnums::StatBonus_Add*> CUnitManager::m_mapFactionsBonuses;
 
 CUnitManager::CUnitManager()
 {
-	m_UnitTexture_Blue = nullptr;
-	m_UnitTexture_Red = nullptr;
+	m_pUnitTexture_Blue = nullptr;
+	m_pUnitTexture_Red = nullptr;
 }
 
 CUnitManager::~CUnitManager()
 {
-	delete m_UnitTexture_Red;
-	delete m_UnitTexture_Blue;
+	delete m_pUnitTexture_Red;
+	delete m_pUnitTexture_Blue;
 
-	m_UnitTexture_Blue = nullptr;
-	m_UnitTexture_Red = nullptr;
+	m_pUnitTexture_Blue = nullptr;
+	m_pUnitTexture_Red = nullptr;
 }
 
-void CUnitManager::ParseConfig(const std::string& _inUnitConfigPath, const std::string& _inFactionConfigPath)
+void CUnitManager::ParseConfig(const std::string& _inUnitConfigPath, const std::string& _inFactionConfigPath, const std::string& _inTerrainSettingsPath)
 {
-	std::fstream currentConfig;
+	std::ifstream currentConfig;
 	std::string currentLine;
 
 	currentConfig.open(_inUnitConfigPath);
@@ -46,11 +46,11 @@ void CUnitManager::ParseConfig(const std::string& _inUnitConfigPath, const std::
 					readLabel = ParseLineGetLabel(currentLine, readPath);
 					if (readLabel.compare("Red") == 0)
 					{
-						m_UnitTexturePath_Red = readPath;
+						m_strUnitTexturePath_Red = readPath;
 					}
 					else if (readLabel.compare("Blue") == 0)
 					{
-						m_UnitTexturePath_Blue = readPath;
+						m_strUnitTexturePath_Blue = readPath;
 					}
 					std::getline(currentConfig, currentLine);
 				}
@@ -145,7 +145,7 @@ void CUnitManager::ParseConfig(const std::string& _inUnitConfigPath, const std::
 				}
 				//Finished parsing this unit
 				std::cout << "\nFinished parsing a unit.\n";
-				m_UnitStats.emplace(currentType, currentUnitStats);
+				m_mapUnitStats.emplace(currentType, currentUnitStats);
 			}
 		}
 	}
@@ -222,31 +222,38 @@ void CUnitManager::ParseConfig(const std::string& _inUnitConfigPath, const std::
 				}
 				//Finished parsing this faction
 				std::cout << "\nFinished parsing a unit.\n";
-				m_FactionsBonuses.emplace(currentFaction, currentFactionBonus);
+				m_mapFactionsBonuses.emplace(currentFaction, currentFactionBonus);
 			}
 		}
 	}
 
-	if (m_UnitTexture_Blue != nullptr)
+	currentConfig.close();
+	currentConfig.open(_inTerrainSettingsPath);
+	if (currentConfig.is_open())
 	{
-		delete m_UnitTexture_Blue;
-		m_UnitTexture_Blue = nullptr;
+
 	}
 
-	if (m_UnitTexture_Red != nullptr)
+	if (m_pUnitTexture_Blue != nullptr)
 	{
-		delete m_UnitTexture_Red;
-		m_UnitTexture_Red = nullptr;
+		delete m_pUnitTexture_Blue;
+		m_pUnitTexture_Blue = nullptr;
 	}
 
-	m_UnitTexture_Blue = new sf::Texture();
-	if (!m_UnitTexture_Blue->loadFromFile(m_UnitTexturePath_Blue))
+	if (m_pUnitTexture_Red != nullptr)
+	{
+		delete m_pUnitTexture_Red;
+		m_pUnitTexture_Red = nullptr;
+	}
+
+	m_pUnitTexture_Blue = new sf::Texture();
+	if (!m_pUnitTexture_Blue->loadFromFile(m_strUnitTexturePath_Blue))
 	{
 		std::cout << "\nERROR:Unable to load textures for Blue units!" << std::endl;
 	}
 
-	m_UnitTexture_Red = new sf::Texture();
-	if (!m_UnitTexture_Red->loadFromFile(m_UnitTexturePath_Red))
+	m_pUnitTexture_Red = new sf::Texture();
+	if (!m_pUnitTexture_Red->loadFromFile(m_strUnitTexturePath_Red))
 	{
 		std::cout << "\nERROR:Unable to load textures for Red units!" << std::endl;
 	}
@@ -254,21 +261,27 @@ void CUnitManager::ParseConfig(const std::string& _inUnitConfigPath, const std::
 
 void CUnitManager::DisplayUnits(sf::RenderWindow& _inWindow)
 {
-	for (auto& element : m_CurrentUnits_Blue)
+	for (auto& element : m_vecCurrentUnits_Blue)
 	{
-		_inWindow.draw(*element->GetSprite());
+		if (element->GetState() != CUnitEnums::STATE::DESTROYED)
+		{
+			_inWindow.draw(*element->GetSprite());
+		}
 	}
 
-	for (auto& element : m_CurrentUnits_Red)
+	for (auto& element : m_vecCurrentUnits_Red)
 	{
-		_inWindow.draw(*element->GetSprite());
+		if (element->GetState() != CUnitEnums::STATE::DESTROYED)
+		{
+			_inWindow.draw(*element->GetSprite());
+		}
 	}
 }
 
 CUnit* CUnitManager::CreateUnit(CUnitEnums::TYPE _inType,CUnitEnums::FACTION _inFaction, CUnitEnums::SIDE _inSide)
 {
 	std::map<CUnitEnums::TYPE, CUnitEnums::UnitRecord*>::iterator mapIter;
-	mapIter = m_UnitStats.find(_inType);
+	mapIter = m_mapUnitStats.find(_inType);
 	CUnitEnums::UnitRecord* newUnitStats = (*mapIter).second;
 	CUnit* newUnit = new CUnit(	
 		_inType,
@@ -289,17 +302,17 @@ CUnit* CUnitManager::CreateUnit(CUnitEnums::TYPE _inType,CUnitEnums::FACTION _in
 	sf::Sprite* unitSprite = new sf::Sprite();
 	if (_inSide == CUnitEnums::SIDE::BLUE)
 	{
-		unitSprite->setTexture(*m_UnitTexture_Blue);
+		unitSprite->setTexture(*m_pUnitTexture_Blue);
 		unitSprite->setTextureRect(unitTextureRect);
 		newUnit->Initialize(unitSprite);
-		m_CurrentUnits_Blue.push_back(newUnit);
+		m_vecCurrentUnits_Blue.push_back(newUnit);
 	}
 	else
 	{
-		unitSprite->setTexture(*m_UnitTexture_Red);
+		unitSprite->setTexture(*m_pUnitTexture_Red);
 		unitSprite->setTextureRect(unitTextureRect);
 		newUnit->Initialize(unitSprite);
-		m_CurrentUnits_Red.push_back(newUnit);
+		m_vecCurrentUnits_Red.push_back(newUnit);
 	}
 	unitSprite = nullptr;
 	return newUnit;
@@ -331,6 +344,12 @@ bool CUnitManager::MoveUnit(CUnit* _inUnit, sf::Vector2u _inPosition)
 	}
 }
 
+/// <summary>
+/// Move units. uses Vector2f instead
+/// </summary>
+/// <param name="_inUnit">Pointer to unit being moved. CUnit*</param>
+/// <param name="_inPosition">New position to move to. sf::Vector2u</param>
+/// <returns>whether the unit will be moved or not</returns>
 bool CUnitManager::MoveUnit(CUnit* _inUnit, sf::Vector2f _inPosition)
 {
 	sf::IntRect unitSpriteRect = _inUnit->GetSprite()->getTextureRect();
@@ -351,30 +370,30 @@ void CUnitManager::ClearUnits()
 	/// <summary>
 	/// TODO: CHECK THESE!
 	/// </summary>
-	for (auto& element : m_CurrentUnits_Blue)
+	for (auto& element : m_vecCurrentUnits_Blue)
 	{
 		delete element;
 		element = nullptr;
 	}
 
-	for (auto& element : m_CurrentUnits_Red)
+	for (auto& element : m_vecCurrentUnits_Red)
 	{
 		delete element;
 		element = nullptr;
 	}
 
-	m_CurrentUnits_Blue.clear();
-	m_CurrentUnits_Red.clear();
+	m_vecCurrentUnits_Blue.clear();
+	m_vecCurrentUnits_Red.clear();
 }
 
 void CUnitManager::Update(double& _inElapsedTime)
 {
-	for (auto& element : m_CurrentUnits_Blue)
+	for (auto& element : m_vecCurrentUnits_Blue)
 	{
 		element->Update(_inElapsedTime);
 	}
 
-	for (auto& element : m_CurrentUnits_Red)
+	for (auto& element : m_vecCurrentUnits_Red)
 	{
 		element->Update(_inElapsedTime);
 	}
@@ -382,5 +401,40 @@ void CUnitManager::Update(double& _inElapsedTime)
 
 bool CUnitManager::CheckIfAnyUnitsLeft(CUnitEnums::SIDE _inSide)
 {
+	if (_inSide == CUnitEnums::SIDE::BLUE)
+	{
+		for (auto& element : m_vecCurrentUnits_Red)
+		{
+			if (element->GetState() != CUnitEnums::STATE::DESTROYED)
+			{
+				return true;
+			}
+		}
+	}
+	else if (_inSide == CUnitEnums::SIDE::RED)
+	{
+		for (auto& element : m_vecCurrentUnits_Blue)
+		{
+			if (element->GetState() != CUnitEnums::STATE::DESTROYED)
+			{
+				return true;
+			}
+		}
+	}
+
 	return false;
 }
+
+void CUnitManager::SwitchTurns()
+{
+	for (auto& element : m_vecCurrentUnits_Blue)
+	{
+		element->Replenish();
+	}
+
+	for (auto& element : m_vecCurrentUnits_Red)
+	{
+		element->Replenish();
+	}
+}
+

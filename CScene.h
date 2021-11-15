@@ -28,28 +28,28 @@ public:
 	virtual int GetUnitAmount(CUnitEnums::SIDE _inSide, CUnitEnums::TYPE _inType);
 	virtual void GetUnitsToPlace(std::map<CUnitEnums::TYPE, int>* _inUnitsB, std::map<CUnitEnums::TYPE, int>* _inUnitsR);
 	int* GetBaseColourArrayPointer() { return m_iBaseColour; }
-	virtual unsigned int GetSceneWidth_Pixels() { return m_iMapColumns*m_iTileWidth; }
-	virtual unsigned int GetSceneHeight_Pixels() { return m_iMapRows*m_iTileWidth; }
-	virtual unsigned int GetTileWidth() { return m_iTileWidth; }
+	virtual unsigned int GetSceneWidth_Pixels() { return m_uiMapColumns*m_uiTileWidth; }
+	virtual unsigned int GetSceneHeight_Pixels() { return m_uiMapRows*m_uiTileWidth; }
+	virtual unsigned int GetTileWidth() { return m_uiTileWidth; }
 	virtual CTile* GetTile(sf::Vector2f _inPosition);
 	virtual CTile* GetTile(unsigned int _inX, unsigned int _inY);
 private:
 	static bool ParseLineForMapSize(std::string& _inputLine, unsigned int& _inputMapRows, unsigned int& _inputMapColumns);
 	static bool ParseLineForUnits(std::string& _inputLine, int& _outUnitAmount, CUnitEnums::TYPE& _outType);
 	
-	const unsigned int m_iTileWidth = 32;
+	const unsigned int m_uiTileWidth = 32;
 	int m_iBaseColour[3] = { 0 };
-	std::map<CUnitEnums::TYPE, int> m_iUnitsRed;
-	std::map<CUnitEnums::TYPE, int> m_iUnitsBlue;
+	std::map<CUnitEnums::TYPE, int> m_mapUnitsRed;
+	std::map<CUnitEnums::TYPE, int> m_mapUnitsBlue;
 
 	std::string m_strTileMapFilePath;
-	std::vector<std::vector<CTile>>* m_MapTiles;
-	unsigned int m_iMapColumns;
-	unsigned int m_iMapRows;
+	std::vector<std::vector<CTile>>* m_pMapTiles;
+	unsigned int m_uiMapColumns;
+	unsigned int m_uiMapRows;
 
 	std::map<unsigned int, CSceneEnums::TILETYPE> m_mapTileValuesToCheck;
 	sf::VertexArray m_SceneTileVertices;
-	sf::Texture* m_MapTileMap;
+	sf::Texture* m_pMapTileMap;
 
 
 	//This overriding function was taken from SFML's tutorial

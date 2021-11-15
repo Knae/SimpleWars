@@ -18,16 +18,16 @@ public:
 
 	virtual void SetTileValue(unsigned int _input)			{ m_uiTileValue = _input; }
 	virtual unsigned int GetTileValue()						{ return m_uiTileValue; }
-	virtual void SetTileType(CSceneEnums::TILETYPE _input)	{ m_Type = _input; }
-	virtual CSceneEnums::TILETYPE GetTileType()				{ return m_Type; }
+	virtual void SetTileType(CSceneEnums::TILETYPE _input)	{ m_eType = _input; }
+	virtual CSceneEnums::TILETYPE GetTileType()				{ return m_eType; }
 	virtual void UnitEntersTile(CUnit* _inPUnit); 
 	virtual void UnitLeavesTile();// 
-	virtual CUnit* GetUnitOnTile()							{ return m_UnitOnTile; }
+	virtual CUnit* GetUnitOnTile()							{ return m_pUnitOnTile; }
 	virtual bool MovementCostToEnter(unsigned short& _movementCost);
 private:
 	unsigned int m_uiTileValue;
-	CSceneEnums::TILETYPE m_Type;
-	CUnit* m_UnitOnTile;
+	CSceneEnums::TILETYPE m_eType;
+	CUnit* m_pUnitOnTile;
 };
 
 #endif // !__CTILE_H__

@@ -107,7 +107,7 @@
     <ClInclude Include="CUnitEnums.h">
       <Filter>Header Files\Enums</Filter>
     </ClInclude>
-    <ClInclude Include="UIEnums.h">
+    <ClInclude Include="CUIEnums.h">
       <Filter>Header Files\Enums</Filter>
     </ClInclude>
     <ClInclude Include="CSceneEnums.h">
@@ -118,6 +118,9 @@
     </ClInclude>
     <ClInclude Include="CVFXManager.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CTerrainEffects.h">
+      <Filter>Header Files\UnitRelatedHeaders</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

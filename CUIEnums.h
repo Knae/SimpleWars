@@ -2,7 +2,7 @@
 #ifndef __UIEnums_H_
 #define __UIEnums_H_
 
-class UIEnums
+class CUIEnums
 {
 public:
 	enum class TURN
@@ -17,7 +17,7 @@ public:
 		NONE,
 		MAPSELECTION,
 		UNITPLACEMENT,
-		GAMELOOP
+		GAMELOOP,
 	};
 
 	enum class MOUSESTATE

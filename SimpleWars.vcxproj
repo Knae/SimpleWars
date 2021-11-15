@@ -171,7 +171,8 @@
     <ClInclude Include="CUnitEnums.h" />
     <ClInclude Include="CUnitManager.h" />
     <ClInclude Include="CVFXManager.h" />
-    <ClInclude Include="UIEnums.h" />
+    <ClInclude Include="CTerrainEffects.h" />
+    <ClInclude Include="CUIEnums.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -111,38 +111,38 @@ bool CParseConfigCommon::ConvertToUnitType(std::string& _inputString, CUnitEnums
 	return true;
 }
 
-UIEnums::TURN CParseConfigCommon::Convert(CUnitEnums::SIDE _input)
+CUIEnums::TURN CParseConfigCommon::Convert(CUnitEnums::SIDE _input)
 {
 	switch (_input)
 	{
 		case CUnitEnums::SIDE::BLUE:
 		{
-			return UIEnums::TURN::BLUE;
+			return CUIEnums::TURN::BLUE;
 			break;
 		}
 		case CUnitEnums::SIDE::RED:
 		{
-			return UIEnums::TURN::RED;
+			return CUIEnums::TURN::RED;
 			break;
 		}
 		default:
 		{
-			return UIEnums::TURN::NONE;
+			return CUIEnums::TURN::NONE;
 			break;
 		}
 	}
 }
 
-CUnitEnums::SIDE CParseConfigCommon::Convert(UIEnums::TURN _input)
+CUnitEnums::SIDE CParseConfigCommon::Convert(CUIEnums::TURN _input)
 {
 	switch (_input)
 	{
-		case UIEnums::TURN::BLUE:
+		case CUIEnums::TURN::BLUE:
 		{
 			return CUnitEnums::SIDE::BLUE;
 			break;
 		}
-		case UIEnums::TURN::RED:
+		case CUIEnums::TURN::RED:
 		{
 			return CUnitEnums::SIDE::RED;
 			break;

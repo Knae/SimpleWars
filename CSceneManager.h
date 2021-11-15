@@ -20,6 +20,7 @@ public:
 	static void DisplayScene(sf::RenderWindow& _targetWindow);
 	static CScene* GetCurrentScene()						{ return m_pCurrentManagedScene; }
 	static CTile* GetTileInScene(sf::Vector2f _inPosition)	{ return m_pCurrentManagedScene->GetTile(_inPosition); }
+	static CTile* GetTileInScene(sf::Vector2u _inPosition)	{ return m_pCurrentManagedScene->GetTile(_inPosition.x, _inPosition.y); }
 	static unsigned int GetTileSize()						{ return m_pCurrentManagedScene->GetTileWidth(); }
 
 private:
@@ -32,5 +33,4 @@ private:
 	static sf::RenderTexture* m_pSceneBackground;
 	static sf::Sprite* m_pSpriteBackground;
 };
-
 #endif // !__CSCENEMANAGER_H__

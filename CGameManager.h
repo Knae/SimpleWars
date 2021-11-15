@@ -5,6 +5,7 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
 #include <iostream>
+#include <iomanip>
 #include "CUIManager.h"
 #include "CSceneManager.h"
 #include "CUnitManager.h"
@@ -25,7 +26,7 @@ public:
 	//====================================
 	virtual bool IntializeGame();
 	virtual bool UpdateManagers(double& _inElapsedTime);
-	virtual bool ChangeCurrentState(UIEnums::GAMESTATE _inState);
+	virtual bool ChangeCurrentState(CUIEnums::GAMESTATE _inState);
 	virtual void SwitchTurns();
 	virtual void SetPointersToOtherSystems(
 							CUIManager* _inputUI,
@@ -50,6 +51,7 @@ public:
 	virtual void SetUIToUnitPlacement();
 	virtual void SetUIToGameLoop();
 	virtual void DisplayUI();
+	virtual void UpdateSidePanelInfo(CTile* _inTile, CUnit* _inUnit);
 
 	virtual sf::RenderWindow* GetGameWindow() { return m_pGameWindow; }
 
@@ -73,19 +75,19 @@ private:
 	sf::RenderTexture* m_pGameBackground;
 	sf::Sprite* m_pSpriteBackground;
 	sf::Font* m_pFont;
-	sf::Vector2u m_v2uGameWindowSize_Current;
+	sf::Vector2u m_GameWindowSize_Current;
 	bool m_bExecutingActions;
 	bool m_bAttackOverlayShown;
 
-	UIEnums::TURN m_eCurrentTurn;
-	UIEnums::GAMESTATE m_eCurrentState;
-	UIEnums::MOUSESTATE m_eCurrentUIMouseState;
+	CUIEnums::TURN m_eCurrentTurn;
+	CUIEnums::GAMESTATE m_eCurrentState;
+	CUIEnums::MOUSESTATE m_eCurrentUIMouseState;
 	CUnitEnums::TYPE m_eCurrentTypeChosen;
-	CUnit* m_SelectedUnit;
+	CUnit* m_pSelectedUnit;
 
 	//track number of units to place
-	std::map<CUnitEnums::TYPE, int> m_iUnitsToPlaced_B;
-	std::map<CUnitEnums::TYPE, int> m_iUnitsToPlaced_R;
+	std::map<CUnitEnums::TYPE, int> m_mapUnitsToPlaced_B;
+	std::map<CUnitEnums::TYPE, int> m_mapUnitsToPlaced_R;
 	std::map<CUnitEnums::TYPE, int>* m_pUnitsToPlace;
 };
 

@@ -2,17 +2,17 @@
 
 CScene::CScene()
 {
-	m_MapTileMap = new sf::Texture();
-	m_MapTiles = nullptr;
-	m_iMapColumns = m_iMapRows = 0;
+	m_pMapTileMap = new sf::Texture();
+	m_pMapTiles = nullptr;
+	m_uiMapColumns = m_uiMapRows = 0;
 }
 
 CScene::~CScene()
 {
-	if (m_MapTiles != nullptr)
+	if (m_pMapTiles != nullptr)
 	{
-		delete m_MapTiles;
-		m_MapTiles = nullptr;
+		delete m_pMapTiles;
+		m_pMapTiles = nullptr;
 	}
 }
 
@@ -40,14 +40,14 @@ bool CScene::ParseConfig(const std::string& _filePath)
 				std::getline(mapSettings, currentLine);
 				while (currentLine.compare("</MapSize>") != 0)
 				{
-					ParseLineForMapSize(currentLine, m_iMapRows, m_iMapColumns);
+					ParseLineForMapSize(currentLine, m_uiMapRows, m_uiMapColumns);
 					std::getline(mapSettings, currentLine);
 				}
-				m_MapTiles = new std::vector<std::vector<CTile>>(m_iMapRows,std::vector<CTile>(m_iMapColumns) );
+				m_pMapTiles = new std::vector<std::vector<CTile>>(m_uiMapRows,std::vector<CTile>(m_uiMapColumns) );
 			}
 			else if (currentLine.compare("<Tiles>")==0)
 			{
-				if (m_MapTiles != nullptr)
+				if (m_pMapTiles != nullptr)
 				{
 					//Getting the tile setup from map config
 					std::cout << "\nReading tile information\n";
@@ -57,26 +57,26 @@ bool CScene::ParseConfig(const std::string& _filePath)
 					std::map<unsigned int, CSceneEnums::TILETYPE>::iterator tileTypeIt;
 					while (currentLine.compare("</Tiles>") != 0)
 					{
-						for (unsigned int row = 0; row < m_iMapRows; row++)
+						for (unsigned int row = 0; row < m_uiMapRows; row++)
 						{
 							std::getline(mapSettings, currentLine);
 							//For each tile, set the tile type to the corresponding type in our
 							//vector tiletypes that we read earlier.
-							for (unsigned int column = 0; column < m_iMapColumns; column++)
+							for (unsigned int column = 0; column < m_uiMapColumns; column++)
 							{
 								markerFirstPosition = markerSecondPosition;
 								if (markerFirstPosition != 0) { markerFirstPosition++; }
 								markerSecondPosition = currentLine.find(',', markerFirstPosition);
 								parsedTileValue = std::stoi(currentLine.substr(markerFirstPosition, markerSecondPosition - markerFirstPosition));
-								(*m_MapTiles)[row][column].SetTileValue(parsedTileValue);
+								(*m_pMapTiles)[row][column].SetTileValue(parsedTileValue);
 								tileTypeIt = m_mapTileValuesToCheck.find(parsedTileValue);
 								if (tileTypeIt != m_mapTileValuesToCheck.end())
 								{
-									(*m_MapTiles)[row][column].SetTileType(tileTypeIt->second);
+									(*m_pMapTiles)[row][column].SetTileType(tileTypeIt->second);
 								}
 								else
 								{
-									(*m_MapTiles)[row][column].SetTileType(CSceneEnums::TILETYPE::NONE);
+									(*m_pMapTiles)[row][column].SetTileType(CSceneEnums::TILETYPE::NONE);
 								}
 							}
 						}
@@ -141,7 +141,7 @@ bool CScene::ParseConfig(const std::string& _filePath)
 				while (currentLine.compare("</Units_Blue>") != 0)
 				{
 					ParseLineForUnits(currentLine, parsedUnitAmount, parsedType);
-					m_iUnitsBlue.emplace(parsedType, parsedUnitAmount);
+					m_mapUnitsBlue.emplace(parsedType, parsedUnitAmount);
 
 					std::getline(mapSettings, currentLine);
 				}
@@ -157,7 +157,7 @@ bool CScene::ParseConfig(const std::string& _filePath)
 				while (currentLine.compare("</Units_Red>") != 0)
 				{
 					ParseLineForUnits(currentLine, parsedUnitAmount, parsedType);
-					m_iUnitsRed.emplace(parsedType, parsedUnitAmount);
+					m_mapUnitsRed.emplace(parsedType, parsedUnitAmount);
 					std::getline(mapSettings, currentLine);
 				}
 			}
@@ -201,7 +201,7 @@ bool CScene::ParseConfig(const std::string& _filePath)
 
 bool CScene::InitializeMap()
 {
-	if (!m_MapTileMap->loadFromFile(m_strTileMapFilePath))
+	if (!m_pMapTileMap->loadFromFile(m_strTileMapFilePath))
 	{
 		//ERROR: Unable to load tilemap
 		std::cout << "\nFailed loading tilemap!\n";
@@ -211,15 +211,15 @@ bool CScene::InitializeMap()
 	m_SceneTileVertices.setPrimitiveType(sf::Quads);
 	//Based on SFML tutorial, I am assuming it's number of tiles
 	//and 4 points each tile
-	m_SceneTileVertices.resize(m_iTileWidth * m_iTileWidth * 4);
+	m_SceneTileVertices.resize(m_uiTileWidth * m_uiTileWidth * 4);
 
-	sf::Vector2f currentTileSize((float)(m_iTileWidth), (float)(m_iTileWidth) );
+	sf::Vector2f currentTileSize((float)(m_uiTileWidth), (float)(m_uiTileWidth) );
 
-	for (unsigned short currentRow = 0; currentRow < m_iMapRows; currentRow++)
+	for (unsigned short currentRow = 0; currentRow < m_uiMapRows; currentRow++)
 	{
-		for (unsigned short currentColumn = 0; currentColumn < m_iMapColumns; currentColumn++)
+		for (unsigned short currentColumn = 0; currentColumn < m_uiMapColumns; currentColumn++)
 		{
-			int currentTileMark = (*m_MapTiles)[currentRow][currentColumn].GetTileValue();
+			int currentTileMark = (*m_pMapTiles)[currentRow][currentColumn].GetTileValue();
 
 			//Which tile in the tileset that
 			//we're putting on the background
@@ -229,15 +229,15 @@ bool CScene::InitializeMap()
 			//Tilemap uses 32*32 size squares. Using this information to calculate the 
 			//total columns in the tilemap, and thus what tile the TileMark
 			//corresponds to.   
-			tileMapColumn = currentTileMark % (m_MapTileMap->getSize().x / m_iTileWidth);
-			tileMapRow = currentTileMark / (m_MapTileMap->getSize().x / m_iTileWidth);
+			tileMapColumn = currentTileMark % (m_pMapTileMap->getSize().x / m_uiTileWidth);
+			tileMapRow = currentTileMark / (m_pMapTileMap->getSize().x / m_uiTileWidth);
 
 			//If we've done one row, then the indexes for the next row will be will all be
 			//plus the number of tiles in a row
 			//ie:		index 0 -till-> 9
 			// then:	index 10-till->19 (each index is 10 above the previous row)
 			//
-			sf::Vertex* currentTileQuad = &m_SceneTileVertices[(currentColumn + (currentRow * m_iTileWidth)) * 4];
+			sf::Vertex* currentTileQuad = &m_SceneTileVertices[(currentColumn + (currentRow * m_uiTileWidth)) * 4];
 
 			//Set the location of the 4 points of the Quads
 			currentTileQuad[0].position = sf::Vector2f(currentColumn * currentTileSize.x, currentRow * currentTileSize.y);
@@ -278,16 +278,16 @@ int CScene::GetUnitAmount(CUnitEnums::SIDE _inSide, CUnitEnums::TYPE _inType)
 
 	if (_inSide == CUnitEnums::SIDE::BLUE)
 	{
-		element = m_iUnitsBlue.find(_inType);
-		if(element!=m_iUnitsBlue.end())
+		element = m_mapUnitsBlue.find(_inType);
+		if(element!=m_mapUnitsBlue.end())
 		{
 			return element->second;
 		}
 	}
 	else
 	{
-		element = m_iUnitsRed.find(_inType);
-		if (element != m_iUnitsBlue.end())
+		element = m_mapUnitsRed.find(_inType);
+		if (element != m_mapUnitsBlue.end())
 		{
 			return element->second;
 		}
@@ -304,13 +304,13 @@ int CScene::GetUnitAmount(CUnitEnums::SIDE _inSide, CUnitEnums::TYPE _inType)
 /// <param name="_inUnitsR">pointer to the container for Red units. std::map<CUnitEnums::TYPE, int>*</param>
 void CScene::GetUnitsToPlace(std::map<CUnitEnums::TYPE, int>* _inUnitsB, std::map<CUnitEnums::TYPE, int>* _inUnitsR)
 {
-		//element = m_iUnitsBlue.find(_inType);
-	for(auto& element:m_iUnitsBlue)
+		//element = m_mapUnitsBlue.find(_inType);
+	for(auto& element:m_mapUnitsBlue)
 	{
 		(*_inUnitsB).emplace(element.first,element.second);
 	}
 	
-	for (auto& element : m_iUnitsRed)
+	for (auto& element : m_mapUnitsRed)
 	{
 		(*_inUnitsR).emplace(element.first, element.second);
 	}
@@ -318,11 +318,11 @@ void CScene::GetUnitsToPlace(std::map<CUnitEnums::TYPE, int>* _inUnitsB, std::ma
 
 CTile* CScene::GetTile(sf::Vector2f _inPosition)
 {
-	unsigned int tilePositionX = (unsigned int)(_inPosition.x / m_iTileWidth);
-	unsigned int tilePositionY = (unsigned int)(_inPosition.y / m_iTileWidth);
+	unsigned int tilePositionX = (unsigned int)(_inPosition.x / m_uiTileWidth);
+	unsigned int tilePositionY = (unsigned int)(_inPosition.y / m_uiTileWidth);
 
-	if (tilePositionX < m_iMapColumns &&
-		tilePositionY < m_iMapRows &&
+	if (tilePositionX < m_uiMapColumns &&
+		tilePositionY < m_uiMapRows &&
 		tilePositionX >= 0 && tilePositionY >= 0)
 	{
 		CTile* tile = GetTile(tilePositionX, tilePositionY);
@@ -336,10 +336,10 @@ CTile* CScene::GetTile(sf::Vector2f _inPosition)
 }
 CTile* CScene::GetTile(unsigned int _inX, unsigned int _inY)
 {
-	if (_inX < m_iMapColumns && _inY < m_iMapRows &&
+	if (_inX < m_uiMapColumns && _inY < m_uiMapRows &&
 		_inX >= 0 && _inY >= 0)
 	{
-		CTile* tile = &(*m_MapTiles)[_inY][_inX];
+		CTile* tile = &(*m_pMapTiles)[_inY][_inX];
 		return tile;
 	}
 	else
@@ -417,7 +417,7 @@ void CScene::draw(sf::RenderTarget& target, sf::RenderStates states) const
 	states.transform *= getTransform();
 
 	// apply the tileset texture
-	states.texture = m_MapTileMap;
+	states.texture = m_pMapTileMap;
 
 	// draw the vertex array
 	target.draw(m_SceneTileVertices, states);

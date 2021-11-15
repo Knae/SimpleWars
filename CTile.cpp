@@ -3,8 +3,8 @@
 CTile::CTile()
 {
 	m_uiTileValue = 0;
-	m_Type = CSceneEnums::TILETYPE::NONE;
-	m_UnitOnTile = nullptr;
+	m_eType = CSceneEnums::TILETYPE::NONE;
+	m_pUnitOnTile = nullptr;
 }
 
 CTile::~CTile()
@@ -14,12 +14,12 @@ CTile::~CTile()
 
 void CTile::UnitEntersTile(CUnit* _inPUnit)
 {
-	m_UnitOnTile = _inPUnit;
+	m_pUnitOnTile = _inPUnit;
 }
 
 void CTile::UnitLeavesTile()
 {
-	m_UnitOnTile = nullptr;
+	m_pUnitOnTile = nullptr;
 }
 
 bool CTile::MovementCostToEnter(unsigned short& _movementCost)

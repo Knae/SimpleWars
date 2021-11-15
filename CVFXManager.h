@@ -24,10 +24,10 @@ private:
 
 	static bool UpdateVFX(double& _inElapsedTime);
 
-	static sf::Texture* m_texVFX_Bullet;
-	static sf::Texture* m_texVFX_Shell;
-	static sf::Texture* m_texVFX_Explode;
-	static sf::Sprite* m_sprtVFX;
+	static sf::Texture* m_pVFXTex_Bullet;
+	static sf::Texture* m_pVFXTex_Shell;
+	static sf::Texture* m_pVFXTex_Explode;
+	static sf::Sprite* m_pVFXSprite;
 
 	static std::string m_strTexture_BulletEff;
 	static std::string m_strTexture_ShellEff;

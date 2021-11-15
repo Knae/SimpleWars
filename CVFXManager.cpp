@@ -1,9 +1,9 @@
 #include "CVFXManager.h"
 
-sf::Texture* CVFXManager::m_texVFX_Bullet;
-sf::Texture* CVFXManager::m_texVFX_Shell;
-sf::Texture* CVFXManager::m_texVFX_Explode;
-sf::Sprite* CVFXManager::m_sprtVFX;
+sf::Texture* CVFXManager::m_pVFXTex_Bullet;
+sf::Texture* CVFXManager::m_pVFXTex_Shell;
+sf::Texture* CVFXManager::m_pVFXTex_Explode;
+sf::Sprite* CVFXManager::m_pVFXSprite;
 
 std::string CVFXManager::m_strTexture_BulletEff;
 std::string CVFXManager::m_strTexture_ShellEff;
@@ -13,23 +13,23 @@ sf::IntRect CVFXManager::m_VFXIntRect;
 
 CVFXManager::CVFXManager()
 {
-	m_sprtVFX = nullptr;
-	m_texVFX_Bullet = nullptr;
-	m_texVFX_Shell = nullptr;
-	m_texVFX_Explode = nullptr;
+	m_pVFXSprite = nullptr;
+	m_pVFXTex_Bullet = nullptr;
+	m_pVFXTex_Shell = nullptr;
+	m_pVFXTex_Explode = nullptr;
 }
 
 CVFXManager::~CVFXManager()
 {
-	delete m_sprtVFX;
-	delete m_texVFX_Bullet;
-	delete m_texVFX_Shell;
-	delete m_texVFX_Explode;
+	delete m_pVFXSprite;
+	delete m_pVFXTex_Bullet;
+	delete m_pVFXTex_Shell;
+	delete m_pVFXTex_Explode;
 
-	m_sprtVFX = nullptr;
-	m_texVFX_Bullet = nullptr;
-	m_texVFX_Shell = nullptr;
-	m_texVFX_Explode = nullptr;
+	m_pVFXSprite = nullptr;
+	m_pVFXTex_Bullet = nullptr;
+	m_pVFXTex_Shell = nullptr;
+	m_pVFXTex_Explode = nullptr;
 }
 
 void CVFXManager::Initialize(std::string& _inConfigPath)
@@ -38,35 +38,35 @@ void CVFXManager::Initialize(std::string& _inConfigPath)
 	m_strTexture_ShellEff = "assets/spritemaps/ShellImpact.png";
 	m_strTexture_ExplosEff = "assets/spritemaps/ExplosionEffect.png";
 
-	if (m_texVFX_Bullet != nullptr)
+	if (m_pVFXTex_Bullet != nullptr)
 	{
-		delete m_texVFX_Bullet;
-		m_texVFX_Bullet = nullptr;
+		delete m_pVFXTex_Bullet;
+		m_pVFXTex_Bullet = nullptr;
 	}
 
-	if (!m_texVFX_Bullet->loadFromFile(m_strTexture_BulletEff))
+	if (!m_pVFXTex_Bullet->loadFromFile(m_strTexture_BulletEff))
 	{
 		//ERROR:Unable to load bullet vfx spritemap
 	}
 
-	if (m_texVFX_Shell != nullptr)
+	if (m_pVFXTex_Shell != nullptr)
 	{
-		delete m_texVFX_Shell;
-		m_texVFX_Shell = nullptr;
+		delete m_pVFXTex_Shell;
+		m_pVFXTex_Shell = nullptr;
 	}
 
-	if (!m_texVFX_Shell->loadFromFile(m_strTexture_ShellEff))
+	if (!m_pVFXTex_Shell->loadFromFile(m_strTexture_ShellEff))
 	{
 		//ERROR:Unable to load shell vfx spritemap
 	}
 
-	if (m_texVFX_Explode != nullptr)
+	if (m_pVFXTex_Explode != nullptr)
 	{
-		delete m_texVFX_Explode;
-		m_texVFX_Explode = nullptr;
+		delete m_pVFXTex_Explode;
+		m_pVFXTex_Explode = nullptr;
 	}
 
-	if (!m_texVFX_Explode->loadFromFile(m_strTexture_ExplosEff))
+	if (!m_pVFXTex_Explode->loadFromFile(m_strTexture_ExplosEff))
 	{
 		//ERROR:Unable to load bullet vfx spritemap
 	}
@@ -85,7 +85,7 @@ void CVFXManager::Initialize(std::string& _inConfigPath)
 /// <returns></returns>
 bool CVFXManager::Display(sf::RenderWindow& _inWindow, double& _inElapsedTime)
 {
-	if (m_sprtVFX != nullptr)
+	if (m_pVFXSprite != nullptr)
 	{
 		return false;
 	}
@@ -109,7 +109,7 @@ bool CVFXManager::UpdateVFX(double& _inElapsedTime)
 
 void CVFXManager::AddAttackParticles_Bullet(sf::Vector2u& _inTilePosition)
 {
-	m_sprtVFX = new sf::Sprite;
+	m_pVFXSprite = new sf::Sprite;
 }
 
 void CVFXManager::AddAttackParticles_Shell(sf::Vector2u& _inTilePosition)
