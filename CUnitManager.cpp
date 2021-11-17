@@ -26,6 +26,11 @@ CUnitManager::~CUnitManager()
 	m_pUnitTexture_Red = nullptr;
 }
 
+/// <summary>
+/// Parse all the config files related to units
+/// </summary>
+/// <param name="_inUnitConfigPath"></param>
+/// <param name="_inFactionConfigPath"></param>
 void CUnitManager::ParseConfig(const std::string& _inUnitConfigPath, const std::string& _inFactionConfigPath)
 {
 	std::ifstream currentConfig;
@@ -75,25 +80,6 @@ void CUnitManager::ParseConfig(const std::string& _inUnitConfigPath, const std::
 						{
 							ParseLineGetLabel(currentLine, readValue);
 							ConvertToUnitType(readValue, currentType);
-							/*{
-
-							}
-							if (readValue.compare("Tank") == 0)
-							{
-								currentType = CUnitEnums::TYPE::TANK;
-							}
-							else if (readValue.compare("Artillery") == 0)
-							{
-								currentType = CUnitEnums::TYPE::ARTILLERY;
-							}
-							else if (readValue.compare("Infantry") == 0)
-							{
-								currentType = CUnitEnums::TYPE::INFANTRY;
-							}
-							else
-							{
-								currentType = CUnitEnums::TYPE::NONE;
-							}*/
 							std::getline(currentConfig, currentLine);
 						}
 					}
@@ -147,6 +133,19 @@ void CUnitManager::ParseConfig(const std::string& _inUnitConfigPath, const std::
 							std::getline(currentConfig, currentLine);
 						}
 					}
+					else if(currentLine.compare("<TerrainMod>") == 0)
+					{
+						while (!currentLine.compare("</TerrainMod>") == 0)
+						{
+							readLabel = ParseLineGetLabel(currentLine, readValue);
+							if (readLabel.compare("Path") == 0)
+							{
+								m_vecUnitTerrainModPaths.push_back(readValue);
+							}
+							std::getline(currentConfig, currentLine);
+						}
+
+					}
 					std::getline(currentConfig, currentLine);
 				}
 				//Finished parsing this unit
@@ -178,6 +177,8 @@ void CUnitManager::ParseConfig(const std::string& _inUnitConfigPath, const std::
 					{
 						while (currentLine.compare("</Name>") != 0)
 						{
+							//This could probably be converted to a function in
+							//ParseConfigCommon
 							ParseLineGetLabel(currentLine, readValue);
 							if (readValue.compare("Graysong Talons") == 0)
 							{
@@ -240,13 +241,87 @@ void CUnitManager::ParseConfig(const std::string& _inUnitConfigPath, const std::
 		currentConfig.open(element);
 		if (currentConfig.is_open())
 		{
-			CUnitEnums::TYPE currentType = CUnitEnums::TYPE::NONE;
-			CSceneEnums::TILETYPE currentTile = CSceneEnums::TILETYPE::NONE;
-			CTerrainEffects* newTerrainRecord = nullptr;
+			/*while (std::getline(currentConfig, currentLine))
+			{*/
+				CUnitEnums::TYPE currentType = CUnitEnums::TYPE::NONE;
+				CSceneEnums::TILETYPE currentTile = CSceneEnums::TILETYPE::NONE;
+				std::string readValue;
+				std::string readLabel;
+				CTerrainEffects* newTerrainRecord = nullptr;
 
+				while (std::getline(currentConfig, currentLine))
+				{
+					if (currentLine.compare("<TYPE>")==0)
+					{
+						while (currentLine.compare("</TYPE>")!=0)
+						{
+							ConvertToUnitType(currentLine, currentType);
+							if (currentType == CUnitEnums::TYPE::NONE)
+							{
+								std::cout << "\nUnknown type in this config file: " << element << std::endl;
+							}
+							std::getline(currentConfig, currentLine);
+						}
+						if (currentType != CUnitEnums::TYPE::NONE)
+						{
+							m_mapTileTerrainEffects.insert(std::make_pair(currentType,std::map<CSceneEnums::TILETYPE,CTerrainEffects*>()));
+						}
+					}
+					else if(currentLine.compare("<TERRAIN>")==0)
+					{
+						while (currentLine.compare("</TERRAIN>")!=0)
+						{
+							if (currentLine.compare("<START>")==0)
+							{
+								newTerrainRecord = new CTerrainEffects();
+								CSceneEnums::TILETYPE terrainType = CSceneEnums::TILETYPE::NONE;
+								while (currentLine.compare("</STOP>") != 0)
+								{
+									readLabel = ParseLineGetLabel(currentLine,readValue);	
+									
+									if (readLabel.compare("TYPE") == 0)
+									{
+										if (!ConvertToTileType(readValue, terrainType))
+										{
+											std::cout << "\nUnrecognised tile type while parsing tile effects: " << readValue << std::endl;
+										}
+									}
+									else if (readLabel.compare("MOV") == 0)
+									{
+										newTerrainRecord->SetModifierMovement(std::stof(readValue));
+									}
+									else if (readLabel.compare("RGE") == 0)
+									{
+										newTerrainRecord->setRangeOffset(std::stoi(readValue));
+									}
+									//Damage Taken
+									else if (readLabel.compare("DMG_T") == 0)
+									{
+										newTerrainRecord->SetModifierDamageTaken(std::stof(readValue));
+									}
+									//Damage dealt
+									else if (readLabel.compare("DMG_D") == 0)
+									{
+										newTerrainRecord->SetModifierDamageDealt(std::stof(readValue));
+									}
+									std::getline(currentConfig, currentLine);
+								}
 
-			newTerrainRecord = nullptr;
+								if (m_mapTileTerrainEffects.find(currentType) != m_mapTileTerrainEffects.end())
+								{
+									(*m_mapTileTerrainEffects.find(currentType)).second.emplace(terrainType, newTerrainRecord);
+								}
+							}
+
+							std::getline(currentConfig, currentLine);
+						}
+					}
+					//std::getline(currentConfig, currentLine);
+				}
+				newTerrainRecord = nullptr;
+			//}
 		}
+		currentConfig.close();
 	}
 
 

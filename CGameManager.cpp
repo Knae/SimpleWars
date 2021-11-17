@@ -592,6 +592,10 @@ void CGameManager::ProcessMouseClick()
 		ChangeCurrentState(CUIEnums::GAMESTATE::UNITPLACEMENT);
 		m_bWaitingForClick = false;
 	}
+	else if (m_bExecutingActions)
+	{
+		m_bExecutingActions = false;
+	}
 }
 
 /// <summary>

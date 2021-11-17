@@ -150,7 +150,6 @@
     <ClCompile Include="COverlayManager.cpp" />
     <ClCompile Include="CParseConfigCommon.cpp" />
     <ClCompile Include="CScene.cpp" />
-    <ClCompile Include="CSceneEnums.cpp" />
     <ClCompile Include="CSceneManager.cpp" />
     <ClCompile Include="CTile.cpp" />
     <ClCompile Include="CUIManager.cpp" />

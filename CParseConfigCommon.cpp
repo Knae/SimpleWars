@@ -72,6 +72,10 @@ bool CParseConfigCommon::ConvertToTileType(std::string& _inputString, CSceneEnum
 	{
 		_outType = CSceneEnums::TILETYPE::BASETILE;
 	}
+	else if (_inputString.compare("COAST") == 0)
+	{
+		_outType = CSceneEnums::TILETYPE::COAST;
+	}
 	else
 	{
 		//Unrecognised tile type name

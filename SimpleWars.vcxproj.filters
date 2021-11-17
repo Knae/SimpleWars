@@ -51,9 +51,6 @@
     <ClCompile Include="CScene.cpp">
       <Filter>Source Files\SceneRelatedSource</Filter>
     </ClCompile>
-    <ClCompile Include="CSceneEnums.cpp">
-      <Filter>Source Files\SceneRelatedSource</Filter>
-    </ClCompile>
     <ClCompile Include="CGameManager.cpp">
       <Filter>Source Files\Systems</Filter>
     </ClCompile>

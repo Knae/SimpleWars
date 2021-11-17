@@ -63,7 +63,7 @@ private:
 	CUIManager(CUIManager const&) = delete;
 	void operator=(CUIManager const&) = delete;
 
-	static void ChangeState(CUIEnums::GAMESTATE _input) { m_eCurrentUIState = _input; }
+	static void ChangeState(CUIEnums::GAMESTATE _input)				{ m_eCurrentUIState = _input; }
 
 	static const std::string m_strUnitButtonSpriteMap;
 	static const std::string m_strEmptyUnitSprite;
