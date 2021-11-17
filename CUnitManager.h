@@ -7,6 +7,7 @@
 #include <vector>
 #include <map>
 #include "CParseConfigCommon.h"
+#include "CSceneEnums.h"
 #include "CUnit.h"
 #include "CTerrainEffects.h"
 
@@ -21,7 +22,7 @@ public:
 
 	static CUnitManager& GetRef() { static CUnitManager m_umThis; return m_umThis; }
 
-	static void ParseConfig(const std::string& _inFilePath, const std::string& _inFactionConfigPath, const std::string& _inTerrainSettingsPath);
+	static void ParseConfig(const std::string& _inFilePath, const std::string& _inFactionConfigPath);
 	static void DisplayUnits(sf::RenderWindow& _inWindow);
 	static CUnit* CreateUnit(CUnitEnums::TYPE _inType, CUnitEnums::FACTION _inFaction, CUnitEnums::SIDE _inSide);
 	static bool MoveUnit(CUnit* _inUnit, sf::Vector2u _inPosition);
@@ -43,11 +44,13 @@ private:
 
 	static std::string m_strUnitTexturePath_Blue;
 	static std::string m_strUnitTexturePath_Red;
+	static std::vector<std::string> m_vecUnitTerrainModPaths;
+
 	static sf::Texture* m_pUnitTexture_Blue;
 	static sf::Texture* m_pUnitTexture_Red;
 
 	static std::map<CUnitEnums::TYPE, CUnitEnums::UnitRecord*> m_mapUnitStats;
-	static std::map<CUnitEnums::TYPE, CTerrainEffects> m_mapTileTerrainEffects;
+	static std::map<CUnitEnums::TYPE, std::map<CSceneEnums::TILETYPE, CTerrainEffects*>> m_mapTileTerrainEffects;
 	static std::map<CUnitEnums::FACTION, CUnitEnums::StatBonus_Add*> m_mapFactionsBonuses;
 };
 #endif // ! _CUNITMANAGER_H__

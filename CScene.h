@@ -23,6 +23,7 @@ public:
 
 	virtual bool ParseConfig(const std::string& _filePath);
 	virtual bool InitializeMap();
+	virtual void ResetTiles();
 	virtual CSceneEnums::TILETYPE GetTileType(sf::Vector2f _input);
 	virtual CSceneEnums::TILETYPE GetTileType(unsigned int _inX, unsigned int _inY);
 	virtual int GetUnitAmount(CUnitEnums::SIDE _inSide, CUnitEnums::TYPE _inType);

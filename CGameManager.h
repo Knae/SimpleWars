@@ -38,6 +38,7 @@ public:
 	virtual void DisplayGameWorld();
 	virtual void DestroyGameWorld();
 	virtual void DisplayDebug();
+	virtual void ClearUnitsToPlace();
 	//====================================
 	//Scene management related
 	//====================================
@@ -61,10 +62,9 @@ private:
 	void operator=(CGameManager const&) = delete;
 
 	const sf::Vector2u m_GameWindowSize_Default = sf::Vector2u(1024, 576);
-	const std::string m_strMountainVillageConfig= "configs/maps/MountainVillage.ini";
-	const std::string m_strUnitConfig = "configs/units/BaseSettings.ini";
-	const std::string m_strFactionConfig = "configs/factions.ini";
-
+	std::string m_strMountainVillageConfig= "configs/maps/MountainVillage.ini";
+	std::string m_strUnitConfig = "configs/units/BaseSettings.ini";
+	std::string m_strFactionConfig = "configs/factions.ini";
 	
 	CUIManager* m_pUIMgr;
 	CSceneManager* m_pSceneMgr;
@@ -78,6 +78,7 @@ private:
 	sf::Vector2u m_GameWindowSize_Current;
 	bool m_bExecutingActions;
 	bool m_bAttackOverlayShown;
+	bool m_bWaitingForClick;
 
 	CUIEnums::TURN m_eCurrentTurn;
 	CUIEnums::GAMESTATE m_eCurrentState;

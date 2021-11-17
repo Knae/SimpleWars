@@ -255,6 +255,17 @@ bool CScene::InitializeMap()
 	return false;
 }
 
+void CScene::ResetTiles()
+{
+	for (unsigned short currentRow = 0; currentRow < m_uiMapRows; currentRow++)
+	{
+		for (unsigned short currentColumn = 0; currentColumn < m_uiMapColumns; currentColumn++)
+		{
+			(*m_pMapTiles)[currentRow][currentColumn].UnitLeavesTile();
+		}
+	}
+}
+
 CSceneEnums::TILETYPE CScene::GetTileType(sf::Vector2f _input)
 {
 	return GetTile(_input)->GetTileType();
@@ -307,12 +318,14 @@ void CScene::GetUnitsToPlace(std::map<CUnitEnums::TYPE, int>* _inUnitsB, std::ma
 		//element = m_mapUnitsBlue.find(_inType);
 	for(auto& element:m_mapUnitsBlue)
 	{
-		(*_inUnitsB).emplace(element.first,element.second);
+		int amount = element.second;
+		(*_inUnitsB).emplace(element.first, amount);
 	}
 	
 	for (auto& element : m_mapUnitsRed)
 	{
-		(*_inUnitsR).emplace(element.first, element.second);
+		int amount = element.second;
+		(*_inUnitsR).emplace(element.first, amount);
 	}
 }
 

@@ -6,7 +6,9 @@ std::string CUnitManager::m_strUnitTexturePath_Blue;
 std::string CUnitManager::m_strUnitTexturePath_Red;
 sf::Texture* CUnitManager::m_pUnitTexture_Blue;
 sf::Texture* CUnitManager::m_pUnitTexture_Red;
+std::vector<std::string> CUnitManager::m_vecUnitTerrainModPaths;
 std::map<CUnitEnums::TYPE, CUnitEnums::UnitRecord*> CUnitManager::m_mapUnitStats;
+std::map<CUnitEnums::TYPE, std::map<CSceneEnums::TILETYPE, CTerrainEffects*>> CUnitManager::m_mapTileTerrainEffects;
 std::map<CUnitEnums::FACTION, CUnitEnums::StatBonus_Add*> CUnitManager::m_mapFactionsBonuses;
 
 CUnitManager::CUnitManager()
@@ -24,7 +26,7 @@ CUnitManager::~CUnitManager()
 	m_pUnitTexture_Red = nullptr;
 }
 
-void CUnitManager::ParseConfig(const std::string& _inUnitConfigPath, const std::string& _inFactionConfigPath, const std::string& _inTerrainSettingsPath)
+void CUnitManager::ParseConfig(const std::string& _inUnitConfigPath, const std::string& _inFactionConfigPath)
 {
 	std::ifstream currentConfig;
 	std::string currentLine;
@@ -72,6 +74,10 @@ void CUnitManager::ParseConfig(const std::string& _inUnitConfigPath, const std::
 						while (currentLine.compare("</Type>") != 0)
 						{
 							ParseLineGetLabel(currentLine, readValue);
+							ConvertToUnitType(readValue, currentType);
+							/*{
+
+							}
 							if (readValue.compare("Tank") == 0)
 							{
 								currentType = CUnitEnums::TYPE::TANK;
@@ -87,7 +93,7 @@ void CUnitManager::ParseConfig(const std::string& _inUnitConfigPath, const std::
 							else
 							{
 								currentType = CUnitEnums::TYPE::NONE;
-							}
+							}*/
 							std::getline(currentConfig, currentLine);
 						}
 					}
@@ -228,11 +234,21 @@ void CUnitManager::ParseConfig(const std::string& _inUnitConfigPath, const std::
 	}
 
 	currentConfig.close();
-	currentConfig.open(_inTerrainSettingsPath);
-	if (currentConfig.is_open())
+	for (auto& element : m_vecUnitTerrainModPaths)
 	{
+		//For each path, open and parse the terrain modifiers
+		currentConfig.open(element);
+		if (currentConfig.is_open())
+		{
+			CUnitEnums::TYPE currentType = CUnitEnums::TYPE::NONE;
+			CSceneEnums::TILETYPE currentTile = CSceneEnums::TILETYPE::NONE;
+			CTerrainEffects* newTerrainRecord = nullptr;
 
+
+			newTerrainRecord = nullptr;
+		}
 	}
+
 
 	if (m_pUnitTexture_Blue != nullptr)
 	{

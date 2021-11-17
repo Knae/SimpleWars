@@ -20,6 +20,7 @@ CGameManager::CGameManager()
 	m_eCurrentTypeChosen = CUnitEnums::TYPE::NONE;
 	m_bAttackOverlayShown = false;
 	m_bExecutingActions = false;
+	m_bWaitingForClick = false;
 }
 
 CGameManager::~CGameManager()
@@ -53,7 +54,7 @@ bool CGameManager::IntializeGame()
 		return false;
 	}
 
-	CUnitManager::ParseConfig(m_strUnitConfig, m_strFactionConfig, m_strFactionConfig);
+	CUnitManager::ParseConfig(m_strUnitConfig, m_strFactionConfig);
 
 	m_pGameWindow = new sf::RenderWindow
 						(
@@ -78,7 +79,7 @@ bool CGameManager::UpdateManagers(double& _inElapsedTime)
 {
 	CUnitManager::Update(_inElapsedTime);
 
-	if (CUIManager::GetIfForfeitChosen)
+	if (CUIManager::GetIfForfeitChosen())
 	{
 		switch (m_eCurrentTurn)
 		{
@@ -98,7 +99,7 @@ bool CGameManager::UpdateManagers(double& _inElapsedTime)
 				break;
 			}
 		}
-		m_eCurrentState = CUIEnums::GAMESTATE::GAMEEND;
+		ChangeCurrentState(CUIEnums::GAMESTATE::GAMEEND);
 	}
 	else if (CUIManager::GetIfTurnEndClicked())
 	{
@@ -112,7 +113,7 @@ bool CGameManager::UpdateManagers(double& _inElapsedTime)
 		std::cout << "\nAll Enemy units  have died!" << std::endl;
 		m_bExecutingActions = false;
 		CUIManager::VictoryAchieved(m_eCurrentTurn);
-		m_eCurrentState = CUIEnums::GAMESTATE::GAMEEND;
+		ChangeCurrentState(CUIEnums::GAMESTATE::GAMEEND);
 	}
 
 	m_eCurrentUIMouseState = CUIManager::GetMouseCurrentState();
@@ -127,14 +128,21 @@ bool CGameManager::UpdateManagers(double& _inElapsedTime)
 bool CGameManager::ChangeCurrentState(CUIEnums::GAMESTATE _inState)
 {
 	m_eCurrentState = _inState;
+
 	switch (m_eCurrentState)
 	{
 		case CUIEnums::GAMESTATE::MAPSELECTION:
 		{
+			CSceneManager::GetCurrentScene()->ResetTiles();
+			CUIManager::ResetChecks();
+			ClearUnitsToPlace();
 			break;
 		}
 		case CUIEnums::GAMESTATE::UNITPLACEMENT:
 		{
+			CSceneManager::GetCurrentScene()->ResetTiles();	//for testing, skipping map selection
+			CUIManager::ResetChecks();						//This too
+			ClearUnitsToPlace();							//Same for this line. Delete after
 			//Set up for the first player to place units
 			m_eCurrentTurn = CUIEnums::TURN::BLUE;
 			m_pSceneMgr->GetCurrentScene()->GetUnitsToPlace(&m_mapUnitsToPlaced_B, &m_mapUnitsToPlaced_R);
@@ -146,6 +154,12 @@ bool CGameManager::ChangeCurrentState(CUIEnums::GAMESTATE _inState)
 		{
 			m_eCurrentTurn = CUIEnums::TURN::BLUE;
 			SetUIToGameLoop();
+			break;
+		}
+		case CUIEnums::GAMESTATE::GAMEEND:
+		{
+			m_eCurrentState = CUIEnums::GAMESTATE::GAMEEND;
+			m_bWaitingForClick = true;
 			break;
 		}
 		default:
@@ -239,6 +253,12 @@ void CGameManager::DisplayDebug()
 {
 }
 
+void CGameManager::ClearUnitsToPlace()
+{
+	m_mapUnitsToPlaced_B.clear();
+	m_mapUnitsToPlaced_R.clear();
+}
+
 bool CGameManager::LoadScene()
 {
 	CSceneEnums::SCENETYPE sceneType = CSceneEnums::SCENETYPE::MOUNTAINGRASS;
@@ -287,10 +307,11 @@ bool CGameManager::InitializeUI()
 /// </summary>
 void CGameManager::ProcessMouseClick()
 {
-	if (!m_bExecutingActions)
+	if (!m_bExecutingActions && !m_bWaitingForClick)
 	{
 		sf::Vector2f mousePosition = m_pGameWindow->mapPixelToCoords(sf::Mouse::getPosition(*(m_pGameWindow)) );
-		//Will get 'true; if we clicked on the side panel
+		std::cout << "\nClicking at " << mousePosition.x << "x " << mousePosition.y << "y" << std::endl;
+		//Will get 'true' if we clicked on the side panel
 		//and false if we clicked on the map instead, since this is
 		//from the perspective of the UIManager
 		if (CUIManager::ProcessClick(mousePosition))
@@ -563,8 +584,13 @@ void CGameManager::ProcessMouseClick()
 			}
 		}
 	}
-	else
+	else if(m_bWaitingForClick)
 	{
+		//ResetAll units, clear map, go back to main menu
+		//ChangeCurrentState(CUIEnums::GAMESTATE::MAPSELECTION);
+		CUnitManager::ClearUnits();
+		ChangeCurrentState(CUIEnums::GAMESTATE::UNITPLACEMENT);
+		m_bWaitingForClick = false;
 	}
 }
 
@@ -576,7 +602,7 @@ void CGameManager::ProcessMouseClick()
 /// </summary>
 void CGameManager::SetUIToUnitPlacement()
 {
-	//m_pUIMgr->ClearUIElements();
+	m_pUIMgr->ClearUIElements();
 	//For now there are only 3 buttons to place,
 	//Infantry, tanks and artillery in that order
 	int* infantryAmount = &(m_pUnitsToPlace->find(CUnitEnums::TYPE::INFANTRY)->second);

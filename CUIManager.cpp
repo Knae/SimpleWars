@@ -81,6 +81,13 @@ CUIManager::~CUIManager()
 	m_pButtonFinish = nullptr;
 }
 
+/// <summary>
+/// Initialize all the pointers and size of the UI side panel
+/// </summary>
+/// <param name="_inWindowSize"></param>
+/// <param name="_inFont"></param>
+/// <param name="_inSceneWidth"></param>
+/// <returns></returns>
 bool CUIManager::IntializeUI(sf::Vector2u _inWindowSize, sf::Font* _inFont, const unsigned int _inSceneWidth )
 {
 	if (m_pPanelBackground != nullptr)
@@ -122,34 +129,34 @@ bool CUIManager::IntializeUI(sf::Vector2u _inWindowSize, sf::Font* _inFont, cons
 	m_pButtonUnitTexture = new sf::Texture;
 	if (!m_pButtonUnitTexture->loadFromFile(m_strUnitButtonSpriteMap))
 	{
-		//std::cout << "\nUnable to initialize textures for unit buttons.\n" << std::endl;
+		std::cout << "\nUnable to initialize textures for unit buttons.\n" << std::endl;
 		return false;
 	}
 
 	m_pEmptyUnitPortrait = new sf::Texture;
 	if (!m_pEmptyUnitPortrait->loadFromFile(m_strEmptyUnitSprite))
 	{
-		//std::cout << "\nUnable to initialize textures for unit buttons.\n" << std::endl;
+		std::cout << "\nUnable to initialize textures for unit buttons.\n" << std::endl;
 		return false;
 	}
 
 	m_pButtonFinish = new sf::Texture;
 	if (!m_pButtonFinish->loadFromFile(m_strFinishButtonSprite))
 	{
-		//std::cout << "\nUnable to initialize textures for unit buttons.\n" << std::endl;
+		std::cout << "\nUnable to initialize textures for unit buttons.\n" << std::endl;
 		return false;
 	}
 	
 	m_pButtonsGameLoop = new sf::Texture;
 	if (!m_pButtonsGameLoop->loadFromFile(m_strGameButtonsSpriteMap))
 	{
-		//std::cout << "\nUnable to initialize textures for unit buttons.\n" << std::endl;
+		std::cout << "\nUnable to initialize textures for unit buttons.\n" << std::endl;
 		return false;
 	}
 
-	if (m_VictoryTexture.loadFromFile("assets/spritemaps/DisplaysVictory.png"))
+	if (!m_VictoryTexture.loadFromFile("assets/spritemaps/DisplaysVictory.png"))
 	{
-		//std::cout << "\nUnable to initialize textures victory display.\n" << std::endl;
+		std::cout << "\nUnable to initialize textures victory display.\n" << std::endl;
 		return false;
 	}
 	m_VictoryRect_Blue = sf::IntRect(0, 0, 640, 192);
@@ -294,6 +301,10 @@ void CUIManager::UpdateUI()
 	}	
 }
 
+/// <summary>
+/// Update and then display the UI elements
+/// </summary>
+/// <param name="_inWindow"></param>
 void CUIManager::DisplayUI(sf::RenderWindow& _inWindow)
 {
 	UpdateUI();
@@ -359,6 +370,7 @@ bool CUIManager::ProcessClick(sf::Vector2f& _inCoords)
 	//side panel
 	if (_inCoords.x > m_uSceneWidth)
 	{
+
 		int buttonClicked = ProcessClickInCtrlPanel(_inCoords);
 		switch (m_eCurrentUIState)
 		{
@@ -426,6 +438,11 @@ bool CUIManager::ProcessClick(sf::Vector2f& _inCoords)
 	//return true;
 }
 
+/// <summary>
+/// Determines which button in the control panel is clicked
+/// </summary>
+/// <param name="_inCoords">Vector2f - assumed to be the coordinates of the mouse</param>
+/// <returns>the index corresponding to the button clicked</returns>
 int CUIManager::ProcessClickInCtrlPanel(sf::Vector2f& _inCoords)
 {
 	for (unsigned short i = 0; i < m_vecButtons_ControlPanel.size(); i++)
@@ -565,6 +582,7 @@ void CUIManager::SetUpGameLoopPanel()
 	currentButton->setTexture(*m_pEmptyUnitPortrait);
 	currentRect = m_ButtonUnitRect_Blue;
 	currentButton->setTextureRect(currentRect);
+	currentButton->setScale(3.0f, 3.0f);
 	currentButton->setPosition(sf::Vector2f((float)(m_uSceneWidth), 96.0f));
 	m_vecButtons_ControlPanel.push_back(currentButton);
 
@@ -572,6 +590,7 @@ void CUIManager::SetUpGameLoopPanel()
 	currentButton->setTexture(*m_pEmptyUnitPortrait);
 	currentRect = m_ButtonUnitRect_Blue;
 	currentButton->setTextureRect(currentRect);
+	currentButton->setScale(3.0f, 3.0f);
 	currentButton->setPosition(sf::Vector2f((float)(m_uSceneWidth+96.0f), 0.0f));
 	m_vecButtons_ControlPanel.push_back(currentButton);
 
@@ -579,6 +598,7 @@ void CUIManager::SetUpGameLoopPanel()
 	currentButton->setTexture(*m_pEmptyUnitPortrait);
 	currentRect = m_ButtonUnitRect_Blue;
 	currentButton->setTextureRect(currentRect);
+	currentButton->setScale(3.0f, 3.0f);
 	currentButton->setPosition(sf::Vector2f((float)(m_uSceneWidth+96.0f), 96.0f));
 	m_vecButtons_ControlPanel.push_back(currentButton);
 
@@ -605,15 +625,6 @@ void CUIManager::SetUpGameLoopPanel()
 bool CUIManager::UpdateInfoDisplay(CSceneEnums::TILETYPE _inTerrain, CUnitEnums::SIDE _inSide, CUnitEnums::TYPE _inType, CUnitEnums::FACTION _inFaction)
 {
 	m_eCurrentUnitSide = _inSide;
-
-	//if (m_eCurrentUnitSide == CParseConfigCommon::Convert(m_eCurrentTurn))
-	//{
-	//	m_bUnitControllable = true;
-	//}
-	//else
-	//{
-	//	m_bUnitControllable = false;
-	//}
 
 	if (_inType != CUnitEnums::TYPE::NONE)
 	{

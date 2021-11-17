@@ -4,6 +4,7 @@
 
 #include<SFML/Graphics.hpp>
 #include <string>
+#include <iostream>
 #include "CUIEnums.h"
 #include "CUnitEnums.h"
 #include "CSceneEnums.h"
@@ -34,7 +35,6 @@ public:
 	static bool GetIfTurnEndClicked()								{ return m_bEndTurn; }
 	static bool GetIfForfeitChosen()								{ return m_bForfeitChosen; }
 	static void VictoryAchieved(CUIEnums::TURN _inSide);
-	static void HideVictoryMessage() { m_bDisplayVictory = false; }
 	/// <summary>
 	/// Set the current state the UI manager is at
 	/// DOES NOT CHANGE THE UI. Changing the UI setup needs
@@ -42,6 +42,12 @@ public:
 	/// required depending on the state.
 	/// </summary>
 	/// <param name="_inState"></param>
+	static void ResetChecks()										
+	{
+		m_eCurrentTypeChosen = CUnitEnums::TYPE::NONE;
+		m_bForfeitChosen = false; 
+		m_bDisplayVictory = false;
+	}
 	static void SetCurrentGameState(CUIEnums::GAMESTATE _inState)	{ m_eCurrentUIState = _inState; }
 	static void SetCurrentMouseState(CUIEnums::MOUSESTATE _inState) { m_eCurrentMouseState = _inState; }
 	static void SetCurrentTurn(CUIEnums::TURN _inTurn)				{ m_eCurrentTurn = _inTurn; m_bEndTurn = false; }
