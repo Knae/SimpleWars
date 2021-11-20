@@ -5,10 +5,10 @@
 class CTerrainEffects
 {
 public:
-	float GetModifierMovement() { return m_ftBonus_Movement; }
-	float GetModifierDamageDealt() { return m_fModifier_DamageDealt; }
-	float GetModifierDamageTaken() { return m_fModifier_DamageTaken; }
-	int GetRangeOffset() { return m_iRangeOffset; }
+	const float GetModifierMovement() { return m_ftBonus_Movement; }
+	const float GetModifierDamageDealt() { return m_fModifier_DamageDealt; }
+	const float GetModifierDamageTaken() { return m_fModifier_DamageTaken; }
+	const int GetRangeOffset() { return m_iRangeOffset; }
 
 	void SetModifierMovement(float _input)		{ m_ftBonus_Movement = _input; }
 	void SetModifierDamageDealt(float _input)	{ m_fModifier_DamageDealt = _input; }
@@ -16,8 +16,8 @@ public:
 	void setRangeOffset(int _input)				{ m_iRangeOffset = _input; }
 private:
 	float	m_ftBonus_Movement = 0.0f;
-	float	m_fModifier_DamageDealt = 0.0f;
-	float	m_fModifier_DamageTaken = 0.0f;
+	float	m_fModifier_DamageDealt = 1.0f;
+	float	m_fModifier_DamageTaken = 1.0f;
 	int		m_iRangeOffset = 0;
 };
 

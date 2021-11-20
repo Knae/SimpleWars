@@ -1,8 +1,10 @@
 #pragma once
 #ifndef __CUNITS_H__
+#define __CUNITS_H__
 
 #include <SFML/Graphics.hpp>
 #include "CUnitEnums.h"
+#include "CSceneEnums.h"
 
 /// <summary>
 /// Unit class that will be used to create a unit
@@ -17,30 +19,32 @@ public:
 
 	//void Initialize(sf::Texture* _inTextureSource);
 	void Initialize(sf::Sprite* _inSpriteSource);
-	void SetHP(float& _inHP)						{ m_fHP = _inHP; }
-	void SetMovement(float& _inMovement)			{ m_fMovementPoints_Base = _inMovement; }
-	void SetDamageDealt(float& _inDamage)			{ m_fDamage = _inDamage; }
-	void SetRange(int& _inRange)					{ m_iRange = _inRange; }
-	void SetFaction(CUnitEnums::FACTION _inFaction) { m_eFaction = _inFaction; }
-	void SetSide(CUnitEnums::SIDE _inSide)			{ m_eControllingPlayer = _inSide; }
-	void SetHasAttacked()							{ m_bHasAttacked = true; }
+	void SetHP(float& _inHP)								{ m_fHP = _inHP; }
+	void SetMovement(float& _inMovement)					{ m_fMovementPoints_Base = _inMovement; }
+	void SetDamageDealt(float& _inDamage)					{ m_fDamage = _inDamage; }
+	void SetRange(int& _inRange)							{ m_iRange = _inRange; }
+	void SetFaction(CUnitEnums::FACTION _inFaction)			{ m_eFaction = _inFaction; }
+	void SetSide(CUnitEnums::SIDE _inSide)					{ m_eControllingPlayer = _inSide; }
+	void SetHasAttacked()									{ m_bHasAttacked = true; }
+	void SetCurrentTileType(CSceneEnums::TILETYPE _inType)	{ m_eCurrentTileType = _inType; }
 	void SetLocation(sf::Vector2f _inPosition);
 
 	void GetMovementStat(float& _outMoveBase, float& _outMovePoints) {
 		_outMoveBase = m_fMovementPoints_Base;
 		_outMovePoints = m_fMovementPoints;
 	}
-	float GetMovePoints()				{ return m_fMovementPoints; };
-	bool GetHasAtacked()				{ return m_bHasAttacked; }
-	sf::Vector2u GetCurrentTile()		{ return m_CurrentTileLocation; }
-	CUnitEnums::STATE GetState()		{ return m_eCurrentState; }
-	CUnitEnums::FACTION GetFaction()	{ return m_eFaction; }
-	CUnitEnums::SIDE GetSide()			{ return m_eControllingPlayer; }
-	CUnitEnums::TYPE GetType()			{ return m_eUnitType; }
-	int GetRange()						{ return m_iRange; }
-	float GetHP()						{ return m_fHP; }
-	float GetDamageDealt()				{ return m_fDamage; }
-	sf::Sprite* GetSprite()				{ return m_UnitSprite; }
+	float GetMovePoints()						{ return m_fMovementPoints; };
+	bool GetHasAtacked()						{ return m_bHasAttacked; }
+	sf::Vector2u GetCurrentTile()				{ return m_CurrentTileLocation; }
+	CSceneEnums::TILETYPE GetCurrentTileType()	{ return m_eCurrentTileType; }
+	CUnitEnums::STATE GetState()				{ return m_eCurrentState; }
+	CUnitEnums::FACTION GetFaction()			{ return m_eFaction; }
+	CUnitEnums::SIDE GetSide()					{ return m_eControllingPlayer; }
+	CUnitEnums::TYPE GetType()					{ return m_eUnitType; }
+	int GetRange()								{ return m_iRange; }
+	float GetHP()								{ return m_fHP; }
+	float GetDamageDealt()						{ return m_fDamage; }
+	sf::Sprite* GetSprite()						{ return m_UnitSprite; }
 
 	void Update();
 	void Update(double& _inTimeElapsed);
@@ -62,6 +66,7 @@ private:
 	CUnitEnums::STATE m_eCurrentState;
 	CUnitEnums::FACTION m_eFaction;
 	CUnitEnums::DIRECTION m_eCurrentDirection;
+	CSceneEnums::TILETYPE m_eCurrentTileType;
 	float m_fHP;
 	float m_fMovementPoints_Base;
 	float m_fMovementPoints;

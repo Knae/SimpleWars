@@ -10,6 +10,7 @@ std::vector<std::string> CUnitManager::m_vecUnitTerrainModPaths;
 std::map<CUnitEnums::TYPE, CUnitEnums::UnitRecord*> CUnitManager::m_mapUnitStats;
 std::map<CUnitEnums::TYPE, std::map<CSceneEnums::TILETYPE, CTerrainEffects*>> CUnitManager::m_mapTileTerrainEffects;
 std::map<CUnitEnums::FACTION, CUnitEnums::StatBonus_Add*> CUnitManager::m_mapFactionsBonuses;
+CTerrainEffects CUnitManager::m_defaultTerrainEffects;
 
 CUnitManager::CUnitManager()
 {
@@ -417,17 +418,43 @@ CUnit* CUnitManager::CreateUnit(CUnitEnums::TYPE _inType,CUnitEnums::FACTION _in
 /// <param name="_inUnit">Pointer to unit being moved. CUnit*</param>
 /// <param name="_inPosition">New position to move to. sf::Vector2u</param>
 /// <returns>whether the unit will be moved or not</returns>
-bool CUnitManager::MoveUnit(CUnit* _inUnit, sf::Vector2u _inPosition)
+bool CUnitManager::MoveUnit(CUnit* _inUnit, sf::Vector2u _inPosition,CSceneEnums::TILETYPE _inTile )
 {
 	sf::Vector2i distanceToCurrentTile(0, 0);
 	sf::Vector2u unitPosition = _inUnit->GetCurrentTile();
+
 	distanceToCurrentTile.x = abs((int)(_inPosition.x - unitPosition.x));
 	distanceToCurrentTile.y = abs((int)(_inPosition.y - unitPosition.y));
 
 	if ((distanceToCurrentTile.x + distanceToCurrentTile.y) == 1)
 	{
-		_inUnit->MoveTo(_inPosition);
-		return true;
+		CUnitEnums::TYPE unitType = _inUnit->GetType();
+		/*std::map<CSceneEnums::TILETYPE, CTerrainEffects*>::iterator mapIterator = (*m_mapTileTerrainEffects.find(unitType)).second.find(_inTile);
+		CTerrainEffects* targetTileEffects = nullptr;
+		if (mapIterator == (*m_mapTileTerrainEffects.find(unitType)).second.end())
+		{
+			targetTileEffects = &m_defaultTerrainEffects;
+		}
+		else
+		{
+			targetTileEffects = (*mapIterator).second;
+		}*/
+		float targetTileMoveBonus = ResolveTerrainEffects(unitType, _inTile)->GetModifierMovement();
+
+		//Only move if movepoints left after is not less than 0
+		if ((_inUnit->GetMovePoints() + targetTileMoveBonus) >= 0)
+		{
+			//apply terrain movement bonus by adding it after subtracting one for moving
+			_inUnit->MoveTo(_inPosition);
+			_inUnit->IncrementMovementPoints(targetTileMoveBonus);
+			_inUnit->SetCurrentTileType(_inTile);
+			return true;
+		}
+		else
+		{
+			std::cout << "\nIllegal Action:This unit will have less than zero MOV points after moving" << std::endl;
+			return false;
+		}
 	}
 	else
 	{
@@ -441,19 +468,37 @@ bool CUnitManager::MoveUnit(CUnit* _inUnit, sf::Vector2u _inPosition)
 /// <param name="_inUnit">Pointer to unit being moved. CUnit*</param>
 /// <param name="_inPosition">New position to move to. sf::Vector2u</param>
 /// <returns>whether the unit will be moved or not</returns>
-bool CUnitManager::MoveUnit(CUnit* _inUnit, sf::Vector2f _inPosition)
+bool CUnitManager::MoveUnit(CUnit* _inUnit, sf::Vector2f _inPosition, CSceneEnums::TILETYPE _inTile)
 {
 	sf::IntRect unitSpriteRect = _inUnit->GetSprite()->getTextureRect();
 	int m_fTileSize = unitSpriteRect.width;
 	sf::Vector2u tilePosition(	(unsigned int)(_inPosition.x / m_fTileSize),
 								(unsigned int)(_inPosition.y / m_fTileSize));
 	
-	return MoveUnit(_inUnit, tilePosition);
+	return MoveUnit(_inUnit, tilePosition, _inTile);
 }
 
-bool CUnitManager::Attack(CUnit* _inAttackinUnit, CUnit* _inDefendingPlayer)
+bool CUnitManager::Attack(CUnit* _inAttackinUnit, CUnit* _inDefendingUnit)
 {
+	float damageDealtModifier = ResolveTerrainEffects(_inAttackinUnit->GetType(),_inAttackinUnit->GetCurrentTileType())->GetModifierDamageDealt();
+	float damageReceivedModifier = ResolveTerrainEffects(_inDefendingUnit->GetType(), _inDefendingUnit->GetCurrentTileType())->GetModifierDamageTaken();
+	float damageDealt = _inAttackinUnit->GetDamageDealt();
+	float totalDamage = damageDealt * damageDealtModifier * damageReceivedModifier;
+	float remainingHP = _inDefendingUnit->TakeDamage(totalDamage);
+
+	std::cout << "\nDamage dealt: (base damage)" << damageDealt << " * (AttackerTerrainBonus)" << damageDealtModifier << " * (DefenderTerrainBonus)" << damageReceivedModifier;
+	std::cout << "\nTotal: " << totalDamage << ". Defender remaining HP: " << remainingHP << std::endl;
+	_inAttackinUnit->SetHasAttacked();
 	return false;
+}
+
+int CUnitManager::GetUnitRange(CUnit* _inUnit)
+{
+	int baseRange = _inUnit->GetRange();
+	int rangeOffset = ResolveTerrainEffects(_inUnit->GetType(), _inUnit->GetCurrentTileType())->GetRangeOffset();
+	int adjustedRange = baseRange + rangeOffset;
+	std::cout << "\nBaseRange: " << baseRange << ". Offset: " << rangeOffset << ". Adjusted Range: " << adjustedRange << std::endl;
+	return adjustedRange;
 }
 
 void CUnitManager::ClearUnits()
@@ -529,3 +574,18 @@ void CUnitManager::SwitchTurns()
 	}
 }
 
+CTerrainEffects* CUnitManager::ResolveTerrainEffects(const CUnitEnums::TYPE _inType, const CSceneEnums::TILETYPE _inTile)
+{
+	std::map<CSceneEnums::TILETYPE, CTerrainEffects*>::iterator mapIterator = (*m_mapTileTerrainEffects.find(_inType)).second.find(_inTile);
+	CTerrainEffects* targetTileEffects = nullptr;
+
+	if (mapIterator == (*m_mapTileTerrainEffects.find(_inType)).second.end())
+	{
+		targetTileEffects = &m_defaultTerrainEffects;
+	}
+	else
+	{
+		targetTileEffects = (*mapIterator).second;
+	}
+	return targetTileEffects;
+}

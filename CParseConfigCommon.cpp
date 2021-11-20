@@ -108,8 +108,38 @@ bool CParseConfigCommon::ConvertToUnitType(std::string& _inputString, CUnitEnums
 	else
 	{
 		//Unrecognised line
-		std::cout << "\nWARN::Unreocignized/Unrecorded unit type" << std::endl;
+		std::cout << "\nWARN::Unrecognized/Unrecorded unit type" << std::endl;
 		_outType = CUnitEnums::TYPE::NONE;
+		return false;
+	}
+	return true;
+}
+
+/// <summary>
+/// Convert unit type to string
+/// </summary>
+/// <param name="_inType"></param>
+/// <param name="_outString"></param>
+/// <returns></returns>
+bool CParseConfigCommon::ConvertUnitTypeToString(CUnitEnums::TYPE& _inType, std::string& _outString)
+{
+	if (_inType == CUnitEnums::TYPE::INFANTRY)
+	{
+		_outString = "Infantry";
+	}
+	else if (_inType == CUnitEnums::TYPE::TANK)
+	{
+		_outString = "Tank";
+	}
+	else if (_inType == CUnitEnums::TYPE::ARTILLERY)
+	{
+		_outString = "Artillery";
+	}
+	else
+	{
+		//Unrecognised line
+		std::cout << "\nWARN::Unrecognized/Unrecorded unit type" << std::endl;
+		_outString = "Unknown Unit";
 		return false;
 	}
 	return true;

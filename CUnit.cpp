@@ -16,6 +16,8 @@ CUnit::CUnit(	CUnitEnums::TYPE _inUnits, CUnitEnums::SIDE _inSIDE,
 	m_eControllingPlayer = _inSIDE;
 	m_UnitSprite = nullptr;
 	m_eFaction = CUnitEnums::FACTION::TALONS;
+	m_eCurrentTileType = CSceneEnums::TILETYPE::NONE;
+	m_bHasAttacked = false;
 }
 
 CUnit::~CUnit()
@@ -122,7 +124,6 @@ void CUnit::MoveTo(sf::Vector2f _inPosition)
 	sf::Vector2u tilePosition(	(unsigned int)(_inPosition.x / m_fTileSize),
 								(unsigned int)(_inPosition.y / m_fTileSize));
 	MoveTo(tilePosition);
-
 }
 
 void CUnit::Replenish()

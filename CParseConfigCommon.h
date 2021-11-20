@@ -18,6 +18,7 @@ public:
 	static std::string ParseLineGetLabel(const std::string& _inputLine, std::string& _lineSettingValues);
 	static bool ConvertToTileType(std::string& _inputString, CSceneEnums::TILETYPE& _outType);
 	static bool ConvertToUnitType(std::string& _inputString, CUnitEnums::TYPE& _outType);
+	static bool ConvertUnitTypeToString(CUnitEnums::TYPE& _inType, std::string& _outString);
 	static CUIEnums::TURN Convert(CUnitEnums::SIDE _input);	
 	static CUnitEnums::SIDE Convert(CUIEnums::TURN _input);
 };

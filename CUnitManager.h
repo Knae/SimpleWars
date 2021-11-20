@@ -7,7 +7,6 @@
 #include <vector>
 #include <map>
 #include "CParseConfigCommon.h"
-#include "CSceneEnums.h"
 #include "CUnit.h"
 #include "CTerrainEffects.h"
 
@@ -25,9 +24,10 @@ public:
 	static void ParseConfig(const std::string& _inFilePath, const std::string& _inFactionConfigPath);
 	static void DisplayUnits(sf::RenderWindow& _inWindow);
 	static CUnit* CreateUnit(CUnitEnums::TYPE _inType, CUnitEnums::FACTION _inFaction, CUnitEnums::SIDE _inSide);
-	static bool MoveUnit(CUnit* _inUnit, sf::Vector2u _inPosition);
-	static bool MoveUnit(CUnit* _inUnit, sf::Vector2f _inPosition);
-	static bool Attack(CUnit* _inAttackinUnit, CUnit* _inDefendingPlayer);
+	static bool MoveUnit(CUnit* _inUnit, sf::Vector2u _inPosition, CSceneEnums::TILETYPE _inTile);
+	static bool MoveUnit(CUnit* _inUnit, sf::Vector2f _inPosition, CSceneEnums::TILETYPE _inTile);
+	static bool Attack(CUnit* _inAttackinUnit, CUnit* _inDefendingUnits);
+	static int GetUnitRange(CUnit* _inUnit);
 	static void ClearUnits();
 	static void Update(double& _inElapsedTime);
 	static bool CheckIfAnyUnitsLeft(CUnitEnums::SIDE _inSide);
@@ -38,6 +38,8 @@ private:
 	CUnitManager();
 	CUnitManager(CUnitManager const&) = delete;
 	void operator=(CUnitManager const&) = delete;
+
+	static CTerrainEffects* ResolveTerrainEffects(const CUnitEnums::TYPE _inType, const CSceneEnums::TILETYPE _inTile);
 
 	static std::vector<CUnit*> m_vecCurrentUnits_Blue;
 	static std::vector<CUnit*> m_vecCurrentUnits_Red;
@@ -52,5 +54,7 @@ private:
 	static std::map<CUnitEnums::TYPE, CUnitEnums::UnitRecord*> m_mapUnitStats;
 	static std::map<CUnitEnums::TYPE, std::map<CSceneEnums::TILETYPE, CTerrainEffects*>> m_mapTileTerrainEffects;
 	static std::map<CUnitEnums::FACTION, CUnitEnums::StatBonus_Add*> m_mapFactionsBonuses;
+
+	static CTerrainEffects m_defaultTerrainEffects;
 };
 #endif // ! _CUNITMANAGER_H__
