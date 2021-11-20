@@ -32,14 +32,13 @@ public:
 	static void Update(double& _inElapsedTime);
 	static bool CheckIfAnyUnitsLeft(CUnitEnums::SIDE _inSide);
 	static void SwitchTurns();
+	static CTerrainEffects* ResolveTerrainEffects(const CUnitEnums::TYPE _inType, const CSceneEnums::TILETYPE _inTile);
 
 private:
 
 	CUnitManager();
 	CUnitManager(CUnitManager const&) = delete;
 	void operator=(CUnitManager const&) = delete;
-
-	static CTerrainEffects* ResolveTerrainEffects(const CUnitEnums::TYPE _inType, const CSceneEnums::TILETYPE _inTile);
 
 	static std::vector<CUnit*> m_vecCurrentUnits_Blue;
 	static std::vector<CUnit*> m_vecCurrentUnits_Red;

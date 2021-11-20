@@ -1,7 +1,8 @@
 #include "COverlayManager.h"
 
-sf::Texture*	COverlayManager::m_pOverlayTexture;
 std::string		COverlayManager::m_strTileSelector;
+sf::Texture*	COverlayManager::m_pOverlayTexture;
+sf::Text*		COverlayManager::m_pMoveCostMod;
 int				COverlayManager::m_iTileSize;
 bool			COverlayManager::m_bShowAttackSelector;
 bool			COverlayManager::m_bShowMoveSelector;
@@ -23,7 +24,7 @@ COverlayManager::~COverlayManager()
 	ClearTileOverlays();
 }
 
-void COverlayManager::InitializeOverlays(const std::string& _inConfigPath, int _inTileSize)
+void COverlayManager::InitializeOverlays(const std::string& _inConfigPath, sf::Font* _inFont, int _inTileSize)
 {
 	if (m_pOverlayTexture != nullptr)
 	{
@@ -52,30 +53,41 @@ void COverlayManager::InitializeOverlays(const std::string& _inConfigPath, int _
 	currentRect = new sf::IntRect(96, 0, 32, 32);
 	m_mapSpriteRect.emplace("Range", *currentRect);
 
+	m_pMoveCostMod = new sf::Text();
+	m_pMoveCostMod->setFillColor(sf::Color::White);
+	m_pMoveCostMod->setOutlineColor(sf::Color::Black);
+	m_pMoveCostMod->setCharacterSize(16);
+	m_pMoveCostMod->setFont(*_inFont);
+
 	CreateUnitSelectorOverlays();
 
 	currentRect = nullptr;
 }
 
-void COverlayManager::Update(double& _elapsedTime)
+void COverlayManager::Update(sf::Vector2f& _inMouse, double _elapsedTime)
 {
-
-}
-
-void COverlayManager::DisplayOverlays(sf::RenderWindow& _inWindow, sf::Vector2f& _inMouse)
-{
-	for (auto& element : m_vecOverlayTileSelector)
-	{
-		_inWindow.draw(*element);
-	}
+	UpdateMoveMod(_inMouse);
 
 	if (m_bShowAttackSelector)
 	{
 		ShowAttackSelector(_inMouse);
 	}
-	else if(m_bShowMoveSelector)
+	else if (m_bShowMoveSelector)
 	{
 		ShowMoveSelector(_inMouse);
+	}
+}
+
+void COverlayManager::DisplayOverlays(sf::RenderWindow& _inWindow)
+{
+	if (m_bShowMoveSelector)
+	{
+		_inWindow.draw(*m_pMoveCostMod);
+	}
+
+	for (auto& element : m_vecOverlayTileSelector)
+	{
+		_inWindow.draw(*element);
 	}
 }
 
@@ -197,6 +209,33 @@ void COverlayManager::ShowAttackSelector(sf::Vector2f& _mouseLocation)
 	sf::Vector2i tileAtLocation((int)(_mouseLocation.x / m_iTileSize), (int)(_mouseLocation.y / m_iTileSize));
 	m_vecOverlayTileSelector[2]->setPosition(sf::Vector2f( (float)(tileAtLocation.x * m_iTileSize), (float)(tileAtLocation.y * m_iTileSize) ));
 	m_bShowAttackSelector = true;
+}
+
+void COverlayManager::UpdateMoveMod(sf::Vector2f& _inMousePosition, float _inMoveMod, bool _inNewValue)
+{
+	if (_inNewValue)
+	{
+		if (_inMoveMod > 0.0f)
+		{
+			m_pMoveCostMod->setFillColor(sf::Color::Green);
+		}
+		else if (_inMoveMod < 0.0f)
+		{
+			m_pMoveCostMod->setFillColor(sf::Color::Red);
+		}
+		else
+		{
+			m_pMoveCostMod->setFillColor(sf::Color::White);
+		}
+
+		std::stringstream shortenDecimal;
+		shortenDecimal << std::setprecision(1) << std::fixed << _inMoveMod;
+
+		std::string moveMod = "MOV cost:\n " + shortenDecimal.str();
+		m_pMoveCostMod->setString(moveMod);
+	}
+	
+	m_pMoveCostMod->setPosition(_inMousePosition.x, _inMousePosition.y - 32.0f);
 }
 
 void COverlayManager::HideUnitSelector()

@@ -4,6 +4,8 @@
 
 #include <string>
 #include <iostream>
+#include <iomanip>
+#include <sstream>
 #include "CSceneEnums.h"
 #include "CUnitEnums.h"
 #include "CUIEnums.h"

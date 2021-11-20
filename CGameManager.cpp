@@ -66,7 +66,7 @@ bool CGameManager::IntializeGame()
 	m_eCurrentTurn = CUIEnums::TURN::NONE;
 
 	m_pGameWindow->setVerticalSyncEnabled(false);
-	m_pGameWindow->setFramerateLimit(30);
+	m_pGameWindow->setFramerateLimit(60);
 	CUIManager::IntializeUI(m_pGameWindow->getSize() , m_pFont,m_GameWindowSize_Current.x - 192);
 	m_pGameWindow->clear();
 
@@ -75,8 +75,32 @@ bool CGameManager::IntializeGame()
 	return true;
 }
 
+/// <summary>
+/// Assigns the pointers to the other managers
+/// *Realized too late that this should have been ref inputs, not
+/// pointers. And also i'm confused between setting up 
+/// singletons and static classes......C'est la vie
+/// </summary>
+/// <param name="_inputUI"></param>
+/// <param name="_inputSceneMgr"></param>
+/// <param name="_inputUnit"></param>
+/// <param name="_inputOverlay"></param>
+void CGameManager::SetPointersToOtherSystems(CUIManager* _inputUI,
+
+	CSceneManager* _inputSceneMgr,
+	CUnitManager* _inputUnit,
+	COverlayManager* _inputOverlay)
+{
+	m_pUIMgr = _inputUI;
+	m_pSceneMgr = _inputSceneMgr;
+	m_pUnitMgr = _inputUnit;
+	m_pOverlayMgr = _inputOverlay;
+}
+
 bool CGameManager::UpdateManagers(double& _inElapsedTime)
 {
+	sf::Vector2f mousePosition = m_pGameWindow->mapPixelToCoords(sf::Mouse::getPosition(*(m_pGameWindow)));
+
 	CUnitManager::Update(_inElapsedTime);
 
 	if (CUIManager::GetIfForfeitChosen())
@@ -117,6 +141,19 @@ bool CGameManager::UpdateManagers(double& _inElapsedTime)
 	}
 
 	m_eCurrentUIMouseState = CUIManager::GetMouseCurrentState();
+
+	if (m_eCurrentUIMouseState == CUIEnums::MOUSESTATE::MOVE && m_pSelectedUnit!=nullptr)
+	{
+		//Need to rethink the structure of the managers
+		CTile* tileUnderMouse = CSceneManager::GetTileInScene(mousePosition);
+		if (tileUnderMouse != nullptr)
+		{
+			CSceneEnums::TILETYPE tileType = tileUnderMouse->GetTileType();
+			CTerrainEffects* tileEffects = CUnitManager::ResolveTerrainEffects(m_pSelectedUnit->GetType(), tileType);
+			float moveMod = tileEffects->GetModifierMovement();
+			COverlayManager::UpdateMoveMod(mousePosition,moveMod,true);
+		}
+	}
 	return false;
 }
 
@@ -143,6 +180,8 @@ bool CGameManager::ChangeCurrentState(CUIEnums::GAMESTATE _inState)
 			CSceneManager::GetCurrentScene()->ResetTiles();	//for testing, skipping map selection
 			CUIManager::ResetChecks();						//This too
 			ClearUnitsToPlace();							//Same for this line. Delete after
+			sf::Vector2f positionZero(0.0f, 0.0f);
+			COverlayManager::ShowMoveSelector(positionZero);
 			//Set up for the first player to place units
 			m_eCurrentTurn = CUIEnums::TURN::BLUE;
 			m_pSceneMgr->GetCurrentScene()->GetUnitsToPlace(&m_mapUnitsToPlaced_B, &m_mapUnitsToPlaced_R);
@@ -210,28 +249,6 @@ void CGameManager::SwitchTurns()
 	}
 }
 
-/// <summary>
-/// Assigns the pointers to the other managers
-/// *Realized too late that this should have been ref inputs, not
-/// pointers. And also i'm confused between setting up 
-/// singletons and static classes......C'est la vie
-/// </summary>
-/// <param name="_inputUI"></param>
-/// <param name="_inputSceneMgr"></param>
-/// <param name="_inputUnit"></param>
-/// <param name="_inputOverlay"></param>
-void CGameManager::SetPointersToOtherSystems(	CUIManager* _inputUI,
-
-												CSceneManager* _inputSceneMgr,
-												CUnitManager* _inputUnit,
-												COverlayManager* _inputOverlay)
-{
-	m_pUIMgr = _inputUI;
-	m_pSceneMgr = _inputSceneMgr;
-	m_pUnitMgr = _inputUnit;
-	m_pOverlayMgr = _inputOverlay;
-}
-
 void CGameManager::DrawObject(sf::Drawable* _object)
 {
 }
@@ -266,7 +283,7 @@ bool CGameManager::LoadScene()
 	{
 		std::cout << "\nSuccesfully loaded Mountain Village map." << std::endl;
 		ChangeCurrentState(CUIEnums::GAMESTATE::UNITPLACEMENT);
-		m_pOverlayMgr->InitializeOverlays(m_strUnitConfig, CSceneManager::GetTileSize() );
+		m_pOverlayMgr->InitializeOverlays(m_strUnitConfig, m_pFont, CSceneManager::GetTileSize() );
 		return true;
 	}
 	else
@@ -279,11 +296,9 @@ bool CGameManager::LoadScene()
 //Display the map and the units in it
 void CGameManager::DisplayScene()
 {
-	sf::Vector2f mousePosition = m_pGameWindow->mapPixelToCoords(sf::Mouse::getPosition(*(m_pGameWindow)));
-
 	CSceneManager::DisplayScene(*m_pGameWindow);
 	CUnitManager::DisplayUnits(*m_pGameWindow);
-	COverlayManager::DisplayOverlays(*m_pGameWindow, mousePosition);
+	COverlayManager::DisplayOverlays(*m_pGameWindow);
 }
 
 bool CGameManager::InitializeUI()
@@ -486,10 +501,12 @@ void CGameManager::ProcessMouseClick()
 									}
 									currentTileUnitOccupies = nullptr;
 								}
-								//If you clicked on a controlable unit, select it.
+								//If you clicked on a controllable unit, select it.
 								else if (targetTile->GetUnitOnTile()->GetSide() == CParseConfigCommon::Convert(m_eCurrentTurn))
 								{
 									m_pSelectedUnit = targetTile->GetUnitOnTile();
+									sf::Vector2u unitTilePosition = m_pSelectedUnit->GetCurrentTile();
+									COverlayManager::ShowUnitSelector(unitTilePosition);
 									CUIManager::SetCurrentUnitHasAttacked(m_pSelectedUnit->GetHasAtacked());
 									m_pSelectedUnit->GetMovePoints() <= 0 ? CUIManager::SetCurrentUnitHasNoMovePoints(true) : CUIManager::SetCurrentUnitHasNoMovePoints(false);
 									UpdateSidePanelInfo(targetTile, m_pSelectedUnit);
@@ -506,11 +523,10 @@ void CGameManager::ProcessMouseClick()
 						}
 						case CUIEnums::MOUSESTATE::ATTACK:
 						{
-							sf::Vector2u currentUnitPosition = m_pSelectedUnit->GetCurrentTile();
-
 							CTile* targetTile = CSceneManager::GetTileInScene(mousePosition);
-							if (targetTile!=nullptr)
+							if (m_pSelectedUnit!=nullptr && targetTile!=nullptr)
 							{
+								sf::Vector2u currentUnitPosition = m_pSelectedUnit->GetCurrentTile();
 								CUnit* targetUnit = targetTile->GetUnitOnTile();
 								if (targetUnit!=nullptr)
 								{

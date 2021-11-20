@@ -429,24 +429,14 @@ bool CUnitManager::MoveUnit(CUnit* _inUnit, sf::Vector2u _inPosition,CSceneEnums
 	if ((distanceToCurrentTile.x + distanceToCurrentTile.y) == 1)
 	{
 		CUnitEnums::TYPE unitType = _inUnit->GetType();
-		/*std::map<CSceneEnums::TILETYPE, CTerrainEffects*>::iterator mapIterator = (*m_mapTileTerrainEffects.find(unitType)).second.find(_inTile);
-		CTerrainEffects* targetTileEffects = nullptr;
-		if (mapIterator == (*m_mapTileTerrainEffects.find(unitType)).second.end())
-		{
-			targetTileEffects = &m_defaultTerrainEffects;
-		}
-		else
-		{
-			targetTileEffects = (*mapIterator).second;
-		}*/
 		float targetTileMoveBonus = ResolveTerrainEffects(unitType, _inTile)->GetModifierMovement();
 
 		//Only move if movepoints left after is not less than 0
 		if ((_inUnit->GetMovePoints() + targetTileMoveBonus) >= 0)
 		{
 			//apply terrain movement bonus by adding it after subtracting one for moving
-			_inUnit->MoveTo(_inPosition);
 			_inUnit->IncrementMovementPoints(targetTileMoveBonus);
+			_inUnit->MoveTo(_inPosition);
 			_inUnit->SetCurrentTileType(_inTile);
 			return true;
 		}
