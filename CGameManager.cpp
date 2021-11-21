@@ -151,6 +151,10 @@ bool CGameManager::UpdateManagers(double& _inElapsedTime)
 		{
 			UpdateSidePanelInfo(tileUnderMouse->GetUnitOnTile());
 		}
+		else
+		{
+			UpdateSidePanelInfo();
+		}
 
 		if (m_eCurrentUIMouseState == CUIEnums::MOUSESTATE::MOVE && m_pSelectedUnit != nullptr)
 		{
@@ -164,6 +168,10 @@ bool CGameManager::UpdateManagers(double& _inElapsedTime)
 			}
 		}
 		COverlayManager::Update(mousePosition);
+	}
+	else
+	{
+		UpdateSidePanelInfo();
 	}
 	
 	return false;
@@ -663,6 +671,7 @@ void CGameManager::UpdateSidePanelInfo(	CUnit* _inViewedUnit)
 	{
 		CTerrainEffects* selectedUnitTerrain = CUnitManager::ResolveTerrainEffects(CUnitEnums::TYPE::NONE, CSceneEnums::TILETYPE::NONE);
 		CTerrainEffects* viewedUnitTerrain = CUnitManager::ResolveTerrainEffects(CUnitEnums::TYPE::NONE, CSceneEnums::TILETYPE::NONE);
+
 		if (m_pSelectedUnit != nullptr)
 		{
 			selectedUnitTerrain = CUnitManager::ResolveTerrainEffects(m_pSelectedUnit->GetType(), m_pSelectedUnit->GetCurrentTileType());
@@ -678,7 +687,6 @@ void CGameManager::UpdateSidePanelInfo(	CUnit* _inViewedUnit)
 										selectedUnitTerrain,
 										viewedUnitTerrain);
 	}
-	
 }
 
 bool CGameManager::CheckIfMouseOverTile(sf::Vector2f _inPosition)

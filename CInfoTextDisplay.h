@@ -1,4 +1,8 @@
 #pragma once
+#ifndef  __CINFOTEXTDISPLAY_H__
+#define __CINFOTEXTDISPLAY_H__
+
+
 #include <SFML/Graphics.hpp>
 #include <iostream>
 #include <vector>
@@ -23,3 +27,4 @@ private:
 	const sf::Color m_fFontColor = sf::Color::White;
 };
 
+#endif // ! __CINFOTEXTDISPLAY_H__

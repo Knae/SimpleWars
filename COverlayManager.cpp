@@ -236,7 +236,7 @@ void COverlayManager::UpdateMoveMod(sf::Vector2f& _inMousePosition, float _inMov
 		m_pMoveCostMod->setString(moveMod);
 	}
 	
-	m_pMoveCostMod->setPosition(_inMousePosition.x, _inMousePosition.y - 32.0f);
+	m_pMoveCostMod->setPosition(_inMousePosition.x + 16.0f, _inMousePosition.y - 48.0f);
 }
 
 void COverlayManager::HideUnitSelector()

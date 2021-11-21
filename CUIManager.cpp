@@ -632,22 +632,6 @@ void CUIManager::SetUpGameLoopPanel()
 		m_vecButtons_ControlPanel.push_back(currentButton);
 	}
 
-	//currentButton = new sf::Sprite;
-	//currentButton->setTexture(*m_pEmptyUnitPortrait);
-	//currentRect = m_ButtonUnitRect_Blue;
-	//currentButton->setTextureRect(currentRect);
-	//currentButton->setScale(3.0f, 3.0f);
-	//currentButton->setPosition(sf::Vector2f((float)(m_uSceneWidth+96.0f), 0.0f));
-	//m_vecButtons_ControlPanel.push_back(currentButton);
-
-	//currentButton = new sf::Sprite;
-	//currentButton->setTexture(*m_pEmptyUnitPortrait);
-	//currentRect = m_ButtonUnitRect_Blue;
-	//currentButton->setTextureRect(currentRect);
-	//currentButton->setScale(3.0f, 3.0f);
-	//currentButton->setPosition(sf::Vector2f((float)(m_uSceneWidth+96.0f), 96.0f));
-	//m_vecButtons_ControlPanel.push_back(currentButton);
-
 	m_eCurrentUIState = CUIEnums::GAMESTATE::GAMELOOP;
 	m_eCurrentTurn = CUIEnums::TURN::BLUE;
 	m_eCurrentMouseState = CUIEnums::MOUSESTATE::SELECT;
@@ -675,35 +659,12 @@ bool CUIManager::UpdateInfoDisplay(	CUnit* _inSelectedUnit,
 									/*CUnitEnums::SIDE _inSide = CUnitEnums::SIDE::NONE,*/
 									/*CUnitEnums::FACTION _inFaction = CUnitEnums::FACTION::NONE*/)
 {
-	//Update unit stats if applicable
 	auto ConvertToString = [](auto input) {std::stringstream str; str << std::setprecision(1) << std::fixed << input; return str.str(); };
+
 	if(_inSelectedUnit!=nullptr)
 	{
-		float valueToUpdate = 0.0f;
-		float value2 = 0.0f;
-		int rangeToUpdate = 0;
-		std::string stringToDisplay;
-
 		m_eCurrentUnitSide = _inSelectedUnit->GetSide();
 		CUnitEnums::TYPE selectedUnitType = _inSelectedUnit->GetType();
-
-		//=============================
-		//Updating Unit stats display
-		//=============================
-		valueToUpdate = _inSelectedUnit->GetHP();
-		stringToDisplay = ConvertToString(valueToUpdate);
-		m_Info_UnitStats.SetValueDisplayAtIndex(1, stringToDisplay);
-		//[Value2->maxMovePoints, ValueToUpdate->CurrentMovePoints]//
-		_inSelectedUnit->GetMovementStat(value2, valueToUpdate);
-		stringToDisplay = ConvertToString(valueToUpdate) + "/" + ConvertToString(value2);
-		m_Info_UnitStats.SetValueDisplayAtIndex(2, stringToDisplay);
-		valueToUpdate = _inSelectedUnit->GetDamageDealt();
-		stringToDisplay = ConvertToString(valueToUpdate);
-		m_Info_UnitStats.SetValueDisplayAtIndex(3, stringToDisplay);
-		rangeToUpdate =  _inSelectedUnit->GetRange();
-		stringToDisplay = ConvertToString(rangeToUpdate);
-		m_Info_UnitStats.SetValueDisplayAtIndex(4, stringToDisplay);
-		//===================================================
 
 		if (selectedUnitType != CUnitEnums::TYPE::NONE)
 		{
@@ -756,7 +717,108 @@ bool CUIManager::UpdateInfoDisplay(	CUnit* _inSelectedUnit,
 			m_vecButtons_ControlPanel[6]->setTexture(*m_pEmptyUnitPortrait);
 			m_vecButtons_ControlPanel[6]->setTextureRect(m_ButtonUnitRect_Blue);
 		}
+
+		//Update unit stats if applicable
+		float valueToUpdate = 0.0f;
+		float value2 = 0.0f;
+		int intToUpdate = 0;
+		std::string stringToDisplay;
+
+		//=============================
+		//Updating Unit stats display
+		//=============================
+		valueToUpdate = _inSelectedUnit->GetHP();
+		stringToDisplay = ConvertToString(valueToUpdate);
+		m_Info_UnitStats.SetValueDisplayAtIndex(1, stringToDisplay);
+		//[Value2->maxMovePoints, ValueToUpdate->CurrentMovePoints]//
+		_inSelectedUnit->GetMovementStat(value2, valueToUpdate);
+		stringToDisplay = ConvertToString(valueToUpdate) + "/" + ConvertToString(value2);
+		m_Info_UnitStats.SetValueDisplayAtIndex(2, stringToDisplay);
+		valueToUpdate = _inSelectedUnit->GetDamageDealt();
+		stringToDisplay = ConvertToString(valueToUpdate);
+		m_Info_UnitStats.SetValueDisplayAtIndex(3, stringToDisplay);
+		intToUpdate = _inSelectedUnit->GetRange();
+		stringToDisplay = ConvertToString(intToUpdate);
+		m_Info_UnitStats.SetValueDisplayAtIndex(4, stringToDisplay);
+
+		//======================================
+		//Updating Ocupied Terrain Modifiers
+		//======================================
+		if (_inSelectedUnitTerrain != nullptr)
+		{
+			valueToUpdate = _inSelectedUnitTerrain->GetModifierMovement();
+			stringToDisplay = ConvertToString(valueToUpdate);
+			m_Info_OccupiedTerrain.SetValueDisplayAtIndex(1, stringToDisplay);
+			valueToUpdate = _inSelectedUnitTerrain->GetModifierDamageDealt();
+			stringToDisplay = " x" + ConvertToString(valueToUpdate);
+			m_Info_OccupiedTerrain.SetValueDisplayAtIndex(2, stringToDisplay);
+			valueToUpdate = _inSelectedUnitTerrain->GetModifierDamageTaken();
+			stringToDisplay = " x" + ConvertToString(valueToUpdate);
+			m_Info_OccupiedTerrain.SetValueDisplayAtIndex(3, stringToDisplay);
+			intToUpdate = _inSelectedUnitTerrain->GetRangeOffset();
+			stringToDisplay = ConvertToString(intToUpdate);
+			m_Info_OccupiedTerrain.SetValueDisplayAtIndex(4, stringToDisplay);
+		}
+		else
+		{
+			m_Info_OccupiedTerrain.SetValueDisplayAtIndex(1, "N/A");
+			m_Info_OccupiedTerrain.SetValueDisplayAtIndex(2, "N/A");
+			m_Info_OccupiedTerrain.SetValueDisplayAtIndex(3, "N/A");
+			m_Info_OccupiedTerrain.SetValueDisplayAtIndex(4, "N/A");
+		}
+
 	}
+	else
+	{
+		m_Info_UnitStats.SetValueDisplayAtIndex(1, "N/A");
+		m_Info_UnitStats.SetValueDisplayAtIndex(2, "N/A");
+		m_Info_UnitStats.SetValueDisplayAtIndex(3, "N/A");
+		m_Info_UnitStats.SetValueDisplayAtIndex(4, "N/A");
+
+		m_Info_OccupiedTerrain.SetValueDisplayAtIndex(1, "N/A");
+		m_Info_OccupiedTerrain.SetValueDisplayAtIndex(2, "N/A");
+		m_Info_OccupiedTerrain.SetValueDisplayAtIndex(3, "N/A");
+		m_Info_OccupiedTerrain.SetValueDisplayAtIndex(4, "N/A");
+
+		m_vecButtons_ControlPanel[6]->setTexture(*m_pEmptyUnitPortrait);
+		m_vecButtons_ControlPanel[6]->setTextureRect(m_ButtonUnitRect_Blue);
+	}
+
+	//======================================
+	//Updating Viewed Terrain Modifiers
+	//======================================
+	if (_inViewedUnitTerrain != nullptr && _inViewedUnit != nullptr)
+	{
+		float valueToUpdate = 0.0f;
+		int intToUpdate = 0;
+		std::string stringToDisplay;
+		
+		CUnitEnums::TYPE unitType = _inViewedUnit->GetType();
+		CParseConfigCommon::ConvertUnitTypeToString(unitType, stringToDisplay);
+		m_Info_ViewedTerrain.SetValueDisplayAtIndex(0, stringToDisplay);
+		valueToUpdate = _inViewedUnitTerrain->GetModifierMovement();
+		stringToDisplay = ConvertToString(valueToUpdate);
+		m_Info_ViewedTerrain.SetValueDisplayAtIndex(1, stringToDisplay);
+		valueToUpdate = _inViewedUnitTerrain->GetModifierDamageDealt();
+		stringToDisplay = " x" + ConvertToString(valueToUpdate);
+		m_Info_ViewedTerrain.SetValueDisplayAtIndex(2, stringToDisplay);
+		valueToUpdate = _inViewedUnitTerrain->GetModifierDamageTaken();
+		stringToDisplay = " x" + ConvertToString(valueToUpdate);
+		m_Info_ViewedTerrain.SetValueDisplayAtIndex(3, stringToDisplay);
+		intToUpdate = _inViewedUnitTerrain->GetRangeOffset();
+		stringToDisplay = ConvertToString(intToUpdate);
+		m_Info_ViewedTerrain.SetValueDisplayAtIndex(4, stringToDisplay);
+	}
+	else
+	{
+		m_Info_ViewedTerrain.SetValueDisplayAtIndex(0, "N/A");
+		m_Info_ViewedTerrain.SetValueDisplayAtIndex(1, "N/A");
+		m_Info_ViewedTerrain.SetValueDisplayAtIndex(2, "N/A");
+		m_Info_ViewedTerrain.SetValueDisplayAtIndex(3, "N/A");
+		m_Info_ViewedTerrain.SetValueDisplayAtIndex(4, "N/A");
+	}
+
+
 
 	return true;
 }

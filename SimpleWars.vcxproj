@@ -146,6 +146,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="CButton.cpp" />
+    <ClCompile Include="CDebug.cpp" />
     <ClCompile Include="CGameManager.cpp" />
     <ClCompile Include="CInfoTextDisplay.cpp" />
     <ClCompile Include="COverlayManager.cpp" />
@@ -161,6 +162,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CButton.h" />
+    <ClInclude Include="CDebug.h" />
     <ClInclude Include="CGameManager.h" />
     <ClInclude Include="CInfoTextDisplay.h" />
     <ClInclude Include="COverlayManager.h" />

@@ -40,6 +40,7 @@ public:
 	virtual void DestroyGameWorld();
 	virtual void DisplayDebug();
 	virtual void ClearUnitsToPlace();
+	virtual CUnit* GetCurrentSelectedUnit() { return m_pSelectedUnit; }
 	//====================================
 	//Scene management related
 	//====================================
