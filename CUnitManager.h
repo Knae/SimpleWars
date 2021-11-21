@@ -4,6 +4,8 @@
 
 #include <fstream>
 #include <iostream>
+#include <iomanip>
+#include <sstream>
 #include <vector>
 #include <map>
 #include "CParseConfigCommon.h"

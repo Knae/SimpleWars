@@ -147,6 +147,7 @@
   <ItemGroup>
     <ClCompile Include="CButton.cpp" />
     <ClCompile Include="CGameManager.cpp" />
+    <ClCompile Include="CInfoTextDisplay.cpp" />
     <ClCompile Include="COverlayManager.cpp" />
     <ClCompile Include="CParseConfigCommon.cpp" />
     <ClCompile Include="CScene.cpp" />
@@ -161,6 +162,7 @@
   <ItemGroup>
     <ClInclude Include="CButton.h" />
     <ClInclude Include="CGameManager.h" />
+    <ClInclude Include="CInfoTextDisplay.h" />
     <ClInclude Include="COverlayManager.h" />
     <ClInclude Include="CParseConfigCommon.h" />
     <ClInclude Include="CScene.h" />

@@ -566,16 +566,25 @@ void CUnitManager::SwitchTurns()
 
 CTerrainEffects* CUnitManager::ResolveTerrainEffects(const CUnitEnums::TYPE _inType, const CSceneEnums::TILETYPE _inTile)
 {
-	std::map<CSceneEnums::TILETYPE, CTerrainEffects*>::iterator mapIterator = (*m_mapTileTerrainEffects.find(_inType)).second.find(_inTile);
 	CTerrainEffects* targetTileEffects = nullptr;
+	std::map<CUnitEnums::TYPE, std::map<CSceneEnums::TILETYPE, CTerrainEffects*>>::iterator searchType = m_mapTileTerrainEffects.find(_inType);
 
-	if (mapIterator == (*m_mapTileTerrainEffects.find(_inType)).second.end())
+	if (searchType == m_mapTileTerrainEffects.end())
 	{
-		targetTileEffects = &m_defaultTerrainEffects;
+		return &m_defaultTerrainEffects;
 	}
 	else
 	{
-		targetTileEffects = (*mapIterator).second;
+		std::map<CSceneEnums::TILETYPE, CTerrainEffects*>::iterator searchTerrain = (*searchType).second.find(_inTile);
+
+		if (searchTerrain == (*searchType).second.end())
+		{
+			return &m_defaultTerrainEffects;
+		}
+		else
+		{
+			return (*searchTerrain).second;
+		}
 	}
-	return targetTileEffects;
+	
 }

@@ -19,7 +19,8 @@
 class CGameManager
 {
 public:
-	static CGameManager& GetRef() { static CGameManager m_gmThis; return m_gmThis; }
+	static CGameManager& GetRef()				{ static CGameManager m_gmThis; return m_gmThis; }
+	virtual sf::RenderWindow* GetGameWindow()	{ return m_pGameWindow; }
 	virtual ~CGameManager();
 	//====================================
 	//General functions
@@ -52,14 +53,14 @@ public:
 	virtual void SetUIToUnitPlacement();
 	virtual void SetUIToGameLoop();
 	virtual void DisplayUI();
-	virtual void UpdateSidePanelInfo(CTile* _inTile, CUnit* _inUnit);
-
-	virtual sf::RenderWindow* GetGameWindow() { return m_pGameWindow; }
+	virtual void UpdateSidePanelInfo(	CUnit* _inViewedUnit = nullptr);
 
 private:
 	CGameManager();
 	CGameManager(CGameManager const&) = delete;
 	void operator=(CGameManager const&) = delete;
+
+	bool CheckIfMouseOverTile(sf::Vector2f _inPosition);
 
 	const sf::Vector2u m_GameWindowSize_Default = sf::Vector2u(1024, 576);
 	std::string m_strMountainVillageConfig= "configs/maps/MountainVillage.ini";

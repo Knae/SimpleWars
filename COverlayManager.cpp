@@ -56,6 +56,7 @@ void COverlayManager::InitializeOverlays(const std::string& _inConfigPath, sf::F
 	m_pMoveCostMod = new sf::Text();
 	m_pMoveCostMod->setFillColor(sf::Color::White);
 	m_pMoveCostMod->setOutlineColor(sf::Color::Black);
+	m_pMoveCostMod->setOutlineThickness(2.0f);
 	m_pMoveCostMod->setCharacterSize(16);
 	m_pMoveCostMod->setFont(*_inFont);
 

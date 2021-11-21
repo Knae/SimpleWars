@@ -5,6 +5,7 @@
 #include<SFML/Graphics.hpp>
 #include <string>
 #include <iostream>
+#include "CInfoTextDisplay.h"
 #include "CUIEnums.h"
 #include "CUnitEnums.h"
 #include "CSceneEnums.h"
@@ -13,6 +14,10 @@
 /// Manager class that is responsible for creating and managing
 /// the UI
 /// </summary>
+
+class CTerrainEffects;
+class CUnit;
+
 class CUIManager
 {
 public:
@@ -28,10 +33,13 @@ public:
 	static void SetUpUnitPlacementPanel(int* _inAmountA, int* _inAmountB, int* _inAmountC);
 	static void SetUpGameLoopPanel();
 	static bool UpdateInfoDisplay(
-		CSceneEnums::TILETYPE _inTerrain,
-		CUnitEnums::SIDE _inSide = CUnitEnums::SIDE::NONE,
-		CUnitEnums::TYPE _inType = CUnitEnums::TYPE::NONE,
-		CUnitEnums::FACTION _inFaction = CUnitEnums::FACTION::NONE);
+		CUnit* _inSelectedUnit = nullptr,
+		CUnit* _inViewedUnit = nullptr,
+		CTerrainEffects* _inSelectedUnitTerrain = nullptr,
+		CTerrainEffects* _inViewedUnitTerrain = nullptr
+		);
+		//CUnitEnums::SIDE _inSide = CUnitEnums::SIDE::NONE,
+		//CUnitEnums::FACTION _inFaction = CUnitEnums::FACTION::NONE);
 	static bool GetIfTurnEndClicked()								{ return m_bEndTurn; }
 	static bool GetIfForfeitChosen()								{ return m_bForfeitChosen; }
 	static void VictoryAchieved(CUIEnums::TURN _inSide);
@@ -97,6 +105,7 @@ private:
 	static bool m_bEndTurn;
 	static bool m_bForfeitChosen;
 	static bool m_bDisplayVictory;
+	static bool m_bDisplayInfoText;
 
 	static const CUnitEnums::TYPE m_eUnitOnButton[4];
 
@@ -105,6 +114,10 @@ private:
 	static CUIEnums::MOUSESTATE m_eCurrentMouseState;
 	static CUnitEnums::TYPE m_eCurrentTypeChosen;
 	static CUnitEnums::SIDE m_eCurrentUnitSide;
+	static CInfoTextDisplay m_Info_FactionBonus;
+	static CInfoTextDisplay m_Info_UnitStats;
+	static CInfoTextDisplay m_Info_OccupiedTerrain;
+	static CInfoTextDisplay m_Info_ViewedTerrain;
 };
 
 #endif // !__CUIMANAGER_H__

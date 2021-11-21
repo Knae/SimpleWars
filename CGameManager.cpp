@@ -131,6 +131,8 @@ bool CGameManager::UpdateManagers(double& _inElapsedTime)
 		CUIManager::SetCurrentTurn(m_eCurrentTurn);
 	}
 
+
+
 	if (!CUnitManager::CheckIfAnyUnitsLeft(CParseConfigCommon::Convert(m_eCurrentTurn)) && m_bExecutingActions)
 	{
 		//GameEnds
@@ -142,18 +144,28 @@ bool CGameManager::UpdateManagers(double& _inElapsedTime)
 
 	m_eCurrentUIMouseState = CUIManager::GetMouseCurrentState();
 
-	if (m_eCurrentUIMouseState == CUIEnums::MOUSESTATE::MOVE && m_pSelectedUnit!=nullptr)
+	if (CheckIfMouseOverTile(mousePosition))
 	{
-		//Need to rethink the structure of the managers
 		CTile* tileUnderMouse = CSceneManager::GetTileInScene(mousePosition);
-		if (tileUnderMouse != nullptr)
+		if (tileUnderMouse->GetUnitOnTile() != nullptr)
 		{
-			CSceneEnums::TILETYPE tileType = tileUnderMouse->GetTileType();
-			CTerrainEffects* tileEffects = CUnitManager::ResolveTerrainEffects(m_pSelectedUnit->GetType(), tileType);
-			float moveMod = tileEffects->GetModifierMovement();
-			COverlayManager::UpdateMoveMod(mousePosition,moveMod,true);
+			UpdateSidePanelInfo(tileUnderMouse->GetUnitOnTile());
 		}
+
+		if (m_eCurrentUIMouseState == CUIEnums::MOUSESTATE::MOVE && m_pSelectedUnit != nullptr)
+		{
+			//Need to rethink the structure of the managers
+			if (tileUnderMouse != nullptr)
+			{
+				CSceneEnums::TILETYPE tileType = tileUnderMouse->GetTileType();
+				CTerrainEffects* tileEffects = CUnitManager::ResolveTerrainEffects(m_pSelectedUnit->GetType(), tileType);
+				float moveMod = tileEffects->GetModifierMovement();
+				COverlayManager::UpdateMoveMod(mousePosition, moveMod, true);
+			}
+		}
+		COverlayManager::Update(mousePosition);
 	}
+	
 	return false;
 }
 
@@ -180,8 +192,6 @@ bool CGameManager::ChangeCurrentState(CUIEnums::GAMESTATE _inState)
 			CSceneManager::GetCurrentScene()->ResetTiles();	//for testing, skipping map selection
 			CUIManager::ResetChecks();						//This too
 			ClearUnitsToPlace();							//Same for this line. Delete after
-			sf::Vector2f positionZero(0.0f, 0.0f);
-			COverlayManager::ShowMoveSelector(positionZero);
 			//Set up for the first player to place units
 			m_eCurrentTurn = CUIEnums::TURN::BLUE;
 			m_pSceneMgr->GetCurrentScene()->GetUnitsToPlace(&m_mapUnitsToPlaced_B, &m_mapUnitsToPlaced_R);
@@ -452,7 +462,7 @@ void CGameManager::ProcessMouseClick()
 								{
 									sf::Vector2u unitTilePosition = m_pSelectedUnit->GetCurrentTile();								
 									COverlayManager::ShowUnitSelector(unitTilePosition);
-									UpdateSidePanelInfo(clickedTile, m_pSelectedUnit);
+									UpdateSidePanelInfo();
 									CUIManager::SetCurrentUnitHasAttacked(m_pSelectedUnit->GetHasAtacked());
 									if (m_pSelectedUnit->GetMovePoints() <= 0)
 									{
@@ -479,9 +489,9 @@ void CGameManager::ProcessMouseClick()
 						}
 						case CUIEnums::MOUSESTATE::MOVE:
 						{
-							if (m_pSelectedUnit != nullptr)
+							CTile* targetTile = m_pSceneMgr->GetTileInScene(mousePosition);
+							if (m_pSelectedUnit != nullptr && targetTile != nullptr)
 							{
-								CTile* targetTile = m_pSceneMgr->GetTileInScene(mousePosition);
 								if (targetTile->GetUnitOnTile()== nullptr)
 								{
 									CTile* currentTileUnitOccupies = m_pSceneMgr->GetTileInScene(m_pSelectedUnit->GetSprite()->getPosition());
@@ -509,7 +519,7 @@ void CGameManager::ProcessMouseClick()
 									COverlayManager::ShowUnitSelector(unitTilePosition);
 									CUIManager::SetCurrentUnitHasAttacked(m_pSelectedUnit->GetHasAtacked());
 									m_pSelectedUnit->GetMovePoints() <= 0 ? CUIManager::SetCurrentUnitHasNoMovePoints(true) : CUIManager::SetCurrentUnitHasNoMovePoints(false);
-									UpdateSidePanelInfo(targetTile, m_pSelectedUnit);
+									UpdateSidePanelInfo();
 									CUIManager::UpdateUI();
 								}
 								targetTile = nullptr;
@@ -537,7 +547,7 @@ void CGameManager::ProcessMouseClick()
 										std::cout << "\nSwitching unit.." << std::endl;
 										m_pSelectedUnit = targetUnit;
 										currentUnitPosition = m_pSelectedUnit->GetCurrentTile();
-										UpdateSidePanelInfo(targetTile, m_pSelectedUnit);
+										UpdateSidePanelInfo(targetUnit);
 										CUIManager::SetCurrentUnitHasAttacked(m_pSelectedUnit->GetHasAtacked());
 
 										if (!m_pSelectedUnit->GetHasAtacked())
@@ -643,11 +653,42 @@ void CGameManager::DisplayUI()
 	CUIManager::DisplayUI(*m_pGameWindow);
 }
 
-void CGameManager::UpdateSidePanelInfo(CTile* _inTile, CUnit* _inUnit)
+void CGameManager::UpdateSidePanelInfo(	CUnit* _inViewedUnit)
 {
-	CUIManager::UpdateInfoDisplay(	_inTile->GetTileType(),
-									_inUnit->GetSide(),
-									_inUnit->GetType(),
-									_inUnit->GetFaction()
-	);
+	if (m_eCurrentState == CUIEnums::GAMESTATE::UNITPLACEMENT)
+	{
+
+	}
+	else if (m_eCurrentState == CUIEnums::GAMESTATE::GAMELOOP)
+	{
+		CTerrainEffects* selectedUnitTerrain = CUnitManager::ResolveTerrainEffects(CUnitEnums::TYPE::NONE, CSceneEnums::TILETYPE::NONE);
+		CTerrainEffects* viewedUnitTerrain = CUnitManager::ResolveTerrainEffects(CUnitEnums::TYPE::NONE, CSceneEnums::TILETYPE::NONE);
+		if (m_pSelectedUnit != nullptr)
+		{
+			selectedUnitTerrain = CUnitManager::ResolveTerrainEffects(m_pSelectedUnit->GetType(), m_pSelectedUnit->GetCurrentTileType());
+		}
+
+		if(_inViewedUnit != nullptr)
+		{
+			viewedUnitTerrain = CUnitManager::ResolveTerrainEffects(_inViewedUnit->GetType(), _inViewedUnit->GetCurrentTileType());
+		}
+
+		CUIManager::UpdateInfoDisplay(	m_pSelectedUnit,
+										_inViewedUnit,
+										selectedUnitTerrain,
+										viewedUnitTerrain);
+	}
+	
+}
+
+bool CGameManager::CheckIfMouseOverTile(sf::Vector2f _inPosition)
+{
+	if (CSceneManager::GetTileInScene(_inPosition) != nullptr)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
 }

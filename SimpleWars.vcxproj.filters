@@ -81,6 +81,9 @@
     <ClCompile Include="CButton.cpp">
       <Filter>Source Files\Helpers</Filter>
     </ClCompile>
+    <ClCompile Include="CInfoTextDisplay.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CScene.h">
@@ -127,6 +130,9 @@
     </ClInclude>
     <ClInclude Include="CButton.h">
       <Filter>Header Files\Helpers</Filter>
+    </ClInclude>
+    <ClInclude Include="CInfoTextDisplay.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

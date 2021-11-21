@@ -1,4 +1,6 @@
 #include "CUIManager.h"
+#include "CUnit.h"
+#include "CTerrainEffects.h"
 
 std::vector<sf::Sprite*> CUIManager::m_vecButtons_ControlPanel;
 std::vector<sf::Sprite*> CUIManager::m_vecOverlays;
@@ -22,12 +24,17 @@ bool CUIManager::m_bUnitHasAttacked;
 bool CUIManager::m_bEndTurn;
 bool CUIManager::m_bForfeitChosen;
 bool CUIManager::m_bDisplayVictory;
+bool CUIManager::m_bDisplayInfoText;
 
 CUIEnums::TURN CUIManager::m_eCurrentTurn;
 CUIEnums::GAMESTATE CUIManager::m_eCurrentUIState;
 CUIEnums::MOUSESTATE CUIManager::m_eCurrentMouseState;
 CUnitEnums::TYPE CUIManager::m_eCurrentTypeChosen;
 CUnitEnums::SIDE CUIManager::m_eCurrentUnitSide;
+CInfoTextDisplay CUIManager::m_Info_FactionBonus;
+CInfoTextDisplay CUIManager::m_Info_UnitStats;
+CInfoTextDisplay CUIManager::m_Info_OccupiedTerrain;
+CInfoTextDisplay CUIManager::m_Info_ViewedTerrain;
 
 const CUnitEnums::TYPE CUIManager::m_eUnitOnButton[]= {	CUnitEnums::TYPE::INFANTRY,
 														CUnitEnums::TYPE::TANK,
@@ -58,6 +65,7 @@ CUIManager::CUIManager()
 	m_bUnitHasAttacked = false;
 	m_bEndTurn = false;
 	m_bDisplayVictory = false;
+	m_bDisplayInfoText = false;
 	m_eCurrentTurn = CUIEnums::TURN::BLUE;
 	m_eCurrentUnitSide = CUnitEnums::SIDE::NONE;
 }
@@ -176,6 +184,29 @@ bool CUIManager::IntializeUI(sf::Vector2u _inWindowSize, sf::Font* _inFont, cons
 
 	m_pFont = _inFont;
 
+	m_Info_FactionBonus.Initialize(m_uSceneWidth + 96.0f, 0.0f, m_pFont, 2);
+
+	m_Info_UnitStats.Initialize(m_uSceneWidth + 96.0f, 96.0f, m_pFont, 5);
+	m_Info_UnitStats.SetTextAtIndex(0, "UnitStats", "");
+	m_Info_UnitStats.SetTextAtIndex(1, "HP :", "N/A");
+	m_Info_UnitStats.SetTextAtIndex(2, "MOV:", "N/A");
+	m_Info_UnitStats.SetTextAtIndex(3, "DMG:", "N/A");
+	m_Info_UnitStats.SetTextAtIndex(4, "RGE:", "N/A");
+
+	m_Info_OccupiedTerrain.Initialize(m_uSceneWidth * 1.0f, 192.0f, m_pFont, 5);
+	m_Info_OccupiedTerrain.SetTextAtIndex(0, "UnitTerrBonus", "");
+	m_Info_OccupiedTerrain.SetTextAtIndex(1, "MOV:", "N/A");
+	m_Info_OccupiedTerrain.SetTextAtIndex(2, "DMG->", "N/A");
+	m_Info_OccupiedTerrain.SetTextAtIndex(3, "DMG<-", "N/A");
+	m_Info_OccupiedTerrain.SetTextAtIndex(4, "RGE:", "N/A");
+
+	m_Info_ViewedTerrain.Initialize(m_uSceneWidth + 96.0f, 192.0f, m_pFont, 5);
+	m_Info_ViewedTerrain.SetTextAtIndex(0, "", "N/A");
+	m_Info_ViewedTerrain.SetTextAtIndex(1, "MOV:", "N/A");
+	m_Info_ViewedTerrain.SetTextAtIndex(2, "DMG->", "N/A");
+	m_Info_ViewedTerrain.SetTextAtIndex(3, "DMG<-", "N/A");
+	m_Info_ViewedTerrain.SetTextAtIndex(4, "RGE:", "N/A");
+
 	return true;
 }
 
@@ -186,7 +217,7 @@ void CUIManager::UpdateUI()
 {
 	if (m_eCurrentUnitSide == CParseConfigCommon::Convert(m_eCurrentTurn))
 	{
-		m_bUnitControllable = true;
+		m_bUnitControllable = true; 
 	}
 	else
 	{
@@ -327,6 +358,14 @@ void CUIManager::DisplayUI(sf::RenderWindow& _inWindow)
 	{
 		_inWindow.draw(m_VictorySprite);
 	}
+
+	if (m_bDisplayInfoText)
+	{
+		m_Info_FactionBonus.DisplayInfo(_inWindow);
+		m_Info_UnitStats.DisplayInfo(_inWindow);
+		m_Info_OccupiedTerrain.DisplayInfo(_inWindow);
+		m_Info_ViewedTerrain.DisplayInfo(_inWindow);
+	}
 }
 
 /// <summary>
@@ -356,6 +395,8 @@ void CUIManager::ClearUIElements()
 	m_vecButtons_ControlPanel.clear();
 	m_vecText_UnitPlacementPanel.clear();
 	m_vecOverlays.clear();
+
+	m_bDisplayInfoText = false;
 }
 
 /// <summary>
@@ -532,12 +573,14 @@ void CUIManager::SetUpUnitPlacementPanel(int* _inAmountA, int* _inAmountB, int* 
 /// 1 = Move
 /// 2 = End Turn
 /// 3 = Forfeit
-/// 4 = Selected unit portrait
-/// 5 = Selected unit stats
-/// 6 = Faction
-/// 7 = Terrain
+/// 4 = Faction Emblem
+/// 5 = Faction Bonuses
+/// 6 = Selected unit portrait
+/// 7 = Selected unit stats
+/// 8 = Tile under selected unit
+/// 9 = Tile under pointer
 /// 
-/// 'buttons' 4-7 are info displays
+/// 'buttons' 4-9 are info displays
 /// </summary>
 void CUIManager::SetUpGameLoopPanel()
 {
@@ -555,7 +598,7 @@ void CUIManager::SetUpGameLoopPanel()
 		currentRect = m_ButtonGameLoop;
 		currentRect.left += (i * 64);
 		currentButton->setTextureRect(currentRect);
-		currentButton->setPosition(sf::Vector2f(m_uSceneWidth + 32.0f +(i*64.0f), 256.0f));
+		currentButton->setPosition(sf::Vector2f(m_uSceneWidth + 32.0f +(i*64.0f), 352.0f));
 		m_vecButtons_ControlPanel.push_back(currentButton);
 	}
 
@@ -566,47 +609,50 @@ void CUIManager::SetUpGameLoopPanel()
 		currentRect = m_ButtonGameLoop;
 		currentRect.left += 128 + (i * 64);
 		currentButton->setTextureRect(currentRect);
-		currentButton->setPosition(sf::Vector2f(m_uSceneWidth + (i * 128.0f), 304.0f));
+		currentButton->setPosition(sf::Vector2f(m_uSceneWidth + (i * 128.0f),400.0f));
 		m_vecButtons_ControlPanel.push_back(currentButton);
 	}
 
-	currentButton = new sf::Sprite;
-	currentButton->setTexture(*m_pEmptyUnitPortrait);
-	currentRect = m_ButtonUnitRect_Blue;
-	currentButton->setTextureRect(currentRect);
-	currentButton->setScale(3.0f,3.0f);
-	currentButton->setPosition(sf::Vector2f((float)(m_uSceneWidth) , 0.0f));
-	m_vecButtons_ControlPanel.push_back(currentButton);
+	for (unsigned short i = 0; i < 3; i++)
+	{
+		currentButton = new sf::Sprite;
+		currentButton->setTexture(*m_pEmptyUnitPortrait);
+		currentRect = m_ButtonUnitRect_Blue;
+		currentButton->setTextureRect(currentRect);
+		currentButton->setScale(3.0f, 3.0f);
+		currentButton->setPosition(sf::Vector2f((float)(m_uSceneWidth ), 0.0f + (i*96.0f) ));
+		m_vecButtons_ControlPanel.push_back(currentButton);
 
-	currentButton = new sf::Sprite;
-	currentButton->setTexture(*m_pEmptyUnitPortrait);
-	currentRect = m_ButtonUnitRect_Blue;
-	currentButton->setTextureRect(currentRect);
-	currentButton->setScale(3.0f, 3.0f);
-	currentButton->setPosition(sf::Vector2f((float)(m_uSceneWidth), 96.0f));
-	m_vecButtons_ControlPanel.push_back(currentButton);
+		currentButton = new sf::Sprite;
+		currentButton->setTexture(*m_pEmptyUnitPortrait);
+		currentRect = m_ButtonUnitRect_Blue;
+		currentButton->setTextureRect(currentRect);
+		currentButton->setScale(3.0f, 3.0f);
+		currentButton->setPosition(sf::Vector2f((float)(m_uSceneWidth + 96.0f), 0.0f + (i * 96.0f) ));
+		m_vecButtons_ControlPanel.push_back(currentButton);
+	}
 
-	currentButton = new sf::Sprite;
-	currentButton->setTexture(*m_pEmptyUnitPortrait);
-	currentRect = m_ButtonUnitRect_Blue;
-	currentButton->setTextureRect(currentRect);
-	currentButton->setScale(3.0f, 3.0f);
-	currentButton->setPosition(sf::Vector2f((float)(m_uSceneWidth+96.0f), 0.0f));
-	m_vecButtons_ControlPanel.push_back(currentButton);
+	//currentButton = new sf::Sprite;
+	//currentButton->setTexture(*m_pEmptyUnitPortrait);
+	//currentRect = m_ButtonUnitRect_Blue;
+	//currentButton->setTextureRect(currentRect);
+	//currentButton->setScale(3.0f, 3.0f);
+	//currentButton->setPosition(sf::Vector2f((float)(m_uSceneWidth+96.0f), 0.0f));
+	//m_vecButtons_ControlPanel.push_back(currentButton);
 
-	currentButton = new sf::Sprite;
-	currentButton->setTexture(*m_pEmptyUnitPortrait);
-	currentRect = m_ButtonUnitRect_Blue;
-	currentButton->setTextureRect(currentRect);
-	currentButton->setScale(3.0f, 3.0f);
-	currentButton->setPosition(sf::Vector2f((float)(m_uSceneWidth+96.0f), 96.0f));
-	m_vecButtons_ControlPanel.push_back(currentButton);
-
+	//currentButton = new sf::Sprite;
+	//currentButton->setTexture(*m_pEmptyUnitPortrait);
+	//currentRect = m_ButtonUnitRect_Blue;
+	//currentButton->setTextureRect(currentRect);
+	//currentButton->setScale(3.0f, 3.0f);
+	//currentButton->setPosition(sf::Vector2f((float)(m_uSceneWidth+96.0f), 96.0f));
+	//m_vecButtons_ControlPanel.push_back(currentButton);
 
 	m_eCurrentUIState = CUIEnums::GAMESTATE::GAMELOOP;
 	m_eCurrentTurn = CUIEnums::TURN::BLUE;
 	m_eCurrentMouseState = CUIEnums::MOUSESTATE::SELECT;
 
+	m_bDisplayInfoText = true;
 	currentButton = nullptr;
 	currentText = nullptr;
 }
@@ -622,62 +668,95 @@ void CUIManager::SetUpGameLoopPanel()
 /// <param name="_inType">Unit Type. CUnitEnums::TYPE</param>
 /// <param name="_inFaction">Faction. CUnitEnums::FACTION</param>
 /// <returns></returns>
-bool CUIManager::UpdateInfoDisplay(CSceneEnums::TILETYPE _inTerrain, CUnitEnums::SIDE _inSide, CUnitEnums::TYPE _inType, CUnitEnums::FACTION _inFaction)
+bool CUIManager::UpdateInfoDisplay(	CUnit* _inSelectedUnit,
+									CUnit* _inViewedUnit,
+									CTerrainEffects* _inSelectedUnitTerrain,
+									CTerrainEffects* _inViewedUnitTerrain//,
+									/*CUnitEnums::SIDE _inSide = CUnitEnums::SIDE::NONE,*/
+									/*CUnitEnums::FACTION _inFaction = CUnitEnums::FACTION::NONE*/)
 {
-	m_eCurrentUnitSide = _inSide;
-
-	if (_inType != CUnitEnums::TYPE::NONE)
+	//Update unit stats if applicable
+	auto ConvertToString = [](auto input) {std::stringstream str; str << std::setprecision(1) << std::fixed << input; return str.str(); };
+	if(_inSelectedUnit!=nullptr)
 	{
-		m_vecButtons_ControlPanel[4]->setTexture(*m_pButtonUnitTexture);
-		sf::IntRect currentRect;
+		float valueToUpdate = 0.0f;
+		float value2 = 0.0f;
+		int rangeToUpdate = 0;
+		std::string stringToDisplay;
 
-		switch (_inSide)
+		m_eCurrentUnitSide = _inSelectedUnit->GetSide();
+		CUnitEnums::TYPE selectedUnitType = _inSelectedUnit->GetType();
+
+		//=============================
+		//Updating Unit stats display
+		//=============================
+		valueToUpdate = _inSelectedUnit->GetHP();
+		stringToDisplay = ConvertToString(valueToUpdate);
+		m_Info_UnitStats.SetValueDisplayAtIndex(1, stringToDisplay);
+		//[Value2->maxMovePoints, ValueToUpdate->CurrentMovePoints]//
+		_inSelectedUnit->GetMovementStat(value2, valueToUpdate);
+		stringToDisplay = ConvertToString(valueToUpdate) + "/" + ConvertToString(value2);
+		m_Info_UnitStats.SetValueDisplayAtIndex(2, stringToDisplay);
+		valueToUpdate = _inSelectedUnit->GetDamageDealt();
+		stringToDisplay = ConvertToString(valueToUpdate);
+		m_Info_UnitStats.SetValueDisplayAtIndex(3, stringToDisplay);
+		rangeToUpdate =  _inSelectedUnit->GetRange();
+		stringToDisplay = ConvertToString(rangeToUpdate);
+		m_Info_UnitStats.SetValueDisplayAtIndex(4, stringToDisplay);
+		//===================================================
+
+		if (selectedUnitType != CUnitEnums::TYPE::NONE)
 		{
-			case CUnitEnums::SIDE::BLUE:
+			m_vecButtons_ControlPanel[6]->setTexture(*m_pButtonUnitTexture);
+			sf::IntRect currentRect;
+
+			switch (m_eCurrentUnitSide)
 			{
-				currentRect = m_ButtonUnitRect_Blue;
-				break;
+				case CUnitEnums::SIDE::BLUE:
+				{
+					currentRect = m_ButtonUnitRect_Blue;
+					break;
+				}
+				case CUnitEnums::SIDE::RED:
+				{
+					currentRect = m_ButtonUnitRect_Red;
+					break;
+				}
+				default:
+				{
+					break;
+				}
 			}
-			case CUnitEnums::SIDE::RED:
+
+			switch (selectedUnitType)
 			{
-				currentRect = m_ButtonUnitRect_Red;
-				break;
+				case CUnitEnums::TYPE::INFANTRY:
+				{
+					break;
+				}
+				case CUnitEnums::TYPE::TANK:
+				{
+					currentRect.left += 32;
+					break;
+				}
+				case CUnitEnums::TYPE::ARTILLERY:
+				{
+					currentRect.left += 64;
+					break;
+				}
+				default:
+				{
+					break;
+				}
 			}
-			default:
-			{
-				break;
-			}
+			m_vecButtons_ControlPanel[6]->setTextureRect(currentRect);
 		}
-		
-		switch (_inType)
+		else
 		{
-			case CUnitEnums::TYPE::INFANTRY:
-			{
-				break;
-			}
-			case CUnitEnums::TYPE::TANK:
-			{
-				currentRect.left += 32;
-				break;
-			}
-			case CUnitEnums::TYPE::ARTILLERY:
-			{
-				currentRect.left += 64;
-				break;
-			}
-			default:
-			{
-				break;
-			}
+			m_vecButtons_ControlPanel[6]->setTexture(*m_pEmptyUnitPortrait);
+			m_vecButtons_ControlPanel[6]->setTextureRect(m_ButtonUnitRect_Blue);
 		}
-		m_vecButtons_ControlPanel[4]->setTextureRect(currentRect);
 	}
-	else
-	{
-		m_vecButtons_ControlPanel[4]->setTexture(*m_pEmptyUnitPortrait);
-		m_vecButtons_ControlPanel[4]->setTextureRect( m_ButtonUnitRect_Blue);
-	}
-	
 
 	return true;
 }
