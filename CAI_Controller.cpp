@@ -20,12 +20,15 @@ int CAI_Controller::FindClosestEnemy(CUnit* _inCurrentUnit, CUnit*& _outTarget)
 	int currentCalculatedDistance = 0;
 	for (auto& unit : *m_vecUnits_Player)
 	{
-		targetPos = unit->GetCurrentTile();
-		currentCalculatedDistance = FindDistanceBetweenTiles(currentPos, targetPos);
-		if (currentCalculatedDistance < currentNearestDistance)
+		if (unit->GetState() != CUnitEnums::STATE::DESTROYED)
 		{
-			currentNearestDistance = currentCalculatedDistance;
-			currentNearestTarget = unit;
+			targetPos = unit->GetCurrentTile();
+			currentCalculatedDistance = FindDistanceBetweenTiles(currentPos, targetPos);
+			if (currentCalculatedDistance < currentNearestDistance)
+			{
+				currentNearestDistance = currentCalculatedDistance;
+				currentNearestTarget = unit;
+			}
 		}
 	}
 	_outTarget = currentNearestTarget;
@@ -60,7 +63,7 @@ void CAI_Controller::IntializeAi(std::vector<CUnit*>* _inPVecAI, std::vector<CUn
 	m_vecUnits_Player = _inPVecPlayer;
 }
 
-void CAI_Controller::StartAITurn()
+bool CAI_Controller::StartAITurn()
 {
 	CUnit* targetUnit = nullptr;
 	for (auto& unit : *m_vecUnits_AI)
@@ -68,9 +71,11 @@ void CAI_Controller::StartAITurn()
 		int dist = FindClosestEnemy(unit, targetUnit);
 		if (targetUnit != nullptr)
 		{
-			bool hasTriedToAttack = false;
-			while (!hasTriedToAttack)
+			bool hasTriedToAttack = unit->GetHasAtacked();
+			bool cannotMove = false;
+			while (!hasTriedToAttack && !cannotMove)
 			{
+				//cannotMove = false;
 				int range = CUnitManager::GetUnitRange(unit);
 				if (dist <= range && !unit->GetHasAtacked())
 				{
@@ -83,11 +88,62 @@ void CAI_Controller::StartAITurn()
 						CSceneManager::GetTileInScene(targetUnit->GetCurrentTile())->UnitLeavesTile();
 					}
 					hasTriedToAttack = true;
+					return false;
 				}
-				else if(unit->GetMovePoints()>0)
+				else if(!cannotMove && unit->GetMovePoints()>0)
 				{
-					//sf::Vector2i
-					hasTriedToAttack = true;
+					sf::Vector2u unitPosition = unit->GetCurrentTile();
+					sf::Vector2u targetPosition = targetUnit->GetCurrentTile();
+					sf::Vector2i dir = GetDirectionToTarget(unitPosition, targetPosition);
+					if (dir.x != 0)
+					{
+						dir.x = dir.x / abs(dir.x);
+					}
+
+					if (dir.y != 0)
+					{
+						dir.y = dir.y / abs(dir.y);
+					}
+					
+					//I hate This
+					sf::Vector2i posTry1(unitPosition.x + dir.x, unitPosition.y);
+					//sf::Vector2i posTry2(unitPosition.x , unitPosition.y + dir.y);
+					CSceneEnums::TILETYPE posTryTileType1 = CSceneManager::GetTileInScene(sf::Vector2u(posTry1))->GetTileType();
+					//CSceneEnums::TILETYPE posTryTileType2 = CSceneManager::GetTileInScene(sf::Vector2u(posTry2))->GetTileType();
+					if (CSceneManager::GetTileInScene(sf::Vector2u(posTry1))->GetUnitOnTile() !=nullptr || 
+						!CUnitManager::MoveUnit(unit, sf::Vector2u(posTry1), posTryTileType1))
+					{
+						posTry1 = sf::Vector2i(unitPosition.x, unitPosition.y + dir.y);
+						posTryTileType1 = CSceneManager::GetTileInScene(sf::Vector2u(posTry1))->GetTileType();
+						if (CSceneManager::GetTileInScene(sf::Vector2u(posTry1))->GetUnitOnTile() != nullptr ||
+							!CUnitManager::MoveUnit(unit, sf::Vector2u(posTry1), posTryTileType1))
+						{
+							posTry1 = sf::Vector2i(unitPosition.x - dir.x, unitPosition.y);
+							posTryTileType1 = CSceneManager::GetTileInScene(sf::Vector2u(posTry1))->GetTileType();
+							if (CSceneManager::GetTileInScene(sf::Vector2u(posTry1))->GetUnitOnTile() != nullptr ||
+								!CUnitManager::MoveUnit(unit, sf::Vector2u(posTry1), posTryTileType1))
+							{
+								posTry1 = sf::Vector2i(unitPosition.x, unitPosition.y - dir.y);
+								posTryTileType1 = CSceneManager::GetTileInScene(sf::Vector2u(posTry1))->GetTileType();
+								if (CSceneManager::GetTileInScene(sf::Vector2u(posTry1))->GetUnitOnTile() != nullptr ||
+									!CUnitManager::MoveUnit(unit, sf::Vector2u(posTry1), posTryTileType1))
+								{
+									cannotMove = true;
+								}
+							}
+						}
+					}
+					else
+					{
+
+					}
+
+					if(!cannotMove)
+					{
+						CSceneManager::GetTileInScene(unitPosition)->UnitLeavesTile();
+						CSceneManager::GetTileInScene(unit->GetCurrentTile())->UnitEntersTile(unit);
+						return false;
+					}
 				}
 				else
 				{
@@ -98,5 +154,6 @@ void CAI_Controller::StartAITurn()
 	}
 
 	targetUnit = nullptr;
+	return true;
 }
 

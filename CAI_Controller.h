@@ -16,7 +16,7 @@ public:
 		std::vector<CUnit*>* _inPVecAI,
 		std::vector<CUnit*>* _inPVecPlayer);
 
-	static void StartAITurn();
+	static bool StartAITurn();
 
 private:
 	CAI_Controller();

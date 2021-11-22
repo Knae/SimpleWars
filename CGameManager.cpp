@@ -116,79 +116,88 @@ void CGameManager::SetPointersToOtherSystems(CUIManager* _inputUI,
 bool CGameManager::UpdateManagers(double& _inElapsedTime)
 {
 	sf::Vector2f mousePosition = m_pGameWindow->mapPixelToCoords(sf::Mouse::getPosition(*(m_pGameWindow)));
-
-	CUnitManager::Update(_inElapsedTime);
-
-	if (CUIManager::GetIfForfeitChosen())
+	if (m_bAIEnabled && m_eCurrentTurn == CUIEnums::TURN::RED && m_eCurrentState == CUIEnums::GAMESTATE::GAMELOOP)
 	{
-		switch (m_eCurrentTurn)
+		if (CAI_Controller::StartAITurn())
 		{
-			case CUIEnums::TURN::BLUE:
-			{
-				CUIManager::VictoryAchieved(CUIEnums::TURN::RED);
-				break;
-			}
-			case CUIEnums::TURN::RED:
-			{
-				CUIManager::VictoryAchieved(CUIEnums::TURN::BLUE);
-				break;
-			}
-			default:
-			case CUIEnums::TURN::NONE:
-			{
-				break;
-			}
+			SwitchTurns();
 		}
-		ChangeCurrentState(CUIEnums::GAMESTATE::GAMEEND);
 	}
-	else if (CUIManager::GetIfTurnEndClicked())
+	else 
 	{
-		SwitchTurns();
-		CUIManager::SetCurrentTurn(m_eCurrentTurn);
-	}
-
-	if (m_eCurrentState == CUIEnums::GAMESTATE::GAMELOOP && !CUnitManager::CheckIfAnyUnitsLeft(CParseConfigCommon::Convert(m_eCurrentTurn))/* && m_bExecutingActions*/)
-	{
-		//GameEnds
-		std::cout << "\nAll Enemy units  have died!" << std::endl;
-		m_bExecutingActions = false;
-		CUIManager::VictoryAchieved(m_eCurrentTurn);
-		ChangeCurrentState(CUIEnums::GAMESTATE::GAMEEND);
-	}
-
-	m_eCurrentUIMouseState = CUIManager::GetMouseCurrentState();
-
-	if (CheckIfMouseOverTile(mousePosition))
-	{
-		CTile* tileUnderMouse = CSceneManager::GetTileInScene(mousePosition);
-		if (tileUnderMouse->GetUnitOnTile() != nullptr)
+		if (CUIManager::GetIfForfeitChosen())
 		{
-			UpdateSidePanelInfo(tileUnderMouse->GetUnitOnTile());
+			switch (m_eCurrentTurn)
+			{
+				case CUIEnums::TURN::BLUE:
+				{
+					CUIManager::VictoryAchieved(CUIEnums::TURN::RED);
+					break;
+				}
+				case CUIEnums::TURN::RED:
+				{
+					CUIManager::VictoryAchieved(CUIEnums::TURN::BLUE);
+					break;
+				}
+				default:
+				case CUIEnums::TURN::NONE:
+				{
+					break;
+				}
+			}
+			ChangeCurrentState(CUIEnums::GAMESTATE::GAMEEND);
+		}
+		else if (CUIManager::GetIfTurnEndClicked())
+		{
+			SwitchTurns();
+			CUIManager::SetCurrentTurn(m_eCurrentTurn);
+		}
+
+		if (m_eCurrentState == CUIEnums::GAMESTATE::GAMELOOP && !CUnitManager::CheckIfAnyUnitsLeft(CParseConfigCommon::Convert(m_eCurrentTurn))/* && m_bExecutingActions*/)
+		{
+			//GameEnds
+			std::cout << "\nAll Enemy units  have died!" << std::endl;
+			m_bExecutingActions = false;
+			CUIManager::VictoryAchieved(m_eCurrentTurn);
+			ChangeCurrentState(CUIEnums::GAMESTATE::GAMEEND);
+		}
+
+		m_eCurrentUIMouseState = CUIManager::GetMouseCurrentState();
+
+		if (CheckIfMouseOverTile(mousePosition))
+		{
+			CTile* tileUnderMouse = CSceneManager::GetTileInScene(mousePosition);
+			if (tileUnderMouse->GetUnitOnTile() != nullptr)
+			{
+				UpdateSidePanelInfo(tileUnderMouse->GetUnitOnTile());
+			}
+			else
+			{
+				UpdateSidePanelInfo();
+			}
+
+			if (m_eCurrentUIMouseState == CUIEnums::MOUSESTATE::MOVE && m_pSelectedUnit != nullptr)
+			{
+				//Need to rethink the structure of the managers
+				if (tileUnderMouse != nullptr)
+				{
+					CSceneEnums::TILETYPE tileType = tileUnderMouse->GetTileType();
+					CTerrainEffects* tileEffects = CUnitManager::ResolveTerrainEffects(m_pSelectedUnit->GetType(), tileType);
+					float moveMod = tileEffects->GetModifierMovement();
+					COverlayManager::UpdateMoveMod(mousePosition, moveMod, true);
+				}
+			}
+			COverlayManager::Update(mousePosition);
 		}
 		else
 		{
 			UpdateSidePanelInfo();
 		}
+	}
 
-		if (m_eCurrentUIMouseState == CUIEnums::MOUSESTATE::MOVE && m_pSelectedUnit != nullptr)
-		{
-			//Need to rethink the structure of the managers
-			if (tileUnderMouse != nullptr)
-			{
-				CSceneEnums::TILETYPE tileType = tileUnderMouse->GetTileType();
-				CTerrainEffects* tileEffects = CUnitManager::ResolveTerrainEffects(m_pSelectedUnit->GetType(), tileType);
-				float moveMod = tileEffects->GetModifierMovement();
-				COverlayManager::UpdateMoveMod(mousePosition, moveMod, true);
-			}
-		}
-		COverlayManager::Update(mousePosition);
-	}
-	else
-	{
-		UpdateSidePanelInfo();
-	}
-	
-	return false;
+	CUnitManager::Update(_inElapsedTime);
+
+	return true;
 }
 
 /// <summary>
@@ -294,11 +303,11 @@ void CGameManager::SwitchTurns()
 		{
 			m_eCurrentTurn = ((m_eCurrentTurn == CUIEnums::TURN::BLUE) ? (CUIEnums::TURN::RED) : (CUIEnums::TURN::BLUE));
 			CUnitManager::SwitchTurns();
-			if (m_bAIEnabled && m_eCurrentTurn == CUIEnums::TURN::RED)
+			/*if (m_bAIEnabled && m_eCurrentTurn == CUIEnums::TURN::RED)
 			{
 				CAI_Controller::StartAITurn();
 				SwitchTurns();
-			}
+			}*/
 			break;
 		}
 		default:
