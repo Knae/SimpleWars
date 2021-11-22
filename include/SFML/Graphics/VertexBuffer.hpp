@@ -145,7 +145,7 @@ public:
     std::size_t getVertexCount() const;
 
     ////////////////////////////////////////////////////////////
-    /// \brief Update the whole buffer from an array of vertices
+    /// \brief UpdateInfoDisplay the whole buffer from an array of vertices
     ///
     /// The \a vertex array is assumed to have the same size as
     /// the \a created buffer.
@@ -165,7 +165,7 @@ public:
     bool update(const Vertex* vertices);
 
     ////////////////////////////////////////////////////////////
-    /// \brief Update a part of the buffer from an array of vertices
+    /// \brief UpdateInfoDisplay a part of the buffer from an array of vertices
     ///
     /// \p offset is specified as the number of vertices to skip
     /// from the beginning of the buffer.

@@ -59,7 +59,7 @@ public:
 	//====================================
 	//UI management related
 	//====================================
-	virtual void UpdateDebugWorld() { m_refDebug.DisplayWindow(); };
+	virtual void UpdateDebugWorld();
 
 private:
 	CGameManager();
@@ -67,6 +67,7 @@ private:
 	void operator=(CGameManager const&) = delete;
 
 	bool CheckIfMouseOverTile(sf::Vector2f _inPosition);
+	void ProcessUnitAsDead(CUnit* _inUnit);
 
 	const sf::Vector2u m_GameWindowSize_Default = sf::Vector2u(1024, 576);
 	std::string m_strMountainVillageConfig= "configs/maps/MountainVillage.ini";

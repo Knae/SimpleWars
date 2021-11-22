@@ -1,5 +1,20 @@
 #include "CGameManager.h"
 
+void CGameManager::UpdateDebugWorld()
+{
+	m_refDebug.Update();
+	CUnit* unitMarkedForDeath = m_refDebug.GetUnitToDestoy();
+	if (unitMarkedForDeath != nullptr)
+	{
+		if (m_pSelectedUnit == unitMarkedForDeath)
+		{
+			m_pSelectedUnit = nullptr;
+		}
+		ProcessUnitAsDead(unitMarkedForDeath);
+	}
+	m_refDebug.DisplayWindow();
+}
+
 CGameManager::CGameManager()
 {
 	m_GameWindowSize_Current = m_GameWindowSize_Default;
@@ -131,7 +146,7 @@ bool CGameManager::UpdateManagers(double& _inElapsedTime)
 		CUIManager::SetCurrentTurn(m_eCurrentTurn);
 	}
 
-	if (!CUnitManager::CheckIfAnyUnitsLeft(CParseConfigCommon::Convert(m_eCurrentTurn)) && m_bExecutingActions)
+	if (m_eCurrentState == CUIEnums::GAMESTATE::GAMELOOP && !CUnitManager::CheckIfAnyUnitsLeft(CParseConfigCommon::Convert(m_eCurrentTurn))/* && m_bExecutingActions*/)
 	{
 		//GameEnds
 		std::cout << "\nAll Enemy units  have died!" << std::endl;
@@ -443,7 +458,7 @@ void CGameManager::ProcessMouseClick()
 								newUnit->SetLocation(mousePosition);
 								newUnit->SetCurrentTileType(m_pSceneMgr->GetCurrentScene()->GetTileType(mousePosition));
 
-								//Update number of units placed
+								//UpdateInfoDisplay number of units placed
 								(element->second)--;
 
 								clickedTile = nullptr;
@@ -586,12 +601,12 @@ void CGameManager::ProcessMouseClick()
 										//m_pSelectedUnit->SetHasAttacked();
 										CUnitManager::Attack(m_pSelectedUnit, targetUnit);
 										CUIManager::SetCurrentUnitHasAttacked(true);
+										//If the target is destroyed, set the tile to have no
+										//units. UnitManager should be doing this
 										if (targetUnit->GetHP() <= 0)
 										{
 											std::cout << "\nTarget was destroyed!" << std::endl;
-											targetUnit->ExplodeInFlamingGlory();
-											sf::Vector2u targetTilePosition = targetUnit->GetCurrentTile();
-											CSceneManager::GetTileInScene(targetTilePosition)->UnitLeavesTile();
+											ProcessUnitAsDead(targetUnit);
 										}
 										CUIManager::SetCurrentMouseState(CUIEnums::MOUSESTATE::SELECT);
 										COverlayManager::ClearRangeOverlay();
@@ -685,8 +700,8 @@ void CGameManager::UpdateSidePanelInfo(	CUnit* _inViewedUnit)
 										selectedUnitTerrain,
 										viewedUnitTerrain);
 
-		//Update the debug window as well
-		m_refDebug.Update(m_pSelectedUnit);
+		//UpdateInfoDisplay the debug window as well
+		m_refDebug.UpdateInfoDisplay(m_pSelectedUnit);
 	}
 }
 
@@ -700,4 +715,11 @@ bool CGameManager::CheckIfMouseOverTile(sf::Vector2f _inPosition)
 	{
 		return false;
 	}
+}
+
+void CGameManager::ProcessUnitAsDead(CUnit* _inUnit)
+{
+	_inUnit->ExplodeInFlamingGlory();
+	sf::Vector2u targetTilePosition = _inUnit->GetCurrentTile();
+	CSceneManager::GetTileInScene(targetTilePosition)->UnitLeavesTile();
 }

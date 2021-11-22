@@ -47,7 +47,7 @@ void CUnit::SetLocation(sf::Vector2f _inPosition)
 }
 
 /// <summary>
-/// Update Function
+/// UpdateInfoDisplay Function
 /// Intended for updating animation frames
 /// </summary>
 void CUnit::Update()

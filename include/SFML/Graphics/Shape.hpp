@@ -277,25 +277,25 @@ private:
     virtual void draw(RenderTarget& target, RenderStates states) const;
 
     ////////////////////////////////////////////////////////////
-    /// \brief Update the fill vertices' color
+    /// \brief UpdateInfoDisplay the fill vertices' color
     ///
     ////////////////////////////////////////////////////////////
     void updateFillColors();
 
     ////////////////////////////////////////////////////////////
-    /// \brief Update the fill vertices' texture coordinates
+    /// \brief UpdateInfoDisplay the fill vertices' texture coordinates
     ///
     ////////////////////////////////////////////////////////////
     void updateTexCoords();
 
     ////////////////////////////////////////////////////////////
-    /// \brief Update the outline vertices' position
+    /// \brief UpdateInfoDisplay the outline vertices' position
     ///
     ////////////////////////////////////////////////////////////
     void updateOutline();
 
     ////////////////////////////////////////////////////////////
-    /// \brief Update the outline vertices' color
+    /// \brief UpdateInfoDisplay the outline vertices' color
     ///
     ////////////////////////////////////////////////////////////
     void updateOutlineColors();

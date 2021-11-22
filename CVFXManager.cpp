@@ -97,7 +97,7 @@ bool CVFXManager::Display(sf::RenderWindow& _inWindow, double& _inElapsedTime)
 }
 
 /// <summary>
-/// Update the animation frame of the VFX sprite
+/// UpdateInfoDisplay the animation frame of the VFX sprite
 /// </summary>
 /// <param name="_inElapsedTime"></param>
 /// <returns></returns>

@@ -7,6 +7,7 @@ std::vector<sf::Sprite*> CUIManager::m_vecOverlays;
 std::vector<sf::Text*> CUIManager::m_vecText_UnitPlacementPanel;
 std::vector<int*> CUIManager::m_vecText_DisplayVariables;
 sf::RenderTexture* CUIManager::m_pPanelBackground;
+sf::Texture* CUIManager::m_pEmblemTexture;
 sf::Texture* CUIManager::m_pButtonUnitTexture;
 sf::Texture* CUIManager::m_pEmptyUnitPortrait;
 sf::Texture* CUIManager::m_pButtonsGameLoop;
@@ -49,12 +50,14 @@ const std::string CUIManager::m_strTileSelectorSpriteMap("assets/spritemaps/tile
 const std::string CUIManager::m_strFinishButtonSprite("assets/spritemaps/FinishButton.png");
 const sf::IntRect CUIManager::m_ButtonUnitRect_Blue({ 0, 0, 32, 32 });
 const sf::IntRect CUIManager::m_ButtonUnitRect_Red({ 0, 32, 32, 32 });
+const sf::IntRect CUIManager::m_ButtonFactionEmblem({ 0, 0, 32, 32 });
 const sf::IntRect CUIManager::m_ButtonGameLoop({ 0, 0, 64, 32 });
 
 CUIManager::CUIManager()
 {
 	m_pPanelBackground = nullptr;
 	m_pSpriteBackground = nullptr;
+	m_pEmblemTexture = nullptr;
 	m_pButtonUnitTexture = nullptr;
 	m_pEmptyUnitPortrait = nullptr;
 	m_pButtonsGameLoop = nullptr;
@@ -76,6 +79,7 @@ CUIManager::~CUIManager()
 
 	delete m_pPanelBackground;
 	delete m_pSpriteBackground;
+	delete m_pEmblemTexture;
 	delete m_pButtonUnitTexture;
 	delete m_pEmptyUnitPortrait;
 	delete m_pButtonsGameLoop;
@@ -83,6 +87,7 @@ CUIManager::~CUIManager()
 
 	m_pPanelBackground = nullptr;
 	m_pSpriteBackground = nullptr;
+	m_pEmblemTexture = nullptr;
 	m_pButtonUnitTexture = nullptr;
 	m_pEmptyUnitPortrait = nullptr;
 	m_pButtonsGameLoop = nullptr;
@@ -110,6 +115,12 @@ bool CUIManager::IntializeUI(sf::Vector2u _inWindowSize, sf::Font* _inFont, cons
 		m_pSpriteBackground = nullptr;
 	}
 
+	if (m_pEmblemTexture != nullptr)
+	{
+		delete m_pEmblemTexture;
+		m_pEmblemTexture = nullptr;
+	}
+
 	if (m_pButtonUnitTexture != nullptr)
 	{
 		delete m_pButtonUnitTexture;
@@ -132,6 +143,13 @@ bool CUIManager::IntializeUI(sf::Vector2u _inWindowSize, sf::Font* _inFont, cons
 	{
 		delete m_pEmptyUnitPortrait;
 		m_pEmptyUnitPortrait = nullptr;
+	}
+
+	m_pEmblemTexture = new sf::Texture;
+	if (!m_pEmblemTexture->loadFromFile(m_strEmblemSpriteMap))
+	{
+		std::cout << "\nUnable to initialize textures for faction emblems.\n" << std::endl;
+		return false;
 	}
 
 	m_pButtonUnitTexture = new sf::Texture;
@@ -211,7 +229,7 @@ bool CUIManager::IntializeUI(sf::Vector2u _inWindowSize, sf::Font* _inFont, cons
 }
 
 /// <summary>
-/// Update the visual elements in the control panel.
+/// UpdateInfoDisplay the visual elements in the control panel.
 /// </summary>
 void CUIManager::UpdateUI()
 {
@@ -333,7 +351,7 @@ void CUIManager::UpdateUI()
 }
 
 /// <summary>
-/// Update and then display the UI elements
+/// UpdateInfoDisplay and then display the UI elements
 /// </summary>
 /// <param name="_inWindow"></param>
 void CUIManager::DisplayUI(sf::RenderWindow& _inWindow)
@@ -665,6 +683,7 @@ bool CUIManager::UpdateInfoDisplay(	CUnit* _inSelectedUnit,
 	{
 		m_eCurrentUnitSide = _inSelectedUnit->GetSide();
 		CUnitEnums::TYPE selectedUnitType = _inSelectedUnit->GetType();
+		CUnitEnums::FACTION selectUnitFaction = _inSelectedUnit->GetFaction();
 
 		if (selectedUnitType != CUnitEnums::TYPE::NONE)
 		{
@@ -711,14 +730,42 @@ bool CUIManager::UpdateInfoDisplay(	CUnit* _inSelectedUnit,
 				}
 			}
 			m_vecButtons_ControlPanel[6]->setTextureRect(currentRect);
+
+			currentRect = m_ButtonFactionEmblem;
+			switch (selectUnitFaction)	
+			{
+				case CUnitEnums::FACTION::TALONS:
+				{
+					break;
+				}
+				case CUnitEnums::FACTION::URSINE:
+				{
+					currentRect.left += 32;
+					break;
+				}
+				case CUnitEnums::FACTION::LYNXES:
+				{
+					currentRect.left += 64;
+					break;
+				}
+				case CUnitEnums::FACTION::NONE:
+				default:
+					break;
+			}
+
+			m_vecButtons_ControlPanel[4]->setTexture(*m_pEmblemTexture);
+			m_vecButtons_ControlPanel[4]->setTextureRect(currentRect);
 		}
 		else
 		{
+			m_vecButtons_ControlPanel[4]->setTexture(*m_pEmptyUnitPortrait);
+			m_vecButtons_ControlPanel[4]->setTextureRect(m_ButtonUnitRect_Blue);
+
 			m_vecButtons_ControlPanel[6]->setTexture(*m_pEmptyUnitPortrait);
 			m_vecButtons_ControlPanel[6]->setTextureRect(m_ButtonUnitRect_Blue);
 		}
 
-		//Update unit stats if applicable
+		//UpdateInfoDisplay unit stats if applicable
 		float valueToUpdate = 0.0f;
 		float value2 = 0.0f;
 		int intToUpdate = 0;

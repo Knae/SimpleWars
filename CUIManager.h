@@ -82,12 +82,14 @@ private:
 	static const sf::IntRect m_ButtonUnitRect_Blue;
 	static const sf::IntRect m_ButtonUnitRect_Red;
 	static const sf::IntRect m_ButtonGameLoop;
+	static const sf::IntRect m_ButtonFactionEmblem;
 
 	static std::vector<sf::Sprite*> m_vecButtons_ControlPanel;
 	static std::vector<sf::Sprite*> m_vecOverlays;
 	static std::vector<sf::Text*> m_vecText_UnitPlacementPanel;
 	static std::vector<int*> m_vecText_DisplayVariables;
 	static sf::RenderTexture* m_pPanelBackground;
+	static sf::Texture* m_pEmblemTexture;
 	static sf::Texture* m_pButtonUnitTexture;
 	static sf::Texture* m_pEmptyUnitPortrait;
 	static sf::Texture* m_pButtonsGameLoop;

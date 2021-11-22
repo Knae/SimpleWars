@@ -145,6 +145,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="CAI.cpp" />
     <ClCompile Include="CButton.cpp" />
     <ClCompile Include="CDebug.cpp" />
     <ClCompile Include="CGameManager.cpp" />
@@ -161,6 +162,7 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CAI.h" />
     <ClInclude Include="CButton.h" />
     <ClInclude Include="CDebug.h" />
     <ClInclude Include="CGameManager.h" />

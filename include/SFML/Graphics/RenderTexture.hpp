@@ -196,7 +196,7 @@ public:
     bool setActive(bool active = true);
 
     ////////////////////////////////////////////////////////////
-    /// \brief Update the contents of the target texture
+    /// \brief UpdateInfoDisplay the contents of the target texture
     ///
     /// This function updates the target texture with what
     /// has been drawn so far. Like for windows, calling this
