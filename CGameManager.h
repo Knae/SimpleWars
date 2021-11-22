@@ -10,6 +10,7 @@
 #include "CSceneManager.h"
 #include "CDebug.h"
 #include "CUnitManager.h"
+#include "CAI_Controller.h"
 #include "COverlayManager.h"
 #include "CParseConfigCommon.h"
 
@@ -89,6 +90,7 @@ private:
 	bool m_bExecutingActions;
 	bool m_bAttackOverlayShown;
 	bool m_bWaitingForClick;
+	bool m_bAIEnabled;
 
 	CUIEnums::TURN m_eCurrentTurn;
 	CUIEnums::GAMESTATE m_eCurrentState;

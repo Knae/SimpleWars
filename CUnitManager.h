@@ -19,7 +19,7 @@
 class CUnitManager : public CParseConfigCommon
 {
 public:
-	virtual ~CUnitManager();
+	~CUnitManager();
 
 	static CUnitManager& GetRef() { static CUnitManager m_umThis; return m_umThis; }
 
@@ -30,11 +30,14 @@ public:
 	static bool MoveUnit(CUnit* _inUnit, sf::Vector2f _inPosition, CSceneEnums::TILETYPE _inTile);
 	static bool Attack(CUnit* _inAttackinUnit, CUnit* _inDefendingUnits);
 	static int GetUnitRange(CUnit* _inUnit);
+
 	static void ClearUnits();
 	static void Update(double& _inElapsedTime);
 	static bool CheckIfAnyUnitsLeft(CUnitEnums::SIDE _inSide);
 	static void SwitchTurns();
 	static CTerrainEffects* ResolveTerrainEffects(const CUnitEnums::TYPE _inType, const CSceneEnums::TILETYPE _inTile);
+	static std::vector<CUnit*>* GetUnits_Blue() { return &m_vecCurrentUnits_Blue; }
+	static std::vector<CUnit*>* GetUnits_Red() { return &m_vecCurrentUnits_Red; }
 
 private:
 

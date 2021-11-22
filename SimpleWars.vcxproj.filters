@@ -75,20 +75,20 @@
     <ClCompile Include="CVFXManager.cpp">
       <Filter>Source Files\Systems</Filter>
     </ClCompile>
-    <ClCompile Include="CParseConfigCommon.cpp">
-      <Filter>Source Files\Helpers</Filter>
-    </ClCompile>
     <ClCompile Include="CButton.cpp">
       <Filter>Source Files\Helpers</Filter>
     </ClCompile>
-    <ClCompile Include="CInfoTextDisplay.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="CDebug.cpp">
+      <Filter>Source Files\Systems</Filter>
+    </ClCompile>
+    <ClCompile Include="CInfoTextDisplay.cpp">
+      <Filter>Source Files\Systems</Filter>
+    </ClCompile>
+    <ClCompile Include="CAI_Controller.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="CAI.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="CParseConfigCommon.cpp">
+      <Filter>Source Files\Systems</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -128,9 +128,6 @@
     <ClInclude Include="CVFXManager.h">
       <Filter>Header Files\Systems</Filter>
     </ClInclude>
-    <ClInclude Include="CParseConfigCommon.h">
-      <Filter>Header Files\Helpers</Filter>
-    </ClInclude>
     <ClInclude Include="CTerrainEffects.h">
       <Filter>Header Files\Helpers</Filter>
     </ClInclude>
@@ -138,13 +135,16 @@
       <Filter>Header Files\Helpers</Filter>
     </ClInclude>
     <ClInclude Include="CInfoTextDisplay.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Systems</Filter>
     </ClInclude>
     <ClInclude Include="CDebug.h">
+      <Filter>Header Files\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="CAI_Controller.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="CAI.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="CParseConfigCommon.h">
+      <Filter>Header Files\Systems</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

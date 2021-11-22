@@ -36,6 +36,7 @@ CGameManager::CGameManager()
 	m_bAttackOverlayShown = false;
 	m_bExecutingActions = false;
 	m_bWaitingForClick = false;
+	m_bAIEnabled = true;
 }
 
 CGameManager::~CGameManager()
@@ -201,11 +202,28 @@ bool CGameManager::ChangeCurrentState(CUIEnums::GAMESTATE _inState)
 
 	switch (m_eCurrentState)
 	{
-		case CUIEnums::GAMESTATE::MAPSELECTION:
+		case CUIEnums::GAMESTATE::MODE:
 		{
 			CSceneManager::GetCurrentScene()->ResetTiles();
 			CUIManager::ResetChecks();
 			ClearUnitsToPlace();
+			ChangeCurrentState(CUIEnums::GAMESTATE::FACTION);
+			break;
+		}
+		case CUIEnums::GAMESTATE::FACTION:
+		{
+			//CSceneManager::GetCurrentScene()->ResetTiles();
+			//CUIManager::ResetChecks();
+			//ClearUnitsToPlace();
+			ChangeCurrentState(CUIEnums::GAMESTATE::MAPSELECTION);
+			break;
+		}
+		case CUIEnums::GAMESTATE::MAPSELECTION:
+		{
+			//CSceneManager::GetCurrentScene()->ResetTiles();
+			//CUIManager::ResetChecks();
+			//ClearUnitsToPlace();
+			ChangeCurrentState(CUIEnums::GAMESTATE::UNITPLACEMENT);
 			break;
 		}
 		case CUIEnums::GAMESTATE::UNITPLACEMENT:
@@ -222,6 +240,10 @@ bool CGameManager::ChangeCurrentState(CUIEnums::GAMESTATE _inState)
 		}
 		case CUIEnums::GAMESTATE::GAMELOOP:
 		{
+			if (m_bAIEnabled)
+			{
+				CAI_Controller::IntializeAi(CUnitManager::GetUnits_Red(),CUnitManager::GetUnits_Blue());
+			}
 			m_eCurrentTurn = CUIEnums::TURN::BLUE;
 			SetUIToGameLoop();
 			break;
@@ -253,6 +275,7 @@ void CGameManager::SwitchTurns()
 		{
 			if (m_eCurrentTurn == CUIEnums::TURN::BLUE)
 			{
+				//if(!m_bAIEnabled)
 				m_pUnitsToPlace = &m_mapUnitsToPlaced_R;
 				m_eCurrentTurn = CUIEnums::TURN::RED;
 				int* infantryAmount = &(m_pUnitsToPlace->find(CUnitEnums::TYPE::INFANTRY)->second);
@@ -271,6 +294,11 @@ void CGameManager::SwitchTurns()
 		{
 			m_eCurrentTurn = ((m_eCurrentTurn == CUIEnums::TURN::BLUE) ? (CUIEnums::TURN::RED) : (CUIEnums::TURN::BLUE));
 			CUnitManager::SwitchTurns();
+			if (m_bAIEnabled && m_eCurrentTurn == CUIEnums::TURN::RED)
+			{
+				CAI_Controller::StartAITurn();
+				SwitchTurns();
+			}
 			break;
 		}
 		default:
@@ -596,14 +624,10 @@ void CGameManager::ProcessMouseClick()
 										//target in range
 										std::cout << "\nTile In Range!" << std::endl;
 										std::cout << "\nAttacking target in tile." << std::endl;
-										//float damageCaused = m_pSelectedUnit->GetDamageDealt();
-										//float remainingHP = targetUnit->TakeDamage(damageCaused);
-										//m_pSelectedUnit->SetHasAttacked();
-										CUnitManager::Attack(m_pSelectedUnit, targetUnit);
-										CUIManager::SetCurrentUnitHasAttacked(true);
+
 										//If the target is destroyed, set the tile to have no
 										//units. UnitManager should be doing this
-										if (targetUnit->GetHP() <= 0)
+										if (CUnitManager::Attack(m_pSelectedUnit, targetUnit))
 										{
 											std::cout << "\nTarget was destroyed!" << std::endl;
 											ProcessUnitAsDead(targetUnit);
@@ -637,7 +661,8 @@ void CGameManager::ProcessMouseClick()
 		//ResetAll units, clear map, go back to main menu
 		//ChangeCurrentState(CUIEnums::GAMESTATE::MAPSELECTION);
 		CUnitManager::ClearUnits();
-		ChangeCurrentState(CUIEnums::GAMESTATE::UNITPLACEMENT);
+		ChangeCurrentState(CUIEnums::GAMESTATE::MODE);
+		m_bAIEnabled = false;
 		m_bWaitingForClick = false;
 	}
 	else if (m_bExecutingActions)
@@ -719,7 +744,7 @@ bool CGameManager::CheckIfMouseOverTile(sf::Vector2f _inPosition)
 
 void CGameManager::ProcessUnitAsDead(CUnit* _inUnit)
 {
-	_inUnit->ExplodeInFlamingGlory();
+	//_inUnit->ExplodeInFlamingGlory();
 	sf::Vector2u targetTilePosition = _inUnit->GetCurrentTile();
 	CSceneManager::GetTileInScene(targetTilePosition)->UnitLeavesTile();
 }

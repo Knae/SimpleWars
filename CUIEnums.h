@@ -15,6 +15,8 @@ public:
 	enum class GAMESTATE
 	{
 		NONE,
+		FACTION,
+		MODE,
 		MAPSELECTION,
 		UNITPLACEMENT,
 		GAMELOOP,

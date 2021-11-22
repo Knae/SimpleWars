@@ -479,7 +479,15 @@ bool CUnitManager::Attack(CUnit* _inAttackinUnit, CUnit* _inDefendingUnit)
 	std::cout << "\nDamage dealt: (base damage)" << damageDealt << " * (AttackerTerrainBonus)" << damageDealtModifier << " * (DefenderTerrainBonus)" << damageReceivedModifier;
 	std::cout << "\nTotal: " << totalDamage << ". Defender remaining HP: " << remainingHP << std::endl;
 	_inAttackinUnit->SetHasAttacked();
-	return false;
+	if (remainingHP <= 0)
+	{
+		_inDefendingUnit->ExplodeInFlamingGlory();
+		return true;
+	}
+	else
+	{
+		return false;
+	}
 }
 
 int CUnitManager::GetUnitRange(CUnit* _inUnit)
