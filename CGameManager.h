@@ -8,6 +8,7 @@
 #include <iomanip>
 #include "CUIManager.h"
 #include "CSceneManager.h"
+#include "CDebug.h"
 #include "CUnitManager.h"
 #include "COverlayManager.h"
 #include "CParseConfigCommon.h"
@@ -55,6 +56,10 @@ public:
 	virtual void SetUIToGameLoop();
 	virtual void DisplayUI();
 	virtual void UpdateSidePanelInfo(	CUnit* _inViewedUnit = nullptr);
+	//====================================
+	//UI management related
+	//====================================
+	virtual void UpdateDebugWorld() { m_refDebug.DisplayWindow(); };
 
 private:
 	CGameManager();
@@ -72,6 +77,8 @@ private:
 	CSceneManager* m_pSceneMgr;
 	CUnitManager* m_pUnitMgr;
 	COverlayManager* m_pOverlayMgr;
+	CDebug&  m_refDebug = CDebug::GetRef();
+
 
 	sf::RenderWindow* m_pGameWindow;
 	sf::RenderTexture* m_pGameBackground;

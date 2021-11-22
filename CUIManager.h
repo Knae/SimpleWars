@@ -33,10 +33,10 @@ public:
 	static void SetUpUnitPlacementPanel(int* _inAmountA, int* _inAmountB, int* _inAmountC);
 	static void SetUpGameLoopPanel();
 	static bool UpdateInfoDisplay(
-		CUnit* _inSelectedUnit = nullptr,
-		CUnit* _inViewedUnit = nullptr,
-		CTerrainEffects* _inSelectedUnitTerrain = nullptr,
-		CTerrainEffects* _inViewedUnitTerrain = nullptr
+			CUnit* _inSelectedUnit = nullptr,
+			CUnit* _inViewedUnit = nullptr,
+			CTerrainEffects* _inSelectedUnitTerrain = nullptr,
+			CTerrainEffects* _inViewedUnitTerrain = nullptr
 		);
 		//CUnitEnums::SIDE _inSide = CUnitEnums::SIDE::NONE,
 		//CUnitEnums::FACTION _inFaction = CUnitEnums::FACTION::NONE);

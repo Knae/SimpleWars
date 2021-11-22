@@ -69,8 +69,9 @@ bool CGameManager::IntializeGame()
 	m_pGameWindow->setFramerateLimit(60);
 	CUIManager::IntializeUI(m_pGameWindow->getSize() , m_pFont,m_GameWindowSize_Current.x - 192);
 	m_pGameWindow->clear();
-
 	m_pGameWindow->display();
+
+	m_refDebug.Initialize(m_pFont);
 
 	return true;
 }
@@ -86,7 +87,6 @@ bool CGameManager::IntializeGame()
 /// <param name="_inputUnit"></param>
 /// <param name="_inputOverlay"></param>
 void CGameManager::SetPointersToOtherSystems(CUIManager* _inputUI,
-
 	CSceneManager* _inputSceneMgr,
 	CUnitManager* _inputUnit,
 	COverlayManager* _inputOverlay)
@@ -130,8 +130,6 @@ bool CGameManager::UpdateManagers(double& _inElapsedTime)
 		SwitchTurns();
 		CUIManager::SetCurrentTurn(m_eCurrentTurn);
 	}
-
-
 
 	if (!CUnitManager::CheckIfAnyUnitsLeft(CParseConfigCommon::Convert(m_eCurrentTurn)) && m_bExecutingActions)
 	{
@@ -686,6 +684,9 @@ void CGameManager::UpdateSidePanelInfo(	CUnit* _inViewedUnit)
 										_inViewedUnit,
 										selectedUnitTerrain,
 										viewedUnitTerrain);
+
+		//Update the debug window as well
+		m_refDebug.Update(m_pSelectedUnit);
 	}
 }
 

@@ -11,20 +11,23 @@ CInfoTextDisplay::~CInfoTextDisplay()
 
 void CInfoTextDisplay::Initialize(float _inTopLeftPosX, float _inTopLeftPosY, sf::Font* _inFont, unsigned int _inNumberOfText)
 {
+	
+	m_TopLeftPosition = sf::Vector2f(_inTopLeftPosX, _inTopLeftPosY);
+
 	for (unsigned int i = 0; i < _inNumberOfText; i++)
 	{
 		sf::Text* newLabel = new sf::Text();
 		newLabel->setFont(*_inFont);
-		newLabel->setCharacterSize(m_fFontSize);
-		newLabel->setFillColor(m_fFontColor);
-		newLabel->setPosition(_inTopLeftPosX + 8.0f, _inTopLeftPosY + 8.0f +(16.0f * i));
+		newLabel->setCharacterSize(m_uiFontSize);
+		newLabel->setFillColor(m_FontColor);
+		newLabel->setPosition(m_TopLeftPosition.x + 8.0f, m_TopLeftPosition.y + 8.0f +(16.0f * i));
 		m_vecLabels.push_back(newLabel);
 
 		sf::Text* newValue = new sf::Text();
 		newValue->setFont(*_inFont);
-		newValue->setCharacterSize(m_fFontSize);
-		newValue->setFillColor(m_fFontColor);
-		newValue->setPosition(_inTopLeftPosX + 48.0f, _inTopLeftPosY + 8.0f + (16.0f * i));
+		newValue->setCharacterSize(m_uiFontSize);
+		newValue->setFillColor(m_FontColor);
+		newValue->setPosition(m_TopLeftPosition.x + 48.0f, m_TopLeftPosition.y + 8.0f + (16.0f * i));
 		m_vecValues.push_back(newValue);
 
 		newLabel = nullptr;

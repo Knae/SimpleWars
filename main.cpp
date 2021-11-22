@@ -8,11 +8,13 @@ int main()
 	sf::Clock m_TimeCountUp;
 	sf::Event gameEvents;
 
+	//All these should be done in GameManager instead
 	CGameManager& m_GMRef = CGameManager::GetRef();
 	CSceneManager& m_SMRef = CSceneManager::GetRef();
 	CUIManager& m_UIMRef = CUIManager::GetRef();
 	CUnitManager& m_UnitMRef = CUnitManager::GetRef();
 	COverlayManager& m_OverlayRef = COverlayManager::GetRef();
+	//=======================================================
 
 	m_GMRef.IntializeGame();
 	m_GMRef.SetPointersToOtherSystems(&m_UIMRef, &m_SMRef, &m_UnitMRef, &m_OverlayRef);
@@ -42,6 +44,7 @@ int main()
 		double elapsedTime = (m_TimeCountUp.restart()).asMilliseconds();
 		m_GMRef.UpdateManagers(elapsedTime);
 		m_GMRef.DisplayGameWorld();
+		m_GMRef.UpdateDebugWorld();
 	}
 
 	return 1;

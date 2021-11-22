@@ -2,10 +2,10 @@
 #ifndef  __CINFOTEXTDISPLAY_H__
 #define __CINFOTEXTDISPLAY_H__
 
-
 #include <SFML/Graphics.hpp>
 #include <iostream>
 #include <vector>
+#include "CParseConfigCommon.h"
 class CInfoTextDisplay
 {
 public:
@@ -23,8 +23,8 @@ private:
 	std::vector<sf::Text*> m_vecLabels;
 	std::vector<sf::Text*> m_vecValues;
 
-	const unsigned int m_fFontSize = 12;
-	const sf::Color m_fFontColor = sf::Color::White;
+	const unsigned int m_uiFontSize = 12;
+	const sf::Color m_FontColor = sf::Color::White;
 };
 
 #endif // ! __CINFOTEXTDISPLAY_H__
