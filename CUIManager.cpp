@@ -552,6 +552,7 @@ void CUIManager::SetUpModeSelectionPanel()
 	CButton* newButton = nullptr;
 
 	currentText = new sf::Text;
+	currentText->setString("Select Game Mode:");
 	currentText->setFont(*m_pFont);
 	currentText->setCharacterSize(24);
 	currentText->setFillColor(sf::Color::White);
@@ -568,6 +569,39 @@ void CUIManager::SetUpModeSelectionPanel()
 
 	newButton = new CButton;
 	newButton->Initialize(std::string("Exit"), m_pFont, std::string("Exit"), sf::Vector2f(m_uSceneWidth + 32.0f, 288.0f), 32);
+	m_vecCustomButtons.push_back(newButton);
+
+	newButton = nullptr;
+}
+
+void CUIManager::SetUpMapSelection()
+{
+	ClearUIElements();
+	sf::Text* currentText = nullptr;
+	CButton* newButton = nullptr;
+
+	currentText = new sf::Text;
+	currentText->setString("Select Map:");
+	currentText->setFont(*m_pFont);
+	currentText->setCharacterSize(24);
+	currentText->setFillColor(sf::Color::White);
+	currentText->setPosition(m_uSceneWidth + 32.0f, 8.0f);
+	m_vecText_ControlPanel.push_back(currentText);
+
+	newButton = new CButton;
+	newButton->Initialize(std::string("MountVillage"), m_pFont, std::string("Mountain\nVilage"), sf::Vector2f(m_uSceneWidth + 32.0f, 128.0f), 32);
+	m_vecCustomButtons.push_back(newButton);
+
+	newButton = new CButton;
+	newButton->Initialize(std::string("MountPass"), m_pFont, std::string("Mountain\nPassage"), sf::Vector2f(m_uSceneWidth + 32.0f, 208), 32);
+	m_vecCustomButtons.push_back(newButton);
+
+	newButton = new CButton;
+	newButton->Initialize(std::string("Bridge"), m_pFont, std::string("Bridge\nPass"), sf::Vector2f(m_uSceneWidth + 32.0f, 288.0f), 32);
+	m_vecCustomButtons.push_back(newButton);
+
+	newButton = new CButton;
+	newButton->Initialize(std::string("Back"), m_pFont, std::string("Back"), sf::Vector2f(m_uSceneWidth + 32.0f, 368.0f), 32);
 	m_vecCustomButtons.push_back(newButton);
 
 	newButton = nullptr;

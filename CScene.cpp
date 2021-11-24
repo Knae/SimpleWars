@@ -30,6 +30,9 @@ CScene::~CScene()
 		type.second = nullptr;
 	}
 	m_mapAILocations.clear();
+
+	delete m_pMapTileMap;
+	m_pMapTileMap = nullptr;
 }
 
 /// <summary>

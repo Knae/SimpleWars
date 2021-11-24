@@ -88,7 +88,6 @@ private:
 	COverlayManager* m_pOverlayMgr;
 	CDebug&  m_refDebug = CDebug::GetRef();
 
-
 	sf::RenderWindow* m_pGameWindow;
 	sf::RenderTexture* m_pGameBackground;
 	sf::Sprite* m_pSpriteBackground;

@@ -33,6 +33,7 @@ public:
 	static int	ProcessClickInCtrlPanel(sf::Vector2f& _inCoords);
 	static bool GetCButtonClicked(sf::Vector2f _inPosition, int& _outButtonIndex);
 	static void SetUpModeSelectionPanel();
+	static void SetUpMapSelection();
 	static void SetUpUnitPlacementPanel(int* _inAmountA, int* _inAmountB, int* _inAmountC);
 	static void SetUpGameLoopPanel();
 	static bool UpdateInfoDisplay(

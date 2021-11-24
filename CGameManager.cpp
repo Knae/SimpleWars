@@ -269,9 +269,10 @@ bool CGameManager::ChangeCurrentState(CUIEnums::GAMESTATE _inState)
 		case CUIEnums::GAMESTATE::MAPSELECTION:
 		{
 			//CSceneManager::GetCurrentScene()->ResetTiles();
-			//CUIManager::ResetChecks();
+			CUIManager::ResetChecks();
 			//ClearUnitsToPlace();
-			ChangeCurrentState(CUIEnums::GAMESTATE::UNITPLACEMENT);
+			//ChangeCurrentState(CUIEnums::GAMESTATE::UNITPLACEMENT);
+			SetUIToMapSelection();
 			break;
 		}
 		case CUIEnums::GAMESTATE::UNITPLACEMENT:
@@ -503,6 +504,27 @@ void CGameManager::ProcessMouseClick()
 					{
 						DestroyGameWorld();
 					}
+					break;
+				}
+				case CUIEnums::GAMESTATE::MAPSELECTION:
+				{
+					if (buttonIndex == 0)
+					{
+						m_eCurrentSelectedMap = CSceneEnums::SCENETYPE::MOUNTAINVILLAGE;
+					}
+					else if (buttonIndex == 1)
+					{
+						m_eCurrentSelectedMap = CSceneEnums::SCENETYPE::MOUNTAINPASS;
+					}
+					else if (buttonIndex == 2)
+					{
+						m_eCurrentSelectedMap = CSceneEnums::SCENETYPE::BRIDGE;
+					}
+					else if (buttonIndex == 3)
+					{
+						ChangeCurrentState(CUIEnums::GAMESTATE::MAPSELECTION);
+					}
+					ChangeCurrentState(CUIEnums::GAMESTATE::UNITPLACEMENT);
 					break;
 				}
 				case CUIEnums::GAMESTATE::UNITPLACEMENT:
@@ -808,7 +830,9 @@ void CGameManager::SetUIToModeSelection()
 
 void CGameManager::SetUIToMapSelection()
 {
-
+	CUIManager::SetUpMapSelection();
+	CUIManager::SetCurrentGameState(m_eCurrentState);
+	CUIManager::SetCurrentTurn(m_eCurrentTurn);
 }
 
 /// <summary>

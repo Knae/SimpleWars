@@ -18,8 +18,10 @@ COverlayManager::COverlayManager()
 COverlayManager::~COverlayManager()
 {
 	delete m_pOverlayTexture;
+	delete m_pMoveCostMod;
 
 	m_pOverlayTexture = nullptr;
+	m_pMoveCostMod = nullptr;
 
 	ClearTileOverlays();
 }
@@ -100,7 +102,7 @@ void COverlayManager::ClearTileOverlays()
 		element = nullptr;
 	}
 	m_vecOverlayTileSelector.clear();
-	m_mapSpriteRect.clear();
+	//m_mapSpriteRect.clear();
 }
 
 /// <summary>
