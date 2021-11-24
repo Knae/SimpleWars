@@ -277,9 +277,6 @@ bool CGameManager::ChangeCurrentState(CUIEnums::GAMESTATE _inState)
 		}
 		case CUIEnums::GAMESTATE::UNITPLACEMENT:
 		{
-			//CSceneManager::GetCurrentScene()->ResetTiles();	//for testing, skipping map selection
-			//CUIManager::ResetChecks();						//This too
-			//ClearUnitsToPlace();							//Same for this line. Delete after
 			LoadScene(m_eCurrentSelectedMap);
 			//Set up for the first player to place units
 			m_eCurrentTurn = CUIEnums::TURN::BLUE;
@@ -309,6 +306,7 @@ bool CGameManager::ChangeCurrentState(CUIEnums::GAMESTATE _inState)
 		}
 		case CUIEnums::GAMESTATE::GAMEEND:
 		{
+			COverlayManager::ClearTileOverlays();
 			m_eCurrentState = CUIEnums::GAMESTATE::GAMEEND;
 			m_bWaitingForClick = true;
 			break;
@@ -422,6 +420,7 @@ bool CGameManager::LoadScene(CSceneEnums::SCENETYPE _inScene)
 		}
 		case CSceneEnums::SCENETYPE::BRIDGE:
 		{
+			configPath = m_strBridgeConfig;
 			break;
 		}
 		case CSceneEnums::SCENETYPE::NONE:
@@ -434,7 +433,7 @@ bool CGameManager::LoadScene(CSceneEnums::SCENETYPE _inScene)
 	if (CSceneManager::CreateScene(configPath))
 	{
 		std::cout << "\nSuccesfully loaded selected map." << std::endl;
-		//COverlayManager::InitializeOverlays(m_strUnitConfig, m_pFont, CSceneManager::GetTileSize() );
+		COverlayManager::InitializeOverlays(m_strUnitConfig, m_pFont, CSceneManager::GetTileSize() );
 		//ChangeCurrentState(CUIEnums::GAMESTATE::UNITPLACEMENT);
 		return true;
 	}
@@ -1007,6 +1006,10 @@ void CGameManager::ParseGameSettings()
 					else if (currentType.compare("MountainPass") == 0)
 					{
 						m_strMountainPassConfig = currentValue;
+					}
+					else if (currentType.compare("Bridge") == 0)
+					{
+						m_strBridgeConfig = currentValue;
 					}
 					std::getline(gameSettings, currentLine);
 				}

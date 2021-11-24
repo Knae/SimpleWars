@@ -102,7 +102,7 @@ void COverlayManager::ClearTileOverlays()
 		element = nullptr;
 	}
 	m_vecOverlayTileSelector.clear();
-	//m_mapSpriteRect.clear();
+	m_mapSpriteRect.clear();
 }
 
 /// <summary>

@@ -80,6 +80,7 @@ private:
 	std::string m_strMainMenuConfig = "configs/maps/MainMenu.ini";
 	std::string m_strMountainVillageConfig= "configs/maps/MountainVillage.ini";
 	std::string m_strMountainPassConfig = "configs/maps/MountainPass.ini";
+	std::string m_strBridgeConfig = "configs/maps/Bridge.ini";
 	std::string m_strUnitConfig = "configs/units/BaseSettings.ini";
 	std::string m_strFactionConfig = "configs/factions.ini";
 	
