@@ -522,7 +522,8 @@ void CGameManager::ProcessMouseClick()
 					}
 					else if (buttonIndex == 3)
 					{
-						ChangeCurrentState(CUIEnums::GAMESTATE::MAPSELECTION);
+						ChangeCurrentState(CUIEnums::GAMESTATE::MODE);
+						break;
 					}
 					ChangeCurrentState(CUIEnums::GAMESTATE::UNITPLACEMENT);
 					break;

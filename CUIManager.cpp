@@ -444,6 +444,7 @@ bool CUIManager::ProcessClick(sf::Vector2f& _inCoords, int& _outIndex)
 		switch (m_eCurrentUIState)
 		{
 			case CUIEnums::GAMESTATE::MODE:
+			case CUIEnums::GAMESTATE::MAPSELECTION:
 			{
 				return GetCButtonClicked(_inCoords, _outIndex);
 				break;
@@ -552,7 +553,7 @@ void CUIManager::SetUpModeSelectionPanel()
 	CButton* newButton = nullptr;
 
 	currentText = new sf::Text;
-	currentText->setString("Select Game Mode:");
+	currentText->setString("Select\nGame Mode:");
 	currentText->setFont(*m_pFont);
 	currentText->setCharacterSize(24);
 	currentText->setFillColor(sf::Color::White);
