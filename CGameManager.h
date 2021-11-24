@@ -79,6 +79,7 @@ private:
 	std::string m_strFontFile = "font/OpenSans-Regular.ttf";
 	std::string m_strMainMenuConfig = "configs/maps/MainMenu.ini";
 	std::string m_strMountainVillageConfig= "configs/maps/MountainVillage.ini";
+	std::string m_strMountainPassConfig = "configs/maps/MountainPass.ini";
 	std::string m_strUnitConfig = "configs/units/BaseSettings.ini";
 	std::string m_strFactionConfig = "configs/factions.ini";
 	
@@ -108,6 +109,9 @@ private:
 	CUIEnums::MOUSESTATE m_eCurrentUIMouseState;
 	CUnitEnums::TYPE m_eCurrentTypeChosen;
 	CUnit* m_pSelectedUnit;
+
+	CUnitEnums::FACTION m_eChosenFaction_Blue;
+	CUnitEnums::FACTION m_eChosenFaction_Red;
 
 	//track number of units to place
 	std::map<CUnitEnums::TYPE, int> m_mapUnitsToPlaced_B;

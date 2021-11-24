@@ -417,6 +417,7 @@ bool CGameManager::LoadScene(CSceneEnums::SCENETYPE _inScene)
 		}
 		case CSceneEnums::SCENETYPE::MOUNTAINPASS:
 		{
+			configPath = m_strMountainPassConfig;
 			break;
 		}
 		case CSceneEnums::SCENETYPE::BRIDGE:
@@ -1002,6 +1003,10 @@ void CGameManager::ParseGameSettings()
 					else if (currentType.compare("MountainVillage") == 0)
 					{
 						m_strMountainVillageConfig = currentValue;
+					}
+					else if (currentType.compare("MountainPass") == 0)
+					{
+						m_strMountainPassConfig = currentValue;
 					}
 					std::getline(gameSettings, currentLine);
 				}
