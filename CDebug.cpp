@@ -173,7 +173,7 @@ void CDebug::Update()
 				//m_pDebugWindow->setVisible(false);
 			}
 
-			if (debugEvent.type == sf::Event::MouseButtonReleased && debugEvent.mouseButton.button == sf::Mouse::Button::Left)
+			if (m_pCurrentUnit!=nullptr && debugEvent.type == sf::Event::MouseButtonReleased && debugEvent.mouseButton.button == sf::Mouse::Button::Left)
 			{
 				sf::Vector2f mousePosition = m_pDebugWindow->mapPixelToCoords(sf::Mouse::getPosition(*m_pDebugWindow));
 				int buttonClicked = isButtonClicked(mousePosition);

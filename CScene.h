@@ -28,13 +28,18 @@ public:
 	virtual CSceneEnums::TILETYPE GetTileType(unsigned int _inX, unsigned int _inY);
 	virtual int GetUnitAmount(CUnitEnums::SIDE _inSide, CUnitEnums::TYPE _inType);
 	virtual void GetUnitsToPlace(std::map<CUnitEnums::TYPE, int>* _inUnitsB, std::map<CUnitEnums::TYPE, int>* _inUnitsR);
-	virtual void PlaceAIUnits();
+	virtual void WriteSpawnAreaDetails(	CUnitEnums::SIDE _inSide,
+										sf::Vector2u& _outLocation,
+										unsigned int& _outAreaWidth,
+										unsigned int& _outAreaHeight);
+	virtual std::map< CUnitEnums::TYPE, std::vector<sf::Vector2u>*>& GetAIUnitLocations();
 	int* GetBaseColourArrayPointer() { return m_iBaseColour; }
 	virtual unsigned int GetSceneWidth_Pixels() { return m_uiMapColumns*m_uiTileWidth; }
 	virtual unsigned int GetSceneHeight_Pixels() { return m_uiMapRows*m_uiTileWidth; }
 	virtual unsigned int GetTileWidth() { return m_uiTileWidth; }
 	virtual CTile* GetTile(sf::Vector2f _inPosition);
 	virtual CTile* GetTile(unsigned int _inX, unsigned int _inY);
+
 private:
 	typedef struct recSpawnArea
 	{
@@ -53,7 +58,7 @@ private:
 
 	std::string m_strTileMapFilePath;
 	std::vector<std::vector<CTile>>* m_pMapTiles;
-	std::map< CUnitEnums::TYPE, std::vector<sf::Vector2u>*> m_AILocations;
+	std::map< CUnitEnums::TYPE, std::vector<sf::Vector2u>*> m_mapAILocations;
 	Spawn m_SpawnBlue;
 	Spawn m_SpawnRed;
 	unsigned int m_uiMapColumns;

@@ -18,7 +18,7 @@ int main()
 
 	m_GMRef.IntializeGame();
 	m_GMRef.SetPointersToOtherSystems(&m_UIMRef, &m_SMRef, &m_UnitMRef, &m_OverlayRef);
-	m_GMRef.LoadScene();
+	//m_GMRef.LoadScene();
 
 	m_TimeCountUp.restart();
 

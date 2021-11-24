@@ -28,6 +28,7 @@ public:
 	void SetHasAttacked()									{ m_bHasAttacked = true; }
 	void SetCurrentTileType(CSceneEnums::TILETYPE _inType)	{ m_eCurrentTileType = _inType; }
 	void SetLocation(sf::Vector2f _inPosition);
+	void SetLocation(sf::Vector2u _inPosition);
 
 	void GetMovementStat(float& _outMoveBase, float& _outMovePoints) {
 		_outMoveBase = m_fMovementPoints_Base;

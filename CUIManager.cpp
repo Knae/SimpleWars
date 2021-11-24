@@ -2,9 +2,10 @@
 #include "CUnit.h"
 #include "CTerrainEffects.h"
 
+std::vector<CButton*> CUIManager::m_vecCustomButtons;
 std::vector<sf::Sprite*> CUIManager::m_vecButtons_ControlPanel;
 std::vector<sf::Sprite*> CUIManager::m_vecOverlays;
-std::vector<sf::Text*> CUIManager::m_vecText_UnitPlacementPanel;
+std::vector<sf::Text*> CUIManager::m_vecText_ControlPanel;
 std::vector<int*> CUIManager::m_vecText_DisplayVariables;
 sf::RenderTexture* CUIManager::m_pPanelBackground;
 sf::Texture* CUIManager::m_pEmblemTexture;
@@ -48,6 +49,7 @@ const std::string CUIManager::m_strEmblemSpriteMap("assets/spritemaps/FactionEmb
 const std::string CUIManager::m_strGameButtonsSpriteMap("assets/spritemaps/GameButtons.png");
 const std::string CUIManager::m_strTileSelectorSpriteMap("assets/spritemaps/tileSelection.png");
 const std::string CUIManager::m_strFinishButtonSprite("assets/spritemaps/FinishButton.png");
+const std::string CUIManager::m_strVictorySprite("assets/spritemaps/DisplaysVictory.png");
 const sf::IntRect CUIManager::m_ButtonUnitRect_Blue({ 0, 0, 32, 32 });
 const sf::IntRect CUIManager::m_ButtonUnitRect_Red({ 0, 32, 32, 32 });
 const sf::IntRect CUIManager::m_ButtonFactionEmblem({ 0, 0, 32, 32 });
@@ -180,7 +182,7 @@ bool CUIManager::IntializeUI(sf::Vector2u _inWindowSize, sf::Font* _inFont, cons
 		return false;
 	}
 
-	if (!m_VictoryTexture.loadFromFile("assets/spritemaps/DisplaysVictory.png"))
+	if (!m_VictoryTexture.loadFromFile(m_strVictorySprite))
 	{
 		std::cout << "\nUnable to initialize textures victory display.\n" << std::endl;
 		return false;
@@ -261,7 +263,7 @@ void CUIManager::UpdateUI()
 		{
 			for (unsigned short i = 0; i < 3; i++)
 			{
-				m_vecText_UnitPlacementPanel[i]->setString(std::to_string(*m_vecText_DisplayVariables[i]) + " unit(s) left\nto place");
+				m_vecText_ControlPanel[i]->setString(std::to_string(*m_vecText_DisplayVariables[i]) + " unit(s) left\nto place");
 			}
 
 			int offsetArray[3] = { 0 };
@@ -358,16 +360,13 @@ void CUIManager::DisplayUI(sf::RenderWindow& _inWindow)
 {
 	UpdateUI();
 	_inWindow.draw(*m_pSpriteBackground);
-	/// <summary>
-	/// TODO: CHECK HERE!
-	/// </summary>
-	/// <param name="_inWindow"></param>
+
 	for (auto& element : m_vecButtons_ControlPanel)
 	{
 		_inWindow.draw(*element);
 	}
 
-	for (auto& element : m_vecText_UnitPlacementPanel)
+	for (auto& element : m_vecText_ControlPanel)
 	{
 		_inWindow.draw(*element);
 	}
@@ -375,6 +374,11 @@ void CUIManager::DisplayUI(sf::RenderWindow& _inWindow)
 	if (m_bDisplayVictory)
 	{
 		_inWindow.draw(m_VictorySprite);
+	}
+
+	for (auto& button : m_vecCustomButtons)
+	{
+		button->Display(_inWindow);
 	}
 
 	if (m_bDisplayInfoText)
@@ -392,13 +396,19 @@ void CUIManager::DisplayUI(sf::RenderWindow& _inWindow)
 /// </summary>
 void CUIManager::ClearUIElements()
 {
+	for (auto& element : m_vecCustomButtons)
+	{
+		delete element;
+		element = nullptr;
+	}
+
 	for (auto& element : m_vecButtons_ControlPanel)
 	{
 		delete element;
 		element = nullptr;
 	}
 
-	for (auto& element : m_vecText_UnitPlacementPanel)
+	for (auto& element : m_vecText_ControlPanel)
 	{
 		delete element;
 		element = nullptr;
@@ -410,8 +420,9 @@ void CUIManager::ClearUIElements()
 		element = nullptr;
 	}
 
+	m_vecCustomButtons.clear();
 	m_vecButtons_ControlPanel.clear();
-	m_vecText_UnitPlacementPanel.clear();
+	m_vecText_ControlPanel.clear();
 	m_vecOverlays.clear();
 
 	m_bDisplayInfoText = false;
@@ -423,16 +434,20 @@ void CUIManager::ClearUIElements()
 /// </summary>
 /// <param name="_inCoords"></param>
 /// <returns>Returns true if click is in the side panel</returns>
-bool CUIManager::ProcessClick(sf::Vector2f& _inCoords)
+bool CUIManager::ProcessClick(sf::Vector2f& _inCoords, int& _outIndex)
 {
 	//If the mouse is this far right, then it's not hovering over any tiles, but is over the
 	//side panel
 	if (_inCoords.x > m_uSceneWidth)
 	{
-
 		int buttonClicked = ProcessClickInCtrlPanel(_inCoords);
 		switch (m_eCurrentUIState)
 		{
+			case CUIEnums::GAMESTATE::MODE:
+			{
+				return GetCButtonClicked(_inCoords, _outIndex);
+				break;
+			}
 			case CUIEnums::GAMESTATE::UNITPLACEMENT:
 			{
 				if (buttonClicked != 3)
@@ -516,6 +531,48 @@ int CUIManager::ProcessClickInCtrlPanel(sf::Vector2f& _inCoords)
 	return -1;
 }
 
+bool CUIManager::GetCButtonClicked(sf::Vector2f _inPosition, int& _outButtonIndex)
+{
+	for (size_t i=0; i<m_vecCustomButtons.size();i++)
+	{
+		if (m_vecCustomButtons[i]->CheckIfClicked(_inPosition))
+		{
+			_outButtonIndex = i;
+			return true;
+		}
+	}
+	_outButtonIndex = 0;
+	return false;
+}
+
+void CUIManager::SetUpModeSelectionPanel()
+{
+	ClearUIElements();
+	sf::Text* currentText = nullptr;
+	CButton* newButton = nullptr;
+
+	currentText = new sf::Text;
+	currentText->setFont(*m_pFont);
+	currentText->setCharacterSize(24);
+	currentText->setFillColor(sf::Color::White);
+	currentText->setPosition(m_uSceneWidth + 32.0f,8.0f);
+	m_vecText_ControlPanel.push_back(currentText);
+
+	newButton = new CButton;
+	newButton->Initialize(std::string("Solo"), m_pFont, std::string("1 Player"), sf::Vector2f(m_uSceneWidth + 32.0f, 128.0f), 32);
+	m_vecCustomButtons.push_back(newButton);
+
+	newButton = new CButton;
+	newButton->Initialize(std::string("Vs"), m_pFont, std::string("2 Players"), sf::Vector2f(m_uSceneWidth + 32.0f, 208), 32);
+	m_vecCustomButtons.push_back(newButton);
+
+	newButton = new CButton;
+	newButton->Initialize(std::string("Exit"), m_pFont, std::string("Exit"), sf::Vector2f(m_uSceneWidth + 32.0f, 288.0f), 32);
+	m_vecCustomButtons.push_back(newButton);
+
+	newButton = nullptr;
+}
+
 /// <summary>
 /// Create the button in the panel for placing units
 /// According to current sprite sheet:
@@ -555,7 +612,7 @@ void CUIManager::SetUpUnitPlacementPanel(int* _inAmountA, int* _inAmountB, int* 
 		currentButtonText->setFillColor(sf::Color::White);
 		currentButtonText->setCharacterSize(16);
 		currentButtonText->setPosition(sf::Vector2f(m_uSceneWidth + 64.0f, 288.0f + (i * 48)));
-		m_vecText_UnitPlacementPanel.push_back(currentButtonText);
+		m_vecText_ControlPanel.push_back(currentButtonText);
 	}
 
 	currentButton = new sf::Sprite;
@@ -568,13 +625,13 @@ void CUIManager::SetUpUnitPlacementPanel(int* _inAmountA, int* _inAmountB, int* 
 	currentText->setFillColor(sf::Color::White);
 	currentText->setCharacterSize(16);
 	currentText->setPosition(sf::Vector2f(m_uSceneWidth + 64.0f, 16.0f));
-	m_vecText_UnitPlacementPanel.push_back(currentText);
+	m_vecText_ControlPanel.push_back(currentText);
 
 	currentText = new sf::Text("Click a unit to select it,\nthen click a tile to place it.\nClick 'Finish' when done", *m_pFont);
 	currentText->setFillColor(sf::Color::White);
 	currentText->setCharacterSize(16);
 	currentText->setPosition(sf::Vector2f((float)(m_uSceneWidth), 464.0f));
-	m_vecText_UnitPlacementPanel.push_back(currentText);
+	m_vecText_ControlPanel.push_back(currentText);
 
 	m_eCurrentUIState = CUIEnums::GAMESTATE::UNITPLACEMENT;
 	m_eCurrentTurn = CUIEnums::TURN::BLUE;
@@ -896,7 +953,7 @@ void CUIManager::VictoryAchieved(CUIEnums::TURN _inSide)
 
 void CUIManager::SwitchTurnForUnitPlacment(int* _inAmountA, int* _inAmountB, int* _inAmountC)
 {
-	m_vecText_UnitPlacementPanel[3]->setString("Red Player");
+	m_vecText_ControlPanel[3]->setString("Red Player");
 
 	for (unsigned short i = 0; i < 3; i++)
 	{

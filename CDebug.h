@@ -20,6 +20,7 @@ public:
 	bool Initialize(sf::Font* _inFont);
 	void Update();
 	void DisplayWindow();
+	sf::RenderWindow* GetWindows() { return m_pDebugWindow; }
 
 	CUnit* GetUnitToDestoy();
 	void UpdateInfoDisplay(CUnit* _inUnit);

@@ -11,9 +11,9 @@ CScene::CScene()
 	m_SpawnRed.m_UpperLeft = sf::Vector2u(0, 0);
 	m_SpawnRed.m_uiHeight = 0;
 	m_SpawnRed.m_uiWidth = 0;
-	m_AILocations.emplace(CUnitEnums::TYPE::INFANTRY,new std::vector<sf::Vector2u>);
-	m_AILocations.emplace(CUnitEnums::TYPE::TANK, new std::vector<sf::Vector2u>);
-	m_AILocations.emplace(CUnitEnums::TYPE::ARTILLERY, new std::vector<sf::Vector2u>);
+	m_mapAILocations.emplace(CUnitEnums::TYPE::INFANTRY,new std::vector<sf::Vector2u>);
+	m_mapAILocations.emplace(CUnitEnums::TYPE::TANK, new std::vector<sf::Vector2u>);
+	m_mapAILocations.emplace(CUnitEnums::TYPE::ARTILLERY, new std::vector<sf::Vector2u>);
 }
 
 CScene::~CScene()
@@ -24,12 +24,12 @@ CScene::~CScene()
 		m_pMapTiles = nullptr;
 	}
 
-	for (auto& type : m_AILocations)
+	for (auto& type : m_mapAILocations)
 	{
 		delete type.second;
 		type.second = nullptr;
 	}
-	m_AILocations.clear();
+	m_mapAILocations.clear();
 }
 
 /// <summary>
@@ -236,7 +236,7 @@ bool CScene::ParseConfig(const std::string& _filePath)
 						ConvertToUnitType(currentLabel, currentType);
 						if (currentType != CUnitEnums::TYPE::NONE)
 						{
-							m_AILocations.find(currentType)->second->push_back(sf::Vector2u(x, y));
+							m_mapAILocations.find(currentType)->second->push_back(sf::Vector2u(x, y));
 						}
 					}
 					else
@@ -445,8 +445,36 @@ void CScene::GetUnitsToPlace(std::map<CUnitEnums::TYPE, int>* _inUnitsB, std::ma
 	}
 }
 
-void CScene::PlaceAIUnits()
+void CScene::WriteSpawnAreaDetails(CUnitEnums::SIDE _inSide, sf::Vector2u& _outLocation, unsigned int& _outAreaWidth, unsigned int& _outAreaHeight)
 {
+	switch (_inSide)
+	{
+		case CUnitEnums::SIDE::BLUE:
+		{
+			_outLocation = m_SpawnBlue.m_UpperLeft;
+			_outAreaWidth = m_SpawnBlue.m_uiWidth;
+			_outAreaHeight = m_SpawnBlue.m_uiHeight;
+			break;
+		}
+		case CUnitEnums::SIDE::RED:
+		{
+			_outLocation = m_SpawnRed.m_UpperLeft;
+			_outAreaWidth = m_SpawnRed.m_uiWidth;
+			_outAreaHeight = m_SpawnRed.m_uiHeight;
+			break;
+		}
+		case CUnitEnums::SIDE::NONE:
+		default:
+		{
+			std::cout << "\nERROR:Requesting spawn details for unknown side" << std::endl;
+			break;
+		}
+	}
+}
+
+std::map< CUnitEnums::TYPE, std::vector<sf::Vector2u>*>& CScene::GetAIUnitLocations()
+{
+	return m_mapAILocations;
 }
 
 CTile* CScene::GetTile(sf::Vector2f _inPosition)

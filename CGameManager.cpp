@@ -36,7 +36,10 @@ CGameManager::CGameManager()
 	m_bAttackOverlayShown = false;
 	m_bExecutingActions = false;
 	m_bWaitingForClick = false;
-	m_bAIEnabled = true;
+	m_bAIEnabled = false;
+
+	m_uiSpawnAreaWidth = 0;
+	m_uiSpawnAreaHeight = 0;
 }
 
 CGameManager::~CGameManager()
@@ -62,8 +65,10 @@ CGameManager::~CGameManager()
 
 bool CGameManager::IntializeGame()
 {
+	ParseGameSettings();
+
 	m_pFont = new sf::Font();
-	if (!m_pFont->loadFromFile("font/OpenSans-Regular.ttf"))
+	if (!m_pFont->loadFromFile(m_strFontFile))
 	{
 		//ERROR: unable to load font file
 		std::cout << "\nERROR: unable to load font file" << std::endl;
@@ -78,12 +83,12 @@ bool CGameManager::IntializeGame()
 							"Simple Wars"
 						);
 
-	m_eCurrentState = CUIEnums::GAMESTATE::NONE;
 	m_eCurrentTurn = CUIEnums::TURN::NONE;
 
 	m_pGameWindow->setVerticalSyncEnabled(false);
-	m_pGameWindow->setFramerateLimit(60);
+	m_pGameWindow->setFramerateLimit(m_uiWindowFrameLimit);
 	CUIManager::IntializeUI(m_pGameWindow->getSize() , m_pFont,m_GameWindowSize_Current.x - 192);
+	ChangeCurrentState(CUIEnums::GAMESTATE::MODE);
 	m_pGameWindow->clear();
 	m_pGameWindow->display();
 
@@ -116,84 +121,114 @@ void CGameManager::SetPointersToOtherSystems(CUIManager* _inputUI,
 bool CGameManager::UpdateManagers(double& _inElapsedTime)
 {
 	sf::Vector2f mousePosition = m_pGameWindow->mapPixelToCoords(sf::Mouse::getPosition(*(m_pGameWindow)));
-	if (m_bAIEnabled && m_eCurrentTurn == CUIEnums::TURN::RED && m_eCurrentState == CUIEnums::GAMESTATE::GAMELOOP)
+
+	if (m_eCurrentState != CUIEnums::GAMESTATE::MODE && m_eCurrentState != CUIEnums::GAMESTATE::MAPSELECTION)
 	{
-		if (CAI_Controller::StartAITurn())
+		if (m_bAIEnabled && m_eCurrentTurn == CUIEnums::TURN::RED /*&& m_eCurrentState == CUIEnums::GAMESTATE::GAMELOOP*/)
 		{
-			SwitchTurns();
-			CUIManager::SetCurrentTurn(m_eCurrentTurn);
-		}
-	}
-	else 
-	{
-		if (CUIManager::GetIfForfeitChosen())
-		{
-			switch (m_eCurrentTurn)
+			if (m_eCurrentState == CUIEnums::GAMESTATE::UNITPLACEMENT)
 			{
-				case CUIEnums::TURN::BLUE:
+				CUnitEnums::SIDE AiController = CUnitEnums::SIDE::RED;
+				std::map< CUnitEnums::TYPE, std::vector<sf::Vector2u>*>& AIUnitLocations = CSceneManager::GetCurrentScene()->GetAIUnitLocations();
+				for (auto& type : AIUnitLocations)
 				{
-					CUIManager::VictoryAchieved(CUIEnums::TURN::RED);
-					break;
+					for (auto& location : (*type.second))
+					{
+						sf::Vector2u unitLocation = location;
+						CUnit* newUnit = CUnitManager::CreateUnit(type.first, CUnitEnums::FACTION::TALONS, AiController);
+						CTile* targetTile = m_pSceneMgr->GetTileInScene(location);
+						targetTile->UnitEntersTile(newUnit);
+						newUnit->SetLocation(location);
+						newUnit->SetCurrentTileType(targetTile->GetTileType());
+					}
 				}
-				case CUIEnums::TURN::RED:
+				SwitchTurns();
+				CUIManager::SetCurrentTurn(m_eCurrentTurn);
+			}
+			else if (m_eCurrentState == CUIEnums::GAMESTATE::GAMELOOP)
+			{
+				if (CAI_Controller::StartAITurn())
 				{
-					CUIManager::VictoryAchieved(CUIEnums::TURN::BLUE);
-					break;
-				}
-				default:
-				case CUIEnums::TURN::NONE:
-				{
-					break;
+					SwitchTurns();
+					CUIManager::SetCurrentTurn(m_eCurrentTurn);
 				}
 			}
-			ChangeCurrentState(CUIEnums::GAMESTATE::GAMEEND);
 		}
-		else if (CUIManager::GetIfTurnEndClicked())
+		else
 		{
-			SwitchTurns();
-			CUIManager::SetCurrentTurn(m_eCurrentTurn);
-		}
-
-		if (m_eCurrentState == CUIEnums::GAMESTATE::GAMELOOP && !CUnitManager::CheckIfAnyUnitsLeft(CParseConfigCommon::Convert(m_eCurrentTurn))/* && m_bExecutingActions*/)
-		{
-			//GameEnds
-			std::cout << "\nAll Enemy units  have died!" << std::endl;
-			m_bExecutingActions = false;
-			CUIManager::VictoryAchieved(m_eCurrentTurn);
-			ChangeCurrentState(CUIEnums::GAMESTATE::GAMEEND);
-		}
-
-		m_eCurrentUIMouseState = CUIManager::GetMouseCurrentState();
-
-		if (CheckIfMouseOverTile(mousePosition))
-		{
-			CTile* tileUnderMouse = CSceneManager::GetTileInScene(mousePosition);
-			if (tileUnderMouse->GetUnitOnTile() != nullptr)
+			if (CUIManager::GetIfForfeitChosen())
 			{
-				UpdateSidePanelInfo(tileUnderMouse->GetUnitOnTile());
+				switch (m_eCurrentTurn)
+				{
+					case CUIEnums::TURN::BLUE:
+					{
+						CUIManager::VictoryAchieved(CUIEnums::TURN::RED);
+						break;
+					}
+					case CUIEnums::TURN::RED:
+					{
+						CUIManager::VictoryAchieved(CUIEnums::TURN::BLUE);
+						break;
+					}
+					default:
+					case CUIEnums::TURN::NONE:
+					{
+						break;
+					}
+				}
+				ChangeCurrentState(CUIEnums::GAMESTATE::GAMEEND);
+			}
+			else if (CUIManager::GetIfTurnEndClicked())
+			{
+				SwitchTurns();
+				CUIManager::SetCurrentTurn(m_eCurrentTurn);
+			}
+
+			if (m_eCurrentState == CUIEnums::GAMESTATE::GAMELOOP && !CUnitManager::CheckIfAnyUnitsLeft(CParseConfigCommon::Convert(m_eCurrentTurn))/* && m_bExecutingActions*/)
+			{
+				//GameEnds
+				std::cout << "\nAll Enemy units  have died!" << std::endl;
+				m_bExecutingActions = false;
+				CUIManager::VictoryAchieved(m_eCurrentTurn);
+				ChangeCurrentState(CUIEnums::GAMESTATE::GAMEEND);
+			}
+
+			m_eCurrentUIMouseState = CUIManager::GetMouseCurrentState();
+
+			if (CheckIfMouseOverTile(mousePosition))
+			{
+				CTile* tileUnderMouse = CSceneManager::GetTileInScene(mousePosition);
+				if (tileUnderMouse->GetUnitOnTile() != nullptr)
+				{
+					UpdateSidePanelInfo(tileUnderMouse->GetUnitOnTile());
+				}
+				else
+				{
+					UpdateSidePanelInfo();
+				}
+
+				if (m_eCurrentUIMouseState == CUIEnums::MOUSESTATE::MOVE && m_pSelectedUnit != nullptr)
+				{
+					//Need to rethink the structure of the managers
+					if (tileUnderMouse != nullptr)
+					{
+						CSceneEnums::TILETYPE tileType = tileUnderMouse->GetTileType();
+						CTerrainEffects* tileEffects = CUnitManager::ResolveTerrainEffects(m_pSelectedUnit->GetType(), tileType);
+						float moveMod = tileEffects->GetModifierMovement();
+						COverlayManager::UpdateMoveMod(mousePosition, moveMod, true);
+					}
+				}
+				COverlayManager::Update(mousePosition);
 			}
 			else
 			{
 				UpdateSidePanelInfo();
 			}
-
-			if (m_eCurrentUIMouseState == CUIEnums::MOUSESTATE::MOVE && m_pSelectedUnit != nullptr)
-			{
-				//Need to rethink the structure of the managers
-				if (tileUnderMouse != nullptr)
-				{
-					CSceneEnums::TILETYPE tileType = tileUnderMouse->GetTileType();
-					CTerrainEffects* tileEffects = CUnitManager::ResolveTerrainEffects(m_pSelectedUnit->GetType(), tileType);
-					float moveMod = tileEffects->GetModifierMovement();
-					COverlayManager::UpdateMoveMod(mousePosition, moveMod, true);
-				}
-			}
-			COverlayManager::Update(mousePosition);
 		}
-		else
-		{
-			UpdateSidePanelInfo();
-		}
+	}
+	else
+	{
+		//not in game loop
 	}
 
 	CUnitManager::Update(_inElapsedTime);
@@ -214,10 +249,13 @@ bool CGameManager::ChangeCurrentState(CUIEnums::GAMESTATE _inState)
 	{
 		case CUIEnums::GAMESTATE::MODE:
 		{
-			CSceneManager::GetCurrentScene()->ResetTiles();
+			//CSceneManager::GetCurrentScene()->ResetTiles();
+			LoadScene(CSceneEnums::SCENETYPE::MAINMENU);
 			CUIManager::ResetChecks();
 			ClearUnitsToPlace();
-			ChangeCurrentState(CUIEnums::GAMESTATE::FACTION);
+			m_eCurrentTurn = CUIEnums::TURN::NONE;
+			SetUIToModeSelection();
+			//ChangeCurrentState(CUIEnums::GAMESTATE::FACTION);
 			break;
 		}
 		case CUIEnums::GAMESTATE::FACTION:
@@ -238,13 +276,23 @@ bool CGameManager::ChangeCurrentState(CUIEnums::GAMESTATE _inState)
 		}
 		case CUIEnums::GAMESTATE::UNITPLACEMENT:
 		{
-			CSceneManager::GetCurrentScene()->ResetTiles();	//for testing, skipping map selection
-			CUIManager::ResetChecks();						//This too
-			ClearUnitsToPlace();							//Same for this line. Delete after
+			//CSceneManager::GetCurrentScene()->ResetTiles();	//for testing, skipping map selection
+			//CUIManager::ResetChecks();						//This too
+			//ClearUnitsToPlace();							//Same for this line. Delete after
+			LoadScene(m_eCurrentSelectedMap);
 			//Set up for the first player to place units
 			m_eCurrentTurn = CUIEnums::TURN::BLUE;
 			m_pSceneMgr->GetCurrentScene()->GetUnitsToPlace(&m_mapUnitsToPlaced_B, &m_mapUnitsToPlaced_R);
 			m_pUnitsToPlace = &m_mapUnitsToPlaced_B;
+			m_pSceneMgr->GetCurrentScene()->WriteSpawnAreaDetails(	CParseConfigCommon::Convert( m_eCurrentTurn),
+																	m_SpawnAreaTopLeft,
+																	m_uiSpawnAreaWidth,
+																	m_uiSpawnAreaHeight);
+			COverlayManager::InitializeOverlays(m_strUnitConfig, m_pFont, CSceneManager::GetTileSize());
+			COverlayManager::ClearRangePlacementOverlay();
+			COverlayManager::CreateUnitPlacementOverlay(m_SpawnAreaTopLeft,
+														m_uiSpawnAreaWidth,
+														m_uiSpawnAreaHeight);
 			SetUIToUnitPlacement();
 			break;
 		}
@@ -276,11 +324,6 @@ void CGameManager::SwitchTurns()
 {
 	switch (m_eCurrentState)
 	{
-
-		case CUIEnums::GAMESTATE::MAPSELECTION:
-		{
-			break;
-		}
 		case CUIEnums::GAMESTATE::UNITPLACEMENT:
 		{
 			if (m_eCurrentTurn == CUIEnums::TURN::BLUE)
@@ -292,12 +335,20 @@ void CGameManager::SwitchTurns()
 				int* tankAmount = &(m_pUnitsToPlace->find(CUnitEnums::TYPE::TANK)->second);
 				int* artilleryAmount = &(m_pUnitsToPlace->find(CUnitEnums::TYPE::ARTILLERY)->second);
 				CUIManager::SwitchTurnForUnitPlacment(infantryAmount, tankAmount, artilleryAmount);
+				m_pSceneMgr->GetCurrentScene()->WriteSpawnAreaDetails(	CParseConfigCommon::Convert(m_eCurrentTurn),
+																		m_SpawnAreaTopLeft,
+																		m_uiSpawnAreaWidth,
+																		m_uiSpawnAreaHeight);
+				COverlayManager::ClearRangePlacementOverlay();
+				COverlayManager::CreateUnitPlacementOverlay(m_SpawnAreaTopLeft,
+															m_uiSpawnAreaWidth,
+															m_uiSpawnAreaHeight);
 			}
 			else
 			{
+				COverlayManager::ClearRangePlacementOverlay();
 				ChangeCurrentState(CUIEnums::GAMESTATE::GAMELOOP);
 			}
-
 			break;
 		}
 		case CUIEnums::GAMESTATE::GAMELOOP:
@@ -311,6 +362,8 @@ void CGameManager::SwitchTurns()
 			}*/
 			break;
 		}
+		case CUIEnums::GAMESTATE::MODE:
+		case CUIEnums::GAMESTATE::MAPSELECTION:
 		default:
 		{
 			break;
@@ -332,6 +385,7 @@ void CGameManager::DisplayGameWorld()
 
 void CGameManager::DestroyGameWorld()
 {
+	m_refDebug.GetWindows()->close();
 	m_pGameWindow->close();
 }
 
@@ -345,19 +399,46 @@ void CGameManager::ClearUnitsToPlace()
 	m_mapUnitsToPlaced_R.clear();
 }
 
-bool CGameManager::LoadScene()
+bool CGameManager::LoadScene(CSceneEnums::SCENETYPE _inScene)
 {
-	CSceneEnums::SCENETYPE sceneType = CSceneEnums::SCENETYPE::MOUNTAINGRASS;
-	if (CSceneManager::CreateScene(sceneType, m_strMountainVillageConfig))
+	std::string configPath;
+	switch (_inScene)
 	{
-		std::cout << "\nSuccesfully loaded Mountain Village map." << std::endl;
-		ChangeCurrentState(CUIEnums::GAMESTATE::UNITPLACEMENT);
-		m_pOverlayMgr->InitializeOverlays(m_strUnitConfig, m_pFont, CSceneManager::GetTileSize() );
+		case CSceneEnums::SCENETYPE::MAINMENU:
+		{
+			configPath = m_strMainMenuConfig;
+			break;
+		}
+		case CSceneEnums::SCENETYPE::MOUNTAINVILLAGE:
+		{
+			configPath = m_strMountainVillageConfig;
+			break;
+		}
+		case CSceneEnums::SCENETYPE::MOUNTAINPASS:
+		{
+			break;
+		}
+		case CSceneEnums::SCENETYPE::BRIDGE:
+		{
+			break;
+		}
+		case CSceneEnums::SCENETYPE::NONE:
+		default:
+		{
+			break;
+		}
+	}
+
+	if (CSceneManager::CreateScene(configPath))
+	{
+		std::cout << "\nSuccesfully loaded selected map." << std::endl;
+		//COverlayManager::InitializeOverlays(m_strUnitConfig, m_pFont, CSceneManager::GetTileSize() );
+		//ChangeCurrentState(CUIEnums::GAMESTATE::UNITPLACEMENT);
 		return true;
 	}
 	else
 	{
-		std::cout << "\nUnable to Mountain Village map." << std::endl;
+		std::cout << "\nUnable to selected map." << std::endl;
 		return false;
 	}
 }
@@ -391,17 +472,39 @@ bool CGameManager::InitializeUI()
 /// </summary>
 void CGameManager::ProcessMouseClick()
 {
+	sf::Vector2f mousePosition = m_pGameWindow->mapPixelToCoords(sf::Mouse::getPosition(*(m_pGameWindow)));
+	std::cout << "\nClicking at " << mousePosition.x << "x " << mousePosition.y << "y" << std::endl;
+
 	if (!m_bExecutingActions && !m_bWaitingForClick)
 	{
-		sf::Vector2f mousePosition = m_pGameWindow->mapPixelToCoords(sf::Mouse::getPosition(*(m_pGameWindow)) );
-		std::cout << "\nClicking at " << mousePosition.x << "x " << mousePosition.y << "y" << std::endl;
 		//Will get 'true' if we clicked on the side panel
 		//and false if we clicked on the map instead, since this is
 		//from the perspective of the UIManager
-		if (CUIManager::ProcessClick(mousePosition))
+		//*outside of gameloop, true means a button was pressed. This was done
+		//since there's nothing else on the window.
+		int buttonIndex = 0;
+		if (CUIManager::ProcessClick(mousePosition, buttonIndex))
 		{
 			switch (m_eCurrentState)
 			{
+				case CUIEnums::GAMESTATE::MODE:
+				{
+					if (buttonIndex == 0)
+					{
+						m_bAIEnabled = true;
+						ChangeCurrentState(CUIEnums::GAMESTATE::MAPSELECTION);
+					}
+					else if (buttonIndex == 1)
+					{
+						m_bAIEnabled = false;
+						ChangeCurrentState(CUIEnums::GAMESTATE::MAPSELECTION);
+					}
+					else if (buttonIndex == 2)
+					{
+						DestroyGameWorld();
+					}
+					break;
+				}
 				case CUIEnums::GAMESTATE::UNITPLACEMENT:
 				{	
 					m_eCurrentTypeChosen = CUIManager::GetChosenUnit();
@@ -425,7 +528,7 @@ void CGameManager::ProcessMouseClick()
 						{
 							sf::Vector2u currentUnitPosition = m_pSelectedUnit->GetCurrentTile();
 							int unitRange = CUnitManager::GetUnitRange(m_pSelectedUnit);
-							COverlayManager::CreateRangeOverlay(currentUnitPosition, unitRange);
+							COverlayManager::CreateUnitOverlay(currentUnitPosition, unitRange);
 							COverlayManager::ShowAttackSelector(mousePosition);
 							COverlayManager::HideMoveSelector();
 							m_bAttackOverlayShown = true;
@@ -434,7 +537,7 @@ void CGameManager::ProcessMouseClick()
 						{
 							if (m_bAttackOverlayShown)
 							{
-								COverlayManager::ClearRangeOverlay();
+								COverlayManager::ClearRangePlacementOverlay();
 								COverlayManager::HideAttackSelector();
 								m_bAttackOverlayShown = false;
 							}
@@ -444,7 +547,7 @@ void CGameManager::ProcessMouseClick()
 						{
 							if (m_bAttackOverlayShown)
 							{
-								COverlayManager::ClearRangeOverlay();
+								COverlayManager::ClearRangePlacementOverlay();
 								m_bAttackOverlayShown = false;
 							}
 							COverlayManager::HideAttackSelector();
@@ -455,7 +558,7 @@ void CGameManager::ProcessMouseClick()
 					{
 						if (m_bAttackOverlayShown)
 						{
-							COverlayManager::ClearRangeOverlay();
+							COverlayManager::ClearRangePlacementOverlay();
 							m_bAttackOverlayShown = false;
 						}
 						COverlayManager::HideAttackSelector();
@@ -474,35 +577,49 @@ void CGameManager::ProcessMouseClick()
 		{
 			switch (m_eCurrentState)
 			{
+				case CUIEnums::GAMESTATE::MODE:
+				{
+					break;
+				}
 				case CUIEnums::GAMESTATE::UNITPLACEMENT:
 				{
-					if (m_eCurrentTypeChosen != CUnitEnums::TYPE::NONE)
+					if (COverlayManager::IsInSpawnArea(mousePosition, m_SpawnAreaTopLeft, m_uiSpawnAreaWidth, m_uiSpawnAreaHeight))
 					{
-						//Get the amount of this unit that has already been placed
-						std::map<CUnitEnums::TYPE, int>::iterator element = m_pUnitsToPlace->find(m_eCurrentTypeChosen);
-
-						int currentAmountPlaced = element->second;
-						CUnitEnums::SIDE controllingPlayer = (m_eCurrentTurn == CUIEnums::TURN::BLUE) ? (CUnitEnums::SIDE::BLUE) : (CUnitEnums::SIDE::RED);
-
-						if (currentAmountPlaced > 0)
+						if (m_eCurrentTypeChosen != CUnitEnums::TYPE::NONE)
 						{
-							CTile* clickedTile = m_pSceneMgr->GetTileInScene(mousePosition);
+							//Get the amount of this unit that has already been placed
+							std::map<CUnitEnums::TYPE, int>::iterator element = m_pUnitsToPlace->find(m_eCurrentTypeChosen);
 
-							if (clickedTile != nullptr && clickedTile->GetUnitOnTile() == nullptr /*&&
-								m_pSceneMgr->GetCurrentScene()->GetTileType(mousePosition) != CSceneEnums::TILETYPE::MOUNTAIN*/)
+							int currentAmountPlaced = element->second;
+							CUnitEnums::SIDE controllingPlayer = (m_eCurrentTurn == CUIEnums::TURN::BLUE) ? (CUnitEnums::SIDE::BLUE) : (CUnitEnums::SIDE::RED);
+
+							if (currentAmountPlaced > 0)
 							{
-								CUnit* newUnit = CUnitManager::CreateUnit(m_eCurrentTypeChosen, CUnitEnums::FACTION::TALONS, controllingPlayer);
-								clickedTile->UnitEntersTile(newUnit);
-								newUnit->SetLocation(mousePosition);
-								newUnit->SetCurrentTileType(m_pSceneMgr->GetCurrentScene()->GetTileType(mousePosition));
+								CTile* clickedTile = m_pSceneMgr->GetTileInScene(mousePosition);
 
-								//UpdateInfoDisplay number of units placed
-								(element->second)--;
+								if (clickedTile != nullptr && clickedTile->GetUnitOnTile() == nullptr)
+								{
+									CUnit* newUnit = CUnitManager::CreateUnit(m_eCurrentTypeChosen, CUnitEnums::FACTION::TALONS, controllingPlayer);
+									clickedTile->UnitEntersTile(newUnit);
+									newUnit->SetLocation(mousePosition);
+									newUnit->SetCurrentTileType(clickedTile->GetTileType());
 
-								clickedTile = nullptr;
-								newUnit = nullptr;
+									//UpdateInfoDisplay number of units placed
+									(element->second)--;
+
+									clickedTile = nullptr;
+									newUnit = nullptr;
+								}
 							}
 						}
+						else
+						{
+							//no unit type selected
+						}
+					}
+					else
+					{
+						std::cout << "\nERROR:Trying to place unit outside spawn area" << std::endl;
 					}
 					break;
 				}
@@ -612,14 +729,14 @@ void CGameManager::ProcessMouseClick()
 										if (!m_pSelectedUnit->GetHasAtacked())
 										{
 											unitRange = CUnitManager::GetUnitRange(m_pSelectedUnit);
-											COverlayManager::ClearRangeOverlay();
-											COverlayManager::CreateRangeOverlay(currentUnitPosition, unitRange);
+											COverlayManager::ClearRangePlacementOverlay();
+											COverlayManager::CreateUnitOverlay(currentUnitPosition, unitRange);
 											m_bAttackOverlayShown = true;
 										}
 										else
 										{
 											CUIManager::SetCurrentMouseState(CUIEnums::MOUSESTATE::SELECT);
-											COverlayManager::ClearRangeOverlay();
+											COverlayManager::ClearRangePlacementOverlay();
 											m_bAttackOverlayShown = false;
 										}
 										m_pSelectedUnit->GetMovePoints() <= 0 ? CUIManager::SetCurrentUnitHasNoMovePoints(true) : CUIManager::SetCurrentUnitHasNoMovePoints(false);
@@ -643,7 +760,7 @@ void CGameManager::ProcessMouseClick()
 											ProcessUnitAsDead(targetUnit);
 										}
 										CUIManager::SetCurrentMouseState(CUIEnums::MOUSESTATE::SELECT);
-										COverlayManager::ClearRangeOverlay();
+										COverlayManager::ClearRangePlacementOverlay();
 										m_bAttackOverlayShown = false;
 										CUIManager::UpdateUI();
 									}
@@ -680,6 +797,18 @@ void CGameManager::ProcessMouseClick()
 	{
 		m_bExecutingActions = false;
 	}
+}
+
+void CGameManager::SetUIToModeSelection()
+{
+	CUIManager::SetUpModeSelectionPanel();
+	CUIManager::SetCurrentGameState(m_eCurrentState);
+	CUIManager::SetCurrentTurn(m_eCurrentTurn);
+}
+
+void CGameManager::SetUIToMapSelection()
+{
+
 }
 
 /// <summary>
@@ -758,4 +887,102 @@ void CGameManager::ProcessUnitAsDead(CUnit* _inUnit)
 	//_inUnit->ExplodeInFlamingGlory();
 	sf::Vector2u targetTilePosition = _inUnit->GetCurrentTile();
 	CSceneManager::GetTileInScene(targetTilePosition)->UnitLeavesTile();
+}
+
+void CGameManager::ParseGameSettings()
+{
+	std::fstream gameSettings;
+	std::string currentLine;
+
+	gameSettings.open(m_strGameConfig);
+	if (gameSettings.is_open())
+	{
+		while (std::getline(gameSettings, currentLine))
+		{
+			std::string currentType;
+			std::string currentValue;
+			if (currentLine.compare("<WindowSize>") == 0)
+			{
+				//Getting the window size from config
+				std::cout << "\nReading window size\n";
+				std::getline(gameSettings, currentLine);
+				while (currentLine.compare("</WindowSize>") != 0)
+				{
+					currentType = CParseConfigCommon::ParseLineGetLabel(currentLine, currentValue);
+					if (currentType.compare("x")==0)
+					{
+						m_GameWindowSize_Current.x = std::stol(currentValue);
+					}
+					else if (currentType.compare("y") == 0)
+					{
+						m_GameWindowSize_Current.y = std::stol(currentValue);
+					}
+					else
+					{
+						std::cout << "\nWarning:Unrecognised window size label" << std::endl;
+					}
+					std::getline(gameSettings, currentLine);
+				}
+			}
+			else if (currentLine.compare("<FrameLimit>") == 0)
+			{
+				//Getting the frame limit
+				std::cout << "\nReading frame limit\n";
+				std::getline(gameSettings, currentLine);
+				while (currentLine.compare("</FrameLimit>") != 0)
+				{
+					 currentType = CParseConfigCommon::ParseLineGetLabel(currentLine, currentValue);
+					 if (currentType.compare("Limit") == 0)
+					 {
+						 m_uiWindowFrameLimit = std::stol( currentValue);
+					 }
+					 std::getline(gameSettings, currentLine);
+				}
+			}
+			else if (currentLine.compare("<Font>") == 0)
+			{
+				//Getting the Font file
+				std::cout << "\nReading Font file location\n";
+				std::getline(gameSettings, currentLine);
+				while (currentLine.compare("</Font>") != 0)
+				{
+					currentType = CParseConfigCommon::ParseLineGetLabel(currentLine, currentValue);
+					if (currentType.compare("Path") == 0)
+					{
+						m_strFontFile = currentValue;
+					}
+					std::getline(gameSettings, currentLine);
+				}
+			}
+			else if (currentLine.compare("<ConfigLocation>") == 0)
+			{
+				//Getting the Font file
+				std::cout << "\nReading config file locations\n";
+				std::getline(gameSettings, currentLine);
+				while (currentLine.compare("</ConfigLocation>") != 0)
+				{
+					currentType = CParseConfigCommon::ParseLineGetLabel(currentLine, currentValue);
+					if (currentType.compare("Unit") == 0)
+					{
+						m_strUnitConfig = currentValue;
+					}
+					else if (currentType.compare("Faction") == 0)
+					{
+						m_strFactionConfig = currentValue;
+					}
+					else if (currentType.compare("MainMenu") == 0)
+					{
+						m_strMainMenuConfig = currentValue;
+					}
+					else if (currentType.compare("MountainVillage") == 0)
+					{
+						m_strMountainVillageConfig = currentValue;
+					}
+					std::getline(gameSettings, currentLine);
+				}
+			}
+
+			std::getline(gameSettings, currentLine);
+		}
+	}
 }

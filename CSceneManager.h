@@ -16,7 +16,7 @@ public:
 	static CSceneManager& GetRef() { return m_SceneMgr; }
 	virtual ~CSceneManager();
 
-	static bool CreateScene(CSceneEnums::SCENETYPE& _inputType,const std::string& _inputConfigPath);
+	static bool CreateScene(const std::string& _inputConfigPath);
 	static void DisplayScene(sf::RenderWindow& _targetWindow);
 	static CScene* GetCurrentScene()						{ return m_pCurrentManagedScene; }
 	static CTile* GetTileInScene(sf::Vector2f _inPosition)	{ return m_pCurrentManagedScene->GetTile(_inPosition); }

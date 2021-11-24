@@ -134,7 +134,25 @@ void COverlayManager::CreateUnitSelectorOverlays()
 	newRangeOverlay = nullptr;
 }
 
-void COverlayManager::CreateRangeOverlay(sf::Vector2u& _tilePosition, int _inRange)
+void COverlayManager::CreateUnitPlacementOverlay(sf::Vector2u& _tileTopLeft, unsigned int& _inAreaWidth, unsigned int& _inAreaHeight)
+{
+	for (unsigned int row = _tileTopLeft.y; row <= (_tileTopLeft.y + _inAreaHeight); row++)
+	{
+		for (unsigned int column = _tileTopLeft.x; column <= (_tileTopLeft.x + _inAreaWidth); column++)
+		{
+			sf::Vector2u currentTarget(column, row);
+			sf::Sprite* newRangeOverlay = new sf::Sprite;
+			newRangeOverlay->setTexture(*m_pOverlayTexture);
+			newRangeOverlay->setTextureRect(m_mapSpriteRect.find("Selected")->second);
+			//convert the position to pixels
+			newRangeOverlay->setPosition(sf::Vector2f((float)(currentTarget.x * m_iTileSize), (float)(currentTarget.y * m_iTileSize)));
+			m_vecOverlayTileSelector.push_back(newRangeOverlay);
+			newRangeOverlay = nullptr;
+		}
+	}
+}
+
+void COverlayManager::CreateUnitOverlay(sf::Vector2u& _tilePosition, int _inRange)
 {
 	int minX = _tilePosition.x - _inRange;
 	int minY = _tilePosition.y - _inRange;
@@ -169,15 +187,19 @@ void COverlayManager::CreateRangeOverlay(sf::Vector2u& _tilePosition, int _inRan
 	}
 }
 
-void COverlayManager::ClearRangeOverlay()
+void COverlayManager::ClearRangePlacementOverlay()
 {
-	for (unsigned int i = 3; i < m_vecOverlayTileSelector.size(); i++)
+	if (m_vecOverlayTileSelector.size() > 0)
 	{
-		delete m_vecOverlayTileSelector[i];
-		m_vecOverlayTileSelector[i] = nullptr;
+		for (unsigned int i = 3; i < m_vecOverlayTileSelector.size(); i++)
+		{
+			delete m_vecOverlayTileSelector[i];
+			m_vecOverlayTileSelector[i] = nullptr;
+		}
+
+		m_vecOverlayTileSelector.erase( m_vecOverlayTileSelector.begin()+3,m_vecOverlayTileSelector.end() );
 	}
 
-	m_vecOverlayTileSelector.erase( m_vecOverlayTileSelector.begin()+3,m_vecOverlayTileSelector.end() );
 }
 
 void COverlayManager::ShowUnitSelector(sf::Vector2u& _inTileLocation)
@@ -254,6 +276,27 @@ void COverlayManager::HideAttackSelector()
 {
 	m_vecOverlayTileSelector[2]->setPosition(sf::Vector2f(-32.0f, 0.0f));
 	m_bShowAttackSelector = false;
+}
+
+bool COverlayManager::IsInSpawnArea(sf::Vector2u& _tilePosition, sf::Vector2u& _tileTopLeft, unsigned int& _inAreaWidth, unsigned int& _inAreaHeight)
+{
+	if ((_tilePosition.x >= _tileTopLeft.x && _tilePosition.x <= (_tileTopLeft.x + _inAreaWidth)) &&
+		(_tilePosition.y >= _tileTopLeft.y && _tilePosition.y <= (_tileTopLeft.y + _inAreaHeight)))
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+bool COverlayManager::IsInSpawnArea(sf::Vector2f& _tilePosition, sf::Vector2u& _tileTopLeft, unsigned int& _inAreaWidth, unsigned int& _inAreaHeight)
+{
+	sf::Vector2u targetTile((unsigned int)(_tilePosition.x / m_iTileSize),
+							(unsigned int)(_tilePosition.y / m_iTileSize));
+
+	return IsInSpawnArea(targetTile, _tileTopLeft, _inAreaWidth, _inAreaHeight);
 }
 
 bool COverlayManager::IsInRange(sf::Vector2u& _tilePosition, sf::Vector2u& _tileTarget, int _inRange)

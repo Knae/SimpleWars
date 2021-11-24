@@ -8,10 +8,13 @@
 class CSceneEnums
 {
 public:
-	enum class SCENETYPE 
+	enum class SCENETYPE
 	{
 		NONE,
-		MOUNTAINGRASS,
+		MAINMENU,
+		MOUNTAINVILLAGE,
+		MOUNTAINPASS,
+		BRIDGE
 	};
 
 	enum class TILETYPE

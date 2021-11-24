@@ -5,6 +5,7 @@
 #include<SFML/Graphics.hpp>
 #include <string>
 #include <iostream>
+#include "CButton.h"
 #include "CInfoTextDisplay.h"
 #include "CUIEnums.h"
 #include "CUnitEnums.h"
@@ -28,8 +29,10 @@ public:
 	static void UpdateUI();
 	static void DisplayUI(sf::RenderWindow& _inWindow);
 	static void ClearUIElements();
-	static bool ProcessClick(sf::Vector2f& _inCoords);
+	static bool ProcessClick(sf::Vector2f& _inCoords, int& _outIndex);
 	static int	ProcessClickInCtrlPanel(sf::Vector2f& _inCoords);
+	static bool GetCButtonClicked(sf::Vector2f _inPosition, int& _outButtonIndex);
+	static void SetUpModeSelectionPanel();
 	static void SetUpUnitPlacementPanel(int* _inAmountA, int* _inAmountB, int* _inAmountC);
 	static void SetUpGameLoopPanel();
 	static bool UpdateInfoDisplay(
@@ -79,14 +82,16 @@ private:
 	static const std::string m_strGameButtonsSpriteMap;
 	static const std::string m_strTileSelectorSpriteMap;
 	static const std::string m_strFinishButtonSprite;
+	static const std::string m_strVictorySprite;
 	static const sf::IntRect m_ButtonUnitRect_Blue;
 	static const sf::IntRect m_ButtonUnitRect_Red;
 	static const sf::IntRect m_ButtonGameLoop;
 	static const sf::IntRect m_ButtonFactionEmblem;
 
+	static std::vector<CButton*> m_vecCustomButtons;
 	static std::vector<sf::Sprite*> m_vecButtons_ControlPanel;
 	static std::vector<sf::Sprite*> m_vecOverlays;
-	static std::vector<sf::Text*> m_vecText_UnitPlacementPanel;
+	static std::vector<sf::Text*> m_vecText_ControlPanel;
 	static std::vector<int*> m_vecText_DisplayVariables;
 	static sf::RenderTexture* m_pPanelBackground;
 	static sf::Texture* m_pEmblemTexture;

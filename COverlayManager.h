@@ -19,8 +19,11 @@ public:
 	static void ClearTileOverlays();
 
 	static void CreateUnitSelectorOverlays();
-	static void CreateRangeOverlay(sf::Vector2u& _tilePosition, int _inRange);
-	static void ClearRangeOverlay();
+	static void CreateUnitPlacementOverlay(	sf::Vector2u& _tileTopLeft,
+											unsigned int& _inAreaWidth,
+											unsigned int& _inAreaHeight);
+	static void CreateUnitOverlay(sf::Vector2u& _tilePosition, int _inRange);
+	static void ClearRangePlacementOverlay();
 	static void ShowUnitSelector(sf::Vector2u& _inTileLocation);
 	static void ShowMoveSelector(sf::Vector2f& _mouseLocation);
 	static void ShowAttackSelector(sf::Vector2f& _mouseLocation);
@@ -28,6 +31,14 @@ public:
 	static void HideUnitSelector();
 	static void HideMoveSelector();
 	static void HideAttackSelector();
+	static bool IsInSpawnArea(	sf::Vector2u& _tilePosition, 
+								sf::Vector2u& _tileTopLeft,
+								unsigned int& _inAreaWidth,
+								unsigned int& _inAreaHeight);
+	static bool IsInSpawnArea(	sf::Vector2f& _tilePosition,
+								sf::Vector2u& _tileTopLeft,
+								unsigned int& _inAreaWidth,
+								unsigned int& _inAreaHeight);
 	static bool IsInRange(sf::Vector2u& _tilePosition, sf::Vector2u& _tileTarget, int _inRange);
 	static bool IsInRange(sf::Vector2u& _tilePosition, sf::Vector2f& _tileTarget, int _inRange);
 

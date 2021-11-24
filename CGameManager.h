@@ -4,6 +4,7 @@
 
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
+#include <fstream>
 #include <iostream>
 #include <iomanip>
 #include "CUIManager.h"
@@ -46,19 +47,21 @@ public:
 	//====================================
 	//Scene management related
 	//====================================
-	virtual bool LoadScene();
+	virtual bool LoadScene(CSceneEnums::SCENETYPE _inScene);
 	virtual void DisplayScene();
 	//====================================
 	//UI management related
 	//====================================
 	virtual bool InitializeUI();
 	virtual void ProcessMouseClick();
+	virtual void SetUIToModeSelection();
+	virtual void SetUIToMapSelection();
 	virtual void SetUIToUnitPlacement();
 	virtual void SetUIToGameLoop();
 	virtual void DisplayUI();
 	virtual void UpdateSidePanelInfo(	CUnit* _inViewedUnit = nullptr);
 	//====================================
-	//UI management related
+	//Debug related
 	//====================================
 	virtual void UpdateDebugWorld();
 
@@ -69,8 +72,12 @@ private:
 
 	bool CheckIfMouseOverTile(sf::Vector2f _inPosition);
 	void ProcessUnitAsDead(CUnit* _inUnit);
+	void ParseGameSettings();
 
 	const sf::Vector2u m_GameWindowSize_Default = sf::Vector2u(1024, 576);
+	const std::string m_strGameConfig = "configs/game.ini";
+	std::string m_strFontFile = "font/OpenSans-Regular.ttf";
+	std::string m_strMainMenuConfig = "configs/maps/MainMenu.ini";
 	std::string m_strMountainVillageConfig= "configs/maps/MountainVillage.ini";
 	std::string m_strUnitConfig = "configs/units/BaseSettings.ini";
 	std::string m_strFactionConfig = "configs/factions.ini";
@@ -87,11 +94,16 @@ private:
 	sf::Sprite* m_pSpriteBackground;
 	sf::Font* m_pFont;
 	sf::Vector2u m_GameWindowSize_Current;
+	sf::Vector2u m_SpawnAreaTopLeft;
+	unsigned int m_uiSpawnAreaWidth;
+	unsigned int m_uiSpawnAreaHeight;
+	unsigned int m_uiWindowFrameLimit = 60;
 	bool m_bExecutingActions;
 	bool m_bAttackOverlayShown;
 	bool m_bWaitingForClick;
 	bool m_bAIEnabled;
 
+	CSceneEnums::SCENETYPE m_eCurrentSelectedMap = CSceneEnums::SCENETYPE::MOUNTAINVILLAGE;
 	CUIEnums::TURN m_eCurrentTurn;
 	CUIEnums::GAMESTATE m_eCurrentState;
 	CUIEnums::MOUSESTATE m_eCurrentUIMouseState;

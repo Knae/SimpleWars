@@ -42,8 +42,13 @@ void CUnit::SetLocation(sf::Vector2f _inPosition)
 {
 	sf::Vector2u tilePosition(	(unsigned int)(_inPosition.x / m_fTileSize),
 								(unsigned int)(_inPosition.y / m_fTileSize));
-	m_CurrentTileLocation = tilePosition;
-	m_UnitSprite->setPosition(tilePosition.x * m_fTileSize, tilePosition.y * m_fTileSize);
+	SetLocation(tilePosition);
+}
+
+void CUnit::SetLocation(sf::Vector2u _inPosition)
+{
+	m_CurrentTileLocation = _inPosition;
+	m_UnitSprite->setPosition(_inPosition.x * m_fTileSize, _inPosition.y * m_fTileSize);
 }
 
 /// <summary>
