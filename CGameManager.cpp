@@ -121,6 +121,7 @@ bool CGameManager::UpdateManagers(double& _inElapsedTime)
 		if (CAI_Controller::StartAITurn())
 		{
 			SwitchTurns();
+			CUIManager::SetCurrentTurn(m_eCurrentTurn);
 		}
 	}
 	else 
@@ -644,6 +645,7 @@ void CGameManager::ProcessMouseClick()
 										CUIManager::SetCurrentMouseState(CUIEnums::MOUSESTATE::SELECT);
 										COverlayManager::ClearRangeOverlay();
 										m_bAttackOverlayShown = false;
+										CUIManager::UpdateUI();
 									}
 								}
 								targetUnit = nullptr;

@@ -75,7 +75,6 @@ bool CAI_Controller::StartAITurn()
 			bool cannotMove = false;
 			while (!hasTriedToAttack && !cannotMove)
 			{
-				//cannotMove = false;
 				int range = CUnitManager::GetUnitRange(unit);
 				if (dist <= range && !unit->GetHasAtacked())
 				{

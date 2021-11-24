@@ -5,6 +5,15 @@ CScene::CScene()
 	m_pMapTileMap = new sf::Texture();
 	m_pMapTiles = nullptr;
 	m_uiMapColumns = m_uiMapRows = 0;
+	m_SpawnBlue.m_UpperLeft = sf::Vector2u(0, 0);
+	m_SpawnBlue.m_uiHeight = 0;
+	m_SpawnBlue.m_uiWidth = 0;
+	m_SpawnRed.m_UpperLeft = sf::Vector2u(0, 0);
+	m_SpawnRed.m_uiHeight = 0;
+	m_SpawnRed.m_uiWidth = 0;
+	m_AILocations.emplace(CUnitEnums::TYPE::INFANTRY,new std::vector<sf::Vector2u>);
+	m_AILocations.emplace(CUnitEnums::TYPE::TANK, new std::vector<sf::Vector2u>);
+	m_AILocations.emplace(CUnitEnums::TYPE::ARTILLERY, new std::vector<sf::Vector2u>);
 }
 
 CScene::~CScene()
@@ -14,6 +23,13 @@ CScene::~CScene()
 		delete m_pMapTiles;
 		m_pMapTiles = nullptr;
 	}
+
+	for (auto& type : m_AILocations)
+	{
+		delete type.second;
+		type.second = nullptr;
+	}
+	m_AILocations.clear();
 }
 
 /// <summary>
@@ -129,6 +145,106 @@ bool CScene::ParseConfig(const std::string& _filePath)
 				std::cout << "\nReading tilemap path\n";
 				std::getline(mapSettings, currentLine);
 				ParseLineGetLabel(currentLine,m_strTileMapFilePath);
+			}
+			else if (currentLine.compare("<SpawnArea>") == 0)
+			{
+				std::cout << "\nReading map Spawn areas\n";
+
+				std::getline(mapSettings, currentLine);
+				while (currentLine.compare("</SpawnArea>") != 0)
+				{
+					std::string currentType;
+					std::string currentValue;
+					if (currentLine.compare("<Blue>") == 0)
+					{
+						while (currentLine.compare("</Blue>") != 0)
+						{
+							currentType = ParseLineGetLabel(currentLine, currentValue);
+							if (currentType.compare("TopLeft") == 0)
+							{
+								std::size_t delimPosition = currentValue.find(',');
+								if (delimPosition != std::string::npos)
+								{
+									unsigned int x = std::stoul(currentValue.substr(0, delimPosition));
+									unsigned int y = std::stoul(currentValue.substr(delimPosition + 1, std::string::npos));
+									m_SpawnBlue.m_UpperLeft = sf::Vector2u(x,y);
+								}
+								else
+								{
+									std::cout << "\nCan't read location of top left tile of Blue spawn area" << std::endl;
+								}
+							}
+							else if (currentType.compare("Width") == 0)
+							{
+								m_SpawnBlue.m_uiWidth = std::stol(currentValue);
+							}
+							else if(currentType.compare("Height") == 0)
+							{
+								m_SpawnBlue.m_uiHeight = std::stol(currentValue);
+							}
+							std::getline(mapSettings, currentLine);
+						}
+					}
+					else if (currentLine.compare("<Red>") == 0)
+					{
+						while (currentLine.compare("</Red>") != 0)
+						{
+							currentType = ParseLineGetLabel(currentLine, currentValue);
+							if (currentType.compare("TopLeft") == 0)
+							{
+								std::size_t delimPosition = currentValue.find(',');
+								if (delimPosition != std::string::npos)
+								{
+									unsigned int x = std::stoul(currentValue.substr(0, delimPosition));
+									unsigned int y = std::stoul(currentValue.substr(delimPosition + 1, std::string::npos));
+									m_SpawnRed.m_UpperLeft = sf::Vector2u(x, y);
+								}
+								else
+								{
+									std::cout << "\nCan't read location of top left tile of Blue spawn area" << std::endl;
+								}
+							}
+							else if (currentType.compare("Width") == 0)
+							{
+								m_SpawnRed.m_uiWidth = std::stol(currentValue);
+							}
+							else if (currentType.compare("Height") == 0)
+							{
+								m_SpawnRed.m_uiHeight = std::stol(currentValue);
+							}
+							std::getline(mapSettings, currentLine);
+						}
+					}
+					std::getline(mapSettings, currentLine);
+				}
+			}
+			else if (currentLine.compare("<AI_Spawn>") == 0)
+			{
+				CUnitEnums::TYPE currentType = CUnitEnums::TYPE::NONE;
+				std::string currentLabel;
+				std::string currentValue;
+				while (currentLine.compare("</AI_Spawn>") != 0)
+				{
+					currentLabel = ParseLineGetLabel(currentLine, currentValue);
+
+					std::size_t delimPosition = currentValue.find(',');
+					if (delimPosition != std::string::npos)
+					{
+						unsigned int x = std::stoul(currentValue.substr(0, delimPosition));
+						unsigned int y = std::stoul(currentValue.substr(delimPosition + 1, std::string::npos));
+
+						ConvertToUnitType(currentLabel, currentType);
+						if (currentType != CUnitEnums::TYPE::NONE)
+						{
+							m_AILocations.find(currentType)->second->push_back(sf::Vector2u(x, y));
+						}
+					}
+					else
+					{
+						std::cout << "\nCan't read location of top left tile of Blue spawn area" << std::endl;
+					}
+					std::getline(mapSettings, currentLine);
+				}
 			}
 			else if (currentLine.compare("<Units_Blue>")==0)
 			{
@@ -327,6 +443,10 @@ void CScene::GetUnitsToPlace(std::map<CUnitEnums::TYPE, int>* _inUnitsB, std::ma
 		int amount = element.second;
 		(*_inUnitsR).emplace(element.first, amount);
 	}
+}
+
+void CScene::PlaceAIUnits()
+{
 }
 
 CTile* CScene::GetTile(sf::Vector2f _inPosition)
