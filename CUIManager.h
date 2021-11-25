@@ -34,13 +34,15 @@ public:
 	static bool GetCButtonClicked(sf::Vector2f _inPosition, int& _outButtonIndex);
 	static void SetUpModeSelectionPanel();
 	static void SetUpMapSelection();
+	static void SetUpFactionSelection();
 	static void SetUpUnitPlacementPanel(int* _inAmountA, int* _inAmountB, int* _inAmountC);
 	static void SetUpGameLoopPanel();
 	static bool UpdateInfoDisplay(
 			CUnit* _inSelectedUnit = nullptr,
 			CUnit* _inViewedUnit = nullptr,
 			CTerrainEffects* _inSelectedUnitTerrain = nullptr,
-			CTerrainEffects* _inViewedUnitTerrain = nullptr
+			CTerrainEffects* _inViewedUnitTerrain = nullptr,
+			CUnitEnums::StatBonus_Add* _inFacBonus = nullptr
 		);
 		//CUnitEnums::SIDE _inSide = CUnitEnums::SIDE::NONE,
 		//CUnitEnums::FACTION _inFaction = CUnitEnums::FACTION::NONE);

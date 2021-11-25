@@ -165,6 +165,7 @@
     <ClInclude Include="CAI_Controller.h" />
     <ClInclude Include="CButton.h" />
     <ClInclude Include="CDebug.h" />
+    <ClInclude Include="CFactionBonus.h" />
     <ClInclude Include="CGameManager.h" />
     <ClInclude Include="CInfoTextDisplay.h" />
     <ClInclude Include="COverlayManager.h" />

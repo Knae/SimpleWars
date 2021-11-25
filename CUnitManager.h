@@ -11,6 +11,7 @@
 #include "CParseConfigCommon.h"
 #include "CUnit.h"
 #include "CTerrainEffects.h"
+#include "CFactionBonus.h"
 
 /// <summary>
 /// This manager will manage units available to both players.
@@ -36,6 +37,10 @@ public:
 	static bool CheckIfAnyUnitsLeft(CUnitEnums::SIDE _inSide);
 	static void SwitchTurns();
 	static CTerrainEffects* ResolveTerrainEffects(const CUnitEnums::TYPE _inType, const CSceneEnums::TILETYPE _inTile);
+	static CUnitEnums::StatBonus_Add* GetFactionBonuses( CUnitEnums::FACTION _input)
+	{
+		return (*m_mapFactionsBonuses.find(_input)).second;
+	}
 	static std::vector<CUnit*>* GetUnits_Blue() { return &m_vecCurrentUnits_Blue; }
 	static std::vector<CUnit*>* GetUnits_Red() { return &m_vecCurrentUnits_Red; }
 

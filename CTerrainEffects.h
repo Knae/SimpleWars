@@ -13,7 +13,7 @@ public:
 	void SetModifierMovement(float _input)		{ m_ftBonus_Movement = _input; }
 	void SetModifierDamageDealt(float _input)	{ m_fModifier_DamageDealt = _input; }
 	void SetModifierDamageTaken(float _input)	{ m_fModifier_DamageTaken = _input; }
-	void setRangeOffset(int _input)				{ m_iRangeOffset = _input; }
+	void SetRangeOffset(int _input)				{ m_iRangeOffset = _input; }
 private:
 	float	m_ftBonus_Movement = 0.0f;
 	float	m_fModifier_DamageDealt = 1.0f;

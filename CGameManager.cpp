@@ -38,8 +38,8 @@ CGameManager::CGameManager()
 	m_eCurrentState = CUIEnums::GAMESTATE::NONE;
 	m_eCurrentUIMouseState = CUIEnums::MOUSESTATE::NONE;
 	m_eCurrentTypeChosen = CUnitEnums::TYPE::NONE;
-	m_eChosenFaction_Blue = CUnitEnums::FACTION::NONE;
-	m_eChosenFaction_Red = CUnitEnums::FACTION::NONE;
+	m_eChosenFaction_Blue = CUnitEnums::FACTION::TALONS;
+	m_eChosenFaction_Red = CUnitEnums::FACTION::LYNXES;
 	m_bAttackOverlayShown = false;
 	m_bExecutingActions = false;
 	m_bWaitingForClick = false;
@@ -159,7 +159,7 @@ bool CGameManager::Update(double& _inElapsedTime)
 					for (auto& location : (*type.second))
 					{
 						sf::Vector2u unitLocation = location;
-						CUnit* newUnit = CUnitManager::CreateUnit(type.first, CUnitEnums::FACTION::TALONS, AiController);
+						CUnit* newUnit = CUnitManager::CreateUnit(type.first, m_eChosenFaction_Red, AiController);
 						CTile* targetTile = m_pSceneMgr->GetTileInScene(location);
 						targetTile->UnitEntersTile(newUnit);
 						newUnit->SetLocation(location);
@@ -690,7 +690,9 @@ void CGameManager::ProcessMouseClick()
 
 								if (clickedTile != nullptr && clickedTile->GetUnitOnTile() == nullptr)
 								{
-									CUnit* newUnit = CUnitManager::CreateUnit(m_eCurrentTypeChosen, CUnitEnums::FACTION::TALONS, controllingPlayer);
+									
+									CUnitEnums::FACTION currentPlayerFaction = (controllingPlayer == CUnitEnums::SIDE::BLUE) ? m_eChosenFaction_Blue : m_eChosenFaction_Red;
+									CUnit * newUnit = CUnitManager::CreateUnit(m_eCurrentTypeChosen, currentPlayerFaction, controllingPlayer);
 									clickedTile->UnitEntersTile(newUnit);
 									newUnit->SetLocation(mousePosition);
 									newUnit->SetCurrentTileType(clickedTile->GetTileType());
@@ -958,12 +960,15 @@ void CGameManager::UpdateSidePanelInfo(	CUnit* _inViewedUnit)
 	}
 	else if (m_eCurrentState == CUIEnums::GAMESTATE::GAMELOOP)
 	{
+		CUnitEnums::StatBonus_Add* selectedUnitFaction = nullptr;
 		CTerrainEffects* selectedUnitTerrain = CUnitManager::ResolveTerrainEffects(CUnitEnums::TYPE::NONE, CSceneEnums::TILETYPE::NONE);
 		CTerrainEffects* viewedUnitTerrain = CUnitManager::ResolveTerrainEffects(CUnitEnums::TYPE::NONE, CSceneEnums::TILETYPE::NONE);
 
 		if (m_pSelectedUnit != nullptr)
 		{
 			selectedUnitTerrain = CUnitManager::ResolveTerrainEffects(m_pSelectedUnit->GetType(), m_pSelectedUnit->GetCurrentTileType());
+			selectedUnitFaction = CUnitManager::GetFactionBonuses( m_pSelectedUnit->GetFaction() );
+				
 		}
 
 		if(_inViewedUnit != nullptr)
@@ -974,7 +979,8 @@ void CGameManager::UpdateSidePanelInfo(	CUnit* _inViewedUnit)
 		CUIManager::UpdateInfoDisplay(	m_pSelectedUnit,
 										_inViewedUnit,
 										selectedUnitTerrain,
-										viewedUnitTerrain);
+										viewedUnitTerrain,
+										selectedUnitFaction);
 
 		//UpdateInfoDisplay the debug window as well
 		m_refDebug.UpdateInfoDisplay(m_pSelectedUnit);

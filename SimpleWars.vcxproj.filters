@@ -84,10 +84,10 @@
     <ClCompile Include="CInfoTextDisplay.cpp">
       <Filter>Source Files\Systems</Filter>
     </ClCompile>
-    <ClCompile Include="CAI_Controller.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="CParseConfigCommon.cpp">
+      <Filter>Source Files\Systems</Filter>
+    </ClCompile>
+    <ClCompile Include="CAI_Controller.cpp">
       <Filter>Source Files\Systems</Filter>
     </ClCompile>
   </ItemGroup>
@@ -140,11 +140,14 @@
     <ClInclude Include="CDebug.h">
       <Filter>Header Files\Systems</Filter>
     </ClInclude>
-    <ClInclude Include="CAI_Controller.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="CParseConfigCommon.h">
       <Filter>Header Files\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="CAI_Controller.h">
+      <Filter>Header Files\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="CFactionBonus.h">
+      <Filter>Header Files\UnitRelatedHeaders</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -207,7 +207,12 @@ bool CUIManager::IntializeUI(sf::Vector2u _inWindowSize, sf::Font* _inFont, cons
 
 	m_pFont = _inFont;
 
-	m_Info_FactionBonus.Initialize(m_uSceneWidth + 96.0f, 0.0f, m_pFont, 2);
+	m_Info_FactionBonus.Initialize(m_uSceneWidth + 96.0f, 0.0f, m_pFont, 5);
+	m_Info_FactionBonus.SetTextAtIndex(0, " ", " ");
+	m_Info_FactionBonus.SetTextAtIndex(1, "HP :", "N/A");
+	m_Info_FactionBonus.SetTextAtIndex(2, "MOV:", "N/A");
+	m_Info_FactionBonus.SetTextAtIndex(3, "DMG:", "N/A");
+	m_Info_FactionBonus.SetTextAtIndex(4, "RGE:", "N/A");
 
 	m_Info_UnitStats.Initialize(m_uSceneWidth + 96.0f, 96.0f, m_pFont, 5);
 	m_Info_UnitStats.SetTextAtIndex(0, "UnitStats", "");
@@ -229,6 +234,7 @@ bool CUIManager::IntializeUI(sf::Vector2u _inWindowSize, sf::Font* _inFont, cons
 	m_Info_ViewedTerrain.SetTextAtIndex(2, "DMG->", "N/A");
 	m_Info_ViewedTerrain.SetTextAtIndex(3, "DMG<-", "N/A");
 	m_Info_ViewedTerrain.SetTextAtIndex(4, "RGE:", "N/A");
+
 
 	return true;
 }
@@ -629,6 +635,49 @@ void CUIManager::SetUpMapSelection()
 }
 
 /// <summary>
+/// setup faction selection menu. Unfinished
+/// </summary>
+void CUIManager::SetUpFactionSelection()
+{
+	ClearUIElements();
+	sf::Sprite* currentButton = nullptr;
+	sf::Text* currentText = nullptr;
+	sf::IntRect currentRect;
+
+	currentButton = new sf::Sprite;
+	currentButton->setTexture(*m_pEmblemTexture);
+	currentRect = m_ButtonUnitRect_Blue;
+	currentButton->setTextureRect(currentRect);
+	currentButton->setScale(3.0f, 3.0f);
+	currentButton->setPosition(sf::Vector2f((float)(m_uSceneWidth), 16.0f));
+	m_vecButtons_ControlPanel.push_back(currentButton);
+
+	currentButton = new sf::Sprite;
+	currentButton->setTexture(*m_pEmblemTexture);
+	currentRect = m_ButtonUnitRect_Blue;
+	currentButton->setTextureRect(currentRect);
+	currentButton->setScale(3.0f, 3.0f);
+	currentButton->setPosition(sf::Vector2f((float)(m_uSceneWidth + 96.0f), 112.0f));
+	m_vecButtons_ControlPanel.push_back(currentButton);
+
+	currentButton = new sf::Sprite;
+	currentButton->setTexture(*m_pEmblemTexture);
+	currentRect = m_ButtonUnitRect_Blue;
+	currentButton->setTextureRect(currentRect);
+	currentButton->setScale(3.0f, 3.0f);
+	currentButton->setPosition(sf::Vector2f((float)(m_uSceneWidth + 96.0f), 208.0f));
+	m_vecButtons_ControlPanel.push_back(currentButton);
+
+	m_eCurrentUIState = CUIEnums::GAMESTATE::FACTION;
+	m_eCurrentTurn = CUIEnums::TURN::BLUE;
+	m_eCurrentMouseState = CUIEnums::MOUSESTATE::SELECT;
+
+	m_bDisplayInfoText = true;
+	currentButton = nullptr;
+	currentText = nullptr;
+}
+
+/// <summary>
 /// Create the button in the panel for placing units
 /// According to current sprite sheet:
 /// 0 = Infantry
@@ -785,9 +834,8 @@ void CUIManager::SetUpGameLoopPanel()
 bool CUIManager::UpdateInfoDisplay(	CUnit* _inSelectedUnit,
 									CUnit* _inViewedUnit,
 									CTerrainEffects* _inSelectedUnitTerrain,
-									CTerrainEffects* _inViewedUnitTerrain//,
-									/*CUnitEnums::SIDE _inSide = CUnitEnums::SIDE::NONE,*/
-									/*CUnitEnums::FACTION _inFaction = CUnitEnums::FACTION::NONE*/)
+									CTerrainEffects* _inViewedUnitTerrain,
+									CUnitEnums::StatBonus_Add* _inFacBonus)
 {
 	auto ConvertToString = [](auto input) {std::stringstream str; str << std::setprecision(1) << std::fixed << input; return str.str(); };
 
@@ -796,6 +844,7 @@ bool CUIManager::UpdateInfoDisplay(	CUnit* _inSelectedUnit,
 		m_eCurrentUnitSide = _inSelectedUnit->GetSide();
 		CUnitEnums::TYPE selectedUnitType = _inSelectedUnit->GetType();
 		CUnitEnums::FACTION selectUnitFaction = _inSelectedUnit->GetFaction();
+		std::string factionName;
 
 		if (selectedUnitType != CUnitEnums::TYPE::NONE)
 		{
@@ -848,15 +897,18 @@ bool CUIManager::UpdateInfoDisplay(	CUnit* _inSelectedUnit,
 			{
 				case CUnitEnums::FACTION::TALONS:
 				{
+					factionName = "Graysong Talons";
 					break;
 				}
 				case CUnitEnums::FACTION::URSINE:
 				{
+					factionName = "Coldfield Ursine";
 					currentRect.left += 32;
 					break;
 				}
 				case CUnitEnums::FACTION::LYNXES:
 				{
+					factionName = "Lowvale Lynxes";
 					currentRect.left += 64;
 					break;
 				}
@@ -882,6 +934,34 @@ bool CUIManager::UpdateInfoDisplay(	CUnit* _inSelectedUnit,
 		float value2 = 0.0f;
 		int intToUpdate = 0;
 		std::string stringToDisplay;
+		//=============================
+		//Updating Faction Bonus display
+		//=============================
+		if (_inFacBonus != nullptr)
+		{
+			m_Info_FactionBonus.SetTextAtIndex(0, factionName," ");
+			valueToUpdate = _inFacBonus->m_tfHPBonus;
+			stringToDisplay = ConvertToString(valueToUpdate);
+			m_Info_FactionBonus.SetValueDisplayAtIndex(1, stringToDisplay);
+			valueToUpdate = _inFacBonus->m_tfMoveBonus;
+			stringToDisplay = ConvertToString(valueToUpdate);
+			m_Info_FactionBonus.SetValueDisplayAtIndex(2, stringToDisplay);
+			valueToUpdate = _inFacBonus->m_tfAtkBonus;
+			stringToDisplay = ConvertToString(valueToUpdate);
+			m_Info_FactionBonus.SetValueDisplayAtIndex(3, stringToDisplay);
+			intToUpdate = _inFacBonus->m_tiRangeBonus;
+			stringToDisplay = ConvertToString(intToUpdate);
+			m_Info_FactionBonus.SetValueDisplayAtIndex(4, stringToDisplay);
+		}
+		else
+		{
+			m_Info_FactionBonus.SetTextAtIndex(0, " ", " ");
+			m_Info_FactionBonus.SetValueDisplayAtIndex(1, "N/A");
+			m_Info_FactionBonus.SetValueDisplayAtIndex(2, "N/A");
+			m_Info_FactionBonus.SetValueDisplayAtIndex(3, "N/A");
+			m_Info_FactionBonus.SetValueDisplayAtIndex(4, "N/A");
+		}
+		
 
 		//=============================
 		//Updating Unit stats display

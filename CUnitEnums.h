@@ -17,14 +17,6 @@ public:
 		int m_tiRangeBonus;
 	};
 
-	struct StatBonus_Multiply
-	{
-		float m_tfAtkBonus;
-		float m_tfMoveBonus;
-		float m_tfRangeBonus;
-		float m_tfIncDamgeBonus;
-	};
-
 	struct UnitRecord
 	{
 		float m_tfHP;

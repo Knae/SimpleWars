@@ -25,6 +25,8 @@ CUnitManager::~CUnitManager()
 
 	m_pUnitTexture_Blue = nullptr;
 	m_pUnitTexture_Red = nullptr;
+
+	ClearUnits();
 }
 
 /// <summary>
@@ -168,6 +170,7 @@ void CUnitManager::ParseConfig(const std::string& _inUnitConfigPath, const std::
 				std::cout << "\nReading config for a factions.\n";
 				CUnitEnums::FACTION currentFaction = CUnitEnums::FACTION::NONE;
 				CUnitEnums::StatBonus_Add* currentFactionBonus = new CUnitEnums::StatBonus_Add;
+				//CFactionBonus* newFaction = new CFactionBonus;
 				std::string readValue;
 				std::string readLabel;
 
@@ -224,7 +227,6 @@ void CUnitManager::ParseConfig(const std::string& _inUnitConfigPath, const std::
 							}
 							std::getline(currentConfig, currentLine);
 						}
-						//std::getline(currentConfig, currentLine);
 					}
 					std::getline(currentConfig, currentLine);
 				}
@@ -293,7 +295,7 @@ void CUnitManager::ParseConfig(const std::string& _inUnitConfigPath, const std::
 									}
 									else if (readLabel.compare("RGE") == 0)
 									{
-										newTerrainRecord->setRangeOffset(std::stoi(readValue));
+										newTerrainRecord->SetRangeOffset(std::stoi(readValue));
 									}
 									//Damage Taken
 									else if (readLabel.compare("DMG_T") == 0)
@@ -395,6 +397,16 @@ CUnit* CUnitManager::CreateUnit(CUnitEnums::TYPE _inType,CUnitEnums::FACTION _in
 		newUnitStats->m_tfAtk,
 		newUnitStats->m_tiRange);
 	newUnit->SetFaction(_inFaction);
+	CUnitEnums::StatBonus_Add* factionBonus = (*m_mapFactionsBonuses.find(_inFaction)).second;
+	//increase HP by doing negative damage to it
+	float factionAdjusted = -1 * factionBonus->m_tfHPBonus;
+	newUnit->TakeDamage(factionAdjusted);
+	float dummy;
+	newUnit->GetMovementStat(factionAdjusted, dummy);
+	factionAdjusted += factionBonus->m_tfMoveBonus;
+	newUnit->SetMovement(factionAdjusted);
+	newUnit->IncrementDamageDealt(factionBonus->m_tfAtkBonus);
+	newUnit->IncrementRange(factionBonus->m_tiRangeBonus);
 
 	sf::IntRect unitTextureRect(
 		newUnitStats->m_tiSpriteLeft,
@@ -417,6 +429,9 @@ CUnit* CUnitManager::CreateUnit(CUnitEnums::TYPE _inType,CUnitEnums::FACTION _in
 		newUnit->Initialize(unitSprite);
 		m_vecCurrentUnits_Red.push_back(newUnit);
 	}
+
+
+
 	unitSprite = nullptr;
 	return newUnit;
 }
