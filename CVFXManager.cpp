@@ -32,6 +32,10 @@ CVFXManager::~CVFXManager()
 	m_pVFXTex_Explode = nullptr;
 }
 
+/// <summary>
+/// Initialize the currently unused VFX class
+/// </summary>
+/// <param name="_inConfigPath"></param>
 void CVFXManager::Initialize(std::string& _inConfigPath)
 {
 	m_strTexture_BulletEff = "assets/spritemaps/BulletEffects.png";
@@ -114,9 +118,11 @@ void CVFXManager::AddAttackParticles_Bullet(sf::Vector2u& _inTilePosition)
 
 void CVFXManager::AddAttackParticles_Shell(sf::Vector2u& _inTilePosition)
 {
+	m_pVFXSprite = new sf::Sprite;
 }
 
 void CVFXManager::AddDeathParticles_Explosive(sf::Vector2u& _inTilePosition)
 {
+	m_pVFXSprite = new sf::Sprite;
 }
 

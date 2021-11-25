@@ -48,6 +48,12 @@ CDebug::~CDebug()
 	m_pUnitToDestroy = nullptr;
 }
 
+/// <summary>
+/// Creates all the sprites and text to be 
+/// displayed on the debug window
+/// </summary>
+/// <param name="_inFont"></param>
+/// <returns></returns>
 bool CDebug::Initialize(sf::Font* _inFont)
 {
 	m_pEmptyPortrait = new sf::Texture();
@@ -161,6 +167,9 @@ bool CDebug::Initialize(sf::Font* _inFont)
 	return true;
 }
 
+/// <summary>
+/// Updates the window, to evaluate events
+/// </summary>
 void CDebug::Update()
 {
 	if (m_pDebugWindow->hasFocus())
@@ -245,6 +254,9 @@ void CDebug::Update()
 	}
 }
 
+/// <summary>
+/// Display all the debug elements
+/// </summary>
 void CDebug::DisplayWindow()
 {
 	m_pDebugWindow->clear(sf::Color::Black);
@@ -264,6 +276,10 @@ void CDebug::DisplayWindow()
 	m_pDebugWindow->display();
 }
 
+/// <summary>
+/// set the pointer to the selected unit to mark it for death
+/// </summary>
+/// <returns></returns>
 CUnit* CDebug::GetUnitToDestoy()
 {
 	CUnit* unitMarked = m_pUnitToDestroy;
@@ -271,6 +287,10 @@ CUnit* CDebug::GetUnitToDestoy()
 	return unitMarked;
 }
 
+/// <summary>
+/// Update the info display with the selected unit's stats
+/// </summary>
+/// <param name="_inUnit"></param>
 void CDebug::UpdateInfoDisplay(CUnit* _inUnit)
 {
 	if (_inUnit != nullptr)

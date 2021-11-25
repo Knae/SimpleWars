@@ -42,7 +42,7 @@ int main()
 		}
 	
 		double elapsedTime = (m_TimeCountUp.restart()).asMilliseconds();
-		m_GMRef.UpdateManagers(elapsedTime);
+		m_GMRef.Update(elapsedTime);
 		m_GMRef.DisplayGameWorld();
 		m_GMRef.UpdateDebugWorld();
 	}

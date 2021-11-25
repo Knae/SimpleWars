@@ -68,6 +68,8 @@ public:
 	static CUIEnums::MOUSESTATE GetMouseCurrentState()				{ return m_eCurrentMouseState; }
 	static void SetCurrentUnitHasNoMovePoints(bool _inHasNoPoints)	{ m_bUnitHasNoMovePoints = _inHasNoPoints; }
 	static void SetCurrentUnitHasAttacked(bool _inHasAttacked)		{ m_bUnitHasAttacked = _inHasAttacked; }
+	static void SetToHideStats()									{ m_bDisplayStats = false; }
+	static void SetToDisplayStats(unsigned int& _inWinsBlue, unsigned int& _inWinsRed);
 	static void SwitchTurnForUnitPlacment(int* _inAmountA, int* _inAmountB, int* _inAmountC);
 
 private:
@@ -94,6 +96,7 @@ private:
 	static std::vector<sf::Sprite*> m_vecOverlays;
 	static std::vector<sf::Text*> m_vecText_ControlPanel;
 	static std::vector<int*> m_vecText_DisplayVariables;
+	static sf::Text m_StatsDisplay;
 	static sf::RenderTexture* m_pPanelBackground;
 	static sf::Texture* m_pEmblemTexture;
 	static sf::Texture* m_pButtonUnitTexture;
@@ -114,6 +117,7 @@ private:
 	static bool m_bForfeitChosen;
 	static bool m_bDisplayVictory;
 	static bool m_bDisplayInfoText;
+	static bool m_bDisplayStats;
 
 	static const CUnitEnums::TYPE m_eUnitOnButton[4];
 

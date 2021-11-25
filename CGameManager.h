@@ -29,9 +29,10 @@ public:
 	//General functions
 	//====================================
 	virtual bool IntializeGame();
-	virtual bool UpdateManagers(double& _inElapsedTime);
+	virtual bool Update(double& _inElapsedTime);
 	virtual bool ChangeCurrentState(CUIEnums::GAMESTATE _inState);
 	virtual void SwitchTurns();
+	virtual void EndGame(CUIEnums::TURN _inWinSide);
 	virtual void SetPointersToOtherSystems(
 							CUIManager* _inputUI,
 							CSceneManager* _inputScene,
@@ -73,10 +74,14 @@ private:
 	bool CheckIfMouseOverTile(sf::Vector2f _inPosition);
 	void ProcessUnitAsDead(CUnit* _inUnit);
 	void ParseGameSettings();
+	void ParseGameStats();
+	void RecordGameStats();
+
 
 	const sf::Vector2u m_GameWindowSize_Default = sf::Vector2u(1024, 576);
 	const std::string m_strGameConfig = "configs/game.ini";
 	std::string m_strFontFile = "font/OpenSans-Regular.ttf";
+	std::string m_strGameStatsConfig = "configs/stats.ini";
 	std::string m_strMainMenuConfig = "configs/maps/MainMenu.ini";
 	std::string m_strMountainVillageConfig= "configs/maps/MountainVillage.ini";
 	std::string m_strMountainPassConfig = "configs/maps/MountainPass.ini";
@@ -99,6 +104,8 @@ private:
 	unsigned int m_uiSpawnAreaWidth;
 	unsigned int m_uiSpawnAreaHeight;
 	unsigned int m_uiWindowFrameLimit = 60;
+	unsigned int m_uiWins_Red = 0;
+	unsigned int m_uiWins_Blue = 0;
 	bool m_bExecutingActions;
 	bool m_bAttackOverlayShown;
 	bool m_bWaitingForClick;

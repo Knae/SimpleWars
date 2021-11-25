@@ -7,6 +7,7 @@ std::vector<sf::Sprite*> CUIManager::m_vecButtons_ControlPanel;
 std::vector<sf::Sprite*> CUIManager::m_vecOverlays;
 std::vector<sf::Text*> CUIManager::m_vecText_ControlPanel;
 std::vector<int*> CUIManager::m_vecText_DisplayVariables;
+sf::Text CUIManager::m_StatsDisplay;
 sf::RenderTexture* CUIManager::m_pPanelBackground;
 sf::Texture* CUIManager::m_pEmblemTexture;
 sf::Texture* CUIManager::m_pButtonUnitTexture;
@@ -27,6 +28,7 @@ bool CUIManager::m_bEndTurn;
 bool CUIManager::m_bForfeitChosen;
 bool CUIManager::m_bDisplayVictory;
 bool CUIManager::m_bDisplayInfoText;
+bool CUIManager::m_bDisplayStats;
 
 CUIEnums::TURN CUIManager::m_eCurrentTurn;
 CUIEnums::GAMESTATE CUIManager::m_eCurrentUIState;
@@ -98,6 +100,7 @@ CUIManager::~CUIManager()
 
 /// <summary>
 /// Initialize all the pointers and size of the UI side panel
+/// as well as sets up all the info panels used in the game loop state
 /// </summary>
 /// <param name="_inWindowSize"></param>
 /// <param name="_inFont"></param>
@@ -388,6 +391,11 @@ void CUIManager::DisplayUI(sf::RenderWindow& _inWindow)
 		m_Info_OccupiedTerrain.DisplayInfo(_inWindow);
 		m_Info_ViewedTerrain.DisplayInfo(_inWindow);
 	}
+
+	if (m_bDisplayStats)
+	{
+		_inWindow.draw(m_StatsDisplay);
+	}
 }
 
 /// <summary>
@@ -532,6 +540,12 @@ int CUIManager::ProcessClickInCtrlPanel(sf::Vector2f& _inCoords)
 	return -1;
 }
 
+/// <summary>
+/// Check each button object if it was clicked
+/// </summary>
+/// <param name="_inPosition"></param>
+/// <param name="_outButtonIndex"></param>
+/// <returns></returns>
 bool CUIManager::GetCButtonClicked(sf::Vector2f _inPosition, int& _outButtonIndex)
 {
 	for (size_t i=0; i<m_vecCustomButtons.size();i++)
@@ -546,6 +560,9 @@ bool CUIManager::GetCButtonClicked(sf::Vector2f _inPosition, int& _outButtonInde
 	return false;
 }
 
+/// <summary>
+/// Sets up the relevant buttons for selecting game mode
+/// </summary>
 void CUIManager::SetUpModeSelectionPanel()
 {
 	ClearUIElements();
@@ -575,6 +592,9 @@ void CUIManager::SetUpModeSelectionPanel()
 	newButton = nullptr;
 }
 
+/// <summary>
+/// Sets up the relevant buttons for selecting a map
+/// </summary>
 void CUIManager::SetUpMapSelection()
 {
 	ClearUIElements();
@@ -962,6 +982,10 @@ bool CUIManager::UpdateInfoDisplay(	CUnit* _inSelectedUnit,
 	return true;
 }
 
+/// <summary>
+/// Displat the relevant victory banner
+/// </summary>
+/// <param name="_inSide"></param>
 void CUIManager::VictoryAchieved(CUIEnums::TURN _inSide)
 {
 	switch (_inSide)	
@@ -986,6 +1010,33 @@ void CUIManager::VictoryAchieved(CUIEnums::TURN _inSide)
 	m_bDisplayVictory = true;
 }
 
+/// <summary>
+/// Displays the game stats based on the given info
+/// </summary>
+/// <param name="_inWinsBlue"></param>
+/// <param name="_inWinsRed"></param>
+void CUIManager::SetToDisplayStats(unsigned int& _inWinsBlue, unsigned int& _inWinsRed)
+{
+	std::string statsToDisplay = "Current Wins:\n\nBlue - " + std::to_string( _inWinsBlue) + 
+								" wins\nRed  - " + std::to_string(_inWinsRed) + " wins\n";
+
+	m_StatsDisplay.setString(statsToDisplay);
+	m_StatsDisplay.setFont(*m_pFont);
+	m_StatsDisplay.setCharacterSize(36);
+	m_StatsDisplay.setFillColor(sf::Color::White);
+	m_StatsDisplay.setPosition(160.0f, 192.0f);
+
+	m_bDisplayStats = true;
+
+}
+
+/// <summary>
+/// Updates the amount of units to place when switching to
+/// the next player in UnitPlacement mode
+/// </summary>
+/// <param name="_inAmountA"></param>
+/// <param name="_inAmountB"></param>
+/// <param name="_inAmountC"></param>
 void CUIManager::SwitchTurnForUnitPlacment(int* _inAmountA, int* _inAmountB, int* _inAmountC)
 {
 	m_vecText_ControlPanel[3]->setString("Red Player");

@@ -29,15 +29,21 @@ CUnit::~CUnit()
 	}
 }
 
-//void CUnit::Initialize(sf::Texture* _inTextureSource)
+/// <summary>
+/// Initializes the unit's sprite source and starting MOV points
+/// </summary>
+/// <param name="_inSpriteSource"></param>
 void CUnit::Initialize(sf::Sprite* _inSpriteSource)
 {
-	//m_texTextureSource = _inTextureSource;
 	m_UnitSprite = _inSpriteSource;
-	//m_UnitSprite->setTexture(*m_texTextureSource);
 	m_fMovementPoints = m_fMovementPoints_Base;
 }
 
+/// <summary>
+/// Converts the position to it's int equivalent before setting
+/// its location
+/// </summary>
+/// <param name="_inPosition"></param>
 void CUnit::SetLocation(sf::Vector2f _inPosition)
 {
 	sf::Vector2u tilePosition(	(unsigned int)(_inPosition.x / m_fTileSize),
@@ -45,6 +51,11 @@ void CUnit::SetLocation(sf::Vector2f _inPosition)
 	SetLocation(tilePosition);
 }
 
+/// <summary>
+/// Sets the units current tile location and also 
+/// it's display position 
+/// </summary>
+/// <param name="_inPosition"></param>
 void CUnit::SetLocation(sf::Vector2u _inPosition)
 {
 	m_CurrentTileLocation = _inPosition;
@@ -94,6 +105,10 @@ void CUnit::Update()
 	}
 }
 
+/// <summary>
+/// Expanded update function to enable animations
+/// </summary>
+/// <param name="_inTimeElapsed"></param>
 void CUnit::Update(double& _inTimeElapsed)
 {
 	m_dAnimProgress += _inTimeElapsed;
@@ -103,6 +118,9 @@ void CUnit::Update(double& _inTimeElapsed)
 	}
 }
 
+/// <summary>
+/// Set current state to attac. Meant for animations
+/// </summary>
 void CUnit::Attack()
 {
 	m_eCurrentState = CUnitEnums::STATE::ATTACK;
@@ -131,6 +149,9 @@ void CUnit::MoveTo(sf::Vector2f _inPosition)
 	MoveTo(tilePosition);
 }
 
+/// <summary>
+/// Reset its MOV points and its state back to idle
+/// </summary>
 void CUnit::Replenish()
 {
 	if (m_eCurrentState != CUnitEnums::STATE::DESTROYED)
@@ -143,7 +164,7 @@ void CUnit::Replenish()
 
 void CUnit::ExplodeInFlamingGlory()
 {
-	//Boom Boom Animation.
+	//Boom Boom Animation goes here.
 	m_eCurrentState = CUnitEnums::STATE::DESTROYED;
 }
 

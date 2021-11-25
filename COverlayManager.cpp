@@ -26,8 +26,15 @@ COverlayManager::~COverlayManager()
 	ClearTileOverlays();
 }
 
+/// <summary>
+/// Empties the current available overlays and recreates the default ones
+/// </summary>
+/// <param name="_inConfigPath"></param>
+/// <param name="_inFont"></param>
+/// <param name="_inTileSize"></param>
 void COverlayManager::InitializeOverlays(const std::string& _inConfigPath, sf::Font* _inFont, int _inTileSize)
 {
+	ClearTileOverlays();
 	if (m_pOverlayTexture != nullptr)
 	{
 		delete m_pOverlayTexture;
@@ -67,6 +74,11 @@ void COverlayManager::InitializeOverlays(const std::string& _inConfigPath, sf::F
 	currentRect = nullptr;
 }
 
+/// <summary>
+/// Updates the location of the attack and move overlay as necessary
+/// </summary>
+/// <param name="_inMouse"></param>
+/// <param name="_elapsedTime"></param>
 void COverlayManager::Update(sf::Vector2f& _inMouse, double _elapsedTime)
 {
 	UpdateMoveMod(_inMouse);
@@ -81,6 +93,10 @@ void COverlayManager::Update(sf::Vector2f& _inMouse, double _elapsedTime)
 	}
 }
 
+/// <summary>
+/// Draws all the overlay objects
+/// </summary>
+/// <param name="_inWindow"></param>
 void COverlayManager::DisplayOverlays(sf::RenderWindow& _inWindow)
 {
 	if (m_bShowMoveSelector)
@@ -94,6 +110,9 @@ void COverlayManager::DisplayOverlays(sf::RenderWindow& _inWindow)
 	}
 }
 
+/// <summary>
+/// Clears all overlays except ther first 3
+/// </summary>
 void COverlayManager::ClearTileOverlays()
 {
 	for (auto& element : m_vecOverlayTileSelector)
@@ -136,6 +155,12 @@ void COverlayManager::CreateUnitSelectorOverlays()
 	newRangeOverlay = nullptr;
 }
 
+/// <summary>
+/// Creates the spawn area overlay
+/// </summary>
+/// <param name="_tileTopLeft"></param>
+/// <param name="_inAreaWidth"></param>
+/// <param name="_inAreaHeight"></param>
 void COverlayManager::CreateUnitPlacementOverlay(sf::Vector2u& _tileTopLeft, unsigned int& _inAreaWidth, unsigned int& _inAreaHeight)
 {
 	for (unsigned int row = _tileTopLeft.y; row <= (_tileTopLeft.y + _inAreaHeight); row++)
@@ -154,7 +179,12 @@ void COverlayManager::CreateUnitPlacementOverlay(sf::Vector2u& _tileTopLeft, uns
 	}
 }
 
-void COverlayManager::CreateUnitOverlay(sf::Vector2u& _tilePosition, int _inRange)
+/// <summary>
+/// Create the overlay to show the range of the selected unit
+/// </summary>
+/// <param name="_tilePosition"></param>
+/// <param name="_inRange"></param>
+void COverlayManager::CreateRangeOverlay(sf::Vector2u& _tilePosition, int _inRange)
 {
 	int minX = _tilePosition.x - _inRange;
 	int minY = _tilePosition.y - _inRange;
@@ -189,6 +219,9 @@ void COverlayManager::CreateUnitOverlay(sf::Vector2u& _tilePosition, int _inRang
 	}
 }
 
+/// <summary>
+/// Remove the range overlay
+/// </summary>
 void COverlayManager::ClearRangePlacementOverlay()
 {
 	if (m_vecOverlayTileSelector.size() > 0)
@@ -204,6 +237,10 @@ void COverlayManager::ClearRangePlacementOverlay()
 
 }
 
+/// <summary>
+/// Show the overlay to indicate the chosen unit
+/// </summary>
+/// <param name="_inTileLocation"></param>
 void COverlayManager::ShowUnitSelector(sf::Vector2u& _inTileLocation)
 {
 	//convert the pixel location to tile index to figure out which tile
@@ -211,31 +248,64 @@ void COverlayManager::ShowUnitSelector(sf::Vector2u& _inTileLocation)
 	//that tile.
 	//[NOTE]Repeated use. Probably should be set to a common function
 	//sf::Vector2i tileAtLocation( (int)(_inTileLocation.x/m_iTileSize), (int)(_inTileLocation.y/m_iTileSize) );
-	m_vecOverlayTileSelector[0]->setPosition(sf::Vector2f((float)(_inTileLocation.x * m_iTileSize), (float)(_inTileLocation.y * m_iTileSize) ));
+	if (m_vecOverlayTileSelector.size() >= 3)
+	{
+		m_vecOverlayTileSelector[0]->setPosition(sf::Vector2f((float)(_inTileLocation.x * m_iTileSize), (float)(_inTileLocation.y * m_iTileSize)));
+	}
 }
 
+/// <summary>
+/// Shows and updates the location of the the overlay to indicate the tile to move to
+/// </summary>
+/// <param name="_mouseLocation"></param>
 void COverlayManager::ShowMoveSelector(sf::Vector2f& _mouseLocation)
 {
 	//convert the pixel location to tile index to figure out which tile
 	//the overlay will be on. Then convert back to get the top-left pixel location of
 	//that tile.
 	//[NOTE]Repeated use.Probably should be set to a common function
-	sf::Vector2i tileAtLocation( (int)(_mouseLocation.x/m_iTileSize), (int)(_mouseLocation.y/m_iTileSize) );
-	m_vecOverlayTileSelector[1]->setPosition(sf::Vector2f( (float)(tileAtLocation.x * m_iTileSize), (float)(tileAtLocation.y * m_iTileSize) ));
-	m_bShowMoveSelector = true;
+	if (m_vecOverlayTileSelector.size() >= 3)
+	{
+		sf::Vector2i tileAtLocation((int)(_mouseLocation.x / m_iTileSize), (int)(_mouseLocation.y / m_iTileSize));
+		m_vecOverlayTileSelector[1]->setPosition(sf::Vector2f((float)(tileAtLocation.x * m_iTileSize), (float)(tileAtLocation.y * m_iTileSize)));
+		m_bShowMoveSelector = true;
+	}
+	else
+	{
+		m_bShowMoveSelector = false;
+	}
 }
 
+
+/// <summary>
+/// shows and updates the location of the overlay that indicates the tile to attack
+/// </summary>
+/// <param name="_mouseLocation"></param>
 void COverlayManager::ShowAttackSelector(sf::Vector2f& _mouseLocation)
 {
 	//convert the pixel location to tile index to figure out which tile
 	//the overlay will be on. Then convert back to get the top-left pixel location of
 	//that tile.
 	//[NOTE]Repeated use. Probably should be set to a common function
-	sf::Vector2i tileAtLocation((int)(_mouseLocation.x / m_iTileSize), (int)(_mouseLocation.y / m_iTileSize));
-	m_vecOverlayTileSelector[2]->setPosition(sf::Vector2f( (float)(tileAtLocation.x * m_iTileSize), (float)(tileAtLocation.y * m_iTileSize) ));
-	m_bShowAttackSelector = true;
+	if (m_vecOverlayTileSelector.size() >= 3)
+	{
+		sf::Vector2i tileAtLocation((int)(_mouseLocation.x / m_iTileSize), (int)(_mouseLocation.y / m_iTileSize));
+		m_vecOverlayTileSelector[2]->setPosition(sf::Vector2f( (float)(tileAtLocation.x * m_iTileSize), (float)(tileAtLocation.y * m_iTileSize) ));
+		m_bShowAttackSelector = true;
+	}
+	else
+	{
+		m_bShowAttackSelector = false;
+	}
 }
 
+/// <summary>
+/// Update the overlay that shows the additionla MOV cost to
+/// move a unit to the tile, as well as the position of overlay
+/// </summary>
+/// <param name="_inMousePosition"></param>
+/// <param name="_inMoveMod"></param>
+/// <param name="_inNewValue"></param>
 void COverlayManager::UpdateMoveMod(sf::Vector2f& _inMousePosition, float _inMoveMod, bool _inNewValue)
 {
 	if (_inNewValue)
@@ -280,6 +350,14 @@ void COverlayManager::HideAttackSelector()
 	m_bShowAttackSelector = false;
 }
 
+/// <summary>
+/// checks if the position is within the spawn area
+/// </summary>
+/// <param name="_tilePosition"></param>
+/// <param name="_tileTopLeft"></param>
+/// <param name="_inAreaWidth"></param>
+/// <param name="_inAreaHeight"></param>
+/// <returns></returns>
 bool COverlayManager::IsInSpawnArea(sf::Vector2u& _tilePosition, sf::Vector2u& _tileTopLeft, unsigned int& _inAreaWidth, unsigned int& _inAreaHeight)
 {
 	if ((_tilePosition.x >= _tileTopLeft.x && _tilePosition.x <= (_tileTopLeft.x + _inAreaWidth)) &&
@@ -293,6 +371,15 @@ bool COverlayManager::IsInSpawnArea(sf::Vector2u& _tilePosition, sf::Vector2u& _
 	}
 }
 
+/// <summary>
+/// converts the position vector to the int equivalent
+/// before checking if the position is within the spawn area
+/// </summary>
+/// <param name="_tilePosition"></param>
+/// <param name="_tileTopLeft"></param>
+/// <param name="_inAreaWidth"></param>
+/// <param name="_inAreaHeight"></param>
+/// <returns></returns>
 bool COverlayManager::IsInSpawnArea(sf::Vector2f& _tilePosition, sf::Vector2u& _tileTopLeft, unsigned int& _inAreaWidth, unsigned int& _inAreaHeight)
 {
 	sf::Vector2u targetTile((unsigned int)(_tilePosition.x / m_iTileSize),
@@ -301,6 +388,13 @@ bool COverlayManager::IsInSpawnArea(sf::Vector2f& _tilePosition, sf::Vector2u& _
 	return IsInSpawnArea(targetTile, _tileTopLeft, _inAreaWidth, _inAreaHeight);
 }
 
+/// <summary>
+/// Checks if tileTarget is within range of tilePosition
+/// </summary>
+/// <param name="_tilePosition"></param>
+/// <param name="_tileTarget"></param>
+/// <param name="_inRange"></param>
+/// <returns></returns>
 bool COverlayManager::IsInRange(sf::Vector2u& _tilePosition, sf::Vector2u& _tileTarget, int _inRange)
 {
 	int tileDistanceX = _tileTarget.x - _tilePosition.x;
@@ -316,6 +410,14 @@ bool COverlayManager::IsInRange(sf::Vector2u& _tilePosition, sf::Vector2u& _tile
 	}
 }
 
+/// <summary>
+/// Converts position vector of tileTarget to int equivalent
+/// before checking if it is in range of tilePosition
+/// </summary>
+/// <param name="_tilePosition"></param>
+/// <param name="_tileTarget"></param>
+/// <param name="_inRange"></param>
+/// <returns></returns>
 bool COverlayManager::IsInRange(sf::Vector2u& _tilePosition, sf::Vector2f& _tileTarget, int _inRange)
 {
 	sf::Vector2u targetTile(	(unsigned int)(_tileTarget.x / m_iTileSize),

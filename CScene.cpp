@@ -318,6 +318,11 @@ bool CScene::ParseConfig(const std::string& _filePath)
 	return true;
 }
 
+/// <summary>
+/// initializes the map based on the data parsed
+/// from the config file
+/// </summary>
+/// <returns></returns>
 bool CScene::InitializeMap()
 {
 	if (!m_pMapTileMap->loadFromFile(m_strTileMapFilePath))
@@ -374,6 +379,9 @@ bool CScene::InitializeMap()
 	return false;
 }
 
+/// <summary>
+/// Resets all tile to contain no units
+/// </summary>
 void CScene::ResetTiles()
 {
 	for (unsigned short currentRow = 0; currentRow < m_uiMapRows; currentRow++)
@@ -448,6 +456,13 @@ void CScene::GetUnitsToPlace(std::map<CUnitEnums::TYPE, int>* _inUnitsB, std::ma
 	}
 }
 
+/// <summary>
+/// Write the corresponding spawn area details into the last 3 args
+/// </summary>
+/// <param name="_inSide"></param>
+/// <param name="_outLocation"></param>
+/// <param name="_outAreaWidth"></param>
+/// <param name="_outAreaHeight"></param>
 void CScene::WriteSpawnAreaDetails(CUnitEnums::SIDE _inSide, sf::Vector2u& _outLocation, unsigned int& _outAreaWidth, unsigned int& _outAreaHeight)
 {
 	switch (_inSide)
@@ -475,6 +490,12 @@ void CScene::WriteSpawnAreaDetails(CUnitEnums::SIDE _inSide, sf::Vector2u& _outL
 	}
 }
 
+/// <summary>
+/// Returns the locations of all the AI units in the form
+/// of a map of std::vector of sf::Vector2u pointers
+/// ie: a map containing the positions of each specific unit type
+/// </summary>
+/// <returns></returns>
 std::map< CUnitEnums::TYPE, std::vector<sf::Vector2u>*>& CScene::GetAIUnitLocations()
 {
 	return m_mapAILocations;

@@ -2,15 +2,23 @@
 #include "CUnitManager.h"
 #include "CSceneManager.h"
 
-std::vector<CUnit*>* CAI_Controller::m_vecUnits_AI;
-std::vector<CUnit*>* CAI_Controller::m_vecUnits_Player;
+std::vector<CUnit*>* CAI_Controller::m_pVecUnits_AI;
+std::vector<CUnit*>* CAI_Controller::m_pVecUnits_Player;
 
 CAI_Controller::CAI_Controller()
 {
-	m_vecUnits_AI = nullptr;
-	m_vecUnits_Player = nullptr;
+	m_pVecUnits_AI = nullptr;
+	m_pVecUnits_Player = nullptr;
 }
 
+/// <summary>
+/// Go through each enemy unit and compares its distance
+/// from the unit given in the first arg.writes the address of the
+/// closest enemy instance into the 2nd arg
+/// </summary>
+/// <param name="_inCurrentUnit"></param>
+/// <param name="_outTarget"></param>
+/// <returns></returns>
 int CAI_Controller::FindClosestEnemy(CUnit* _inCurrentUnit, CUnit*& _outTarget)
 {
 	sf::Vector2u currentPos = _inCurrentUnit->GetCurrentTile();
@@ -18,7 +26,7 @@ int CAI_Controller::FindClosestEnemy(CUnit* _inCurrentUnit, CUnit*& _outTarget)
 	CUnit* currentNearestTarget = nullptr;
 	int currentNearestDistance = 99999;
 	int currentCalculatedDistance = 0;
-	for (auto& unit : *m_vecUnits_Player)
+	for (auto& unit : *m_pVecUnits_Player)
 	{
 		if (unit->GetState() != CUnitEnums::STATE::DESTROYED)
 		{
@@ -36,6 +44,13 @@ int CAI_Controller::FindClosestEnemy(CUnit* _inCurrentUnit, CUnit*& _outTarget)
 	return currentNearestDistance;
 }
 
+/// <summary>
+/// Calculates and returns the distance
+/// between the given tile locations
+/// </summary>
+/// <param name="_inCurrentTile"></param>
+/// <param name="_targetTile"></param>
+/// <returns></returns>
 int CAI_Controller::FindDistanceBetweenTiles(sf::Vector2u& _inCurrentTile, sf::Vector2u& _targetTile)
 {
 	//Check if can get negative values
@@ -44,6 +59,13 @@ int CAI_Controller::FindDistanceBetweenTiles(sf::Vector2u& _inCurrentTile, sf::V
 	return dist;
 }
 
+/// <summary>
+/// Calculates and returns the direction that the tile
+/// from arg2 is from the tile in arg1
+/// </summary>
+/// <param name="_inCurrentTile"></param>
+/// <param name="_targetTile"></param>
+/// <returns>sf::Vector2i of the direction</returns>
 sf::Vector2i CAI_Controller::GetDirectionToTarget(sf::Vector2u& _inCurrentTile, sf::Vector2u& _targetTile)
 {
 	//Check if can get negative values
@@ -53,20 +75,34 @@ sf::Vector2i CAI_Controller::GetDirectionToTarget(sf::Vector2u& _inCurrentTile, 
 
 CAI_Controller::~CAI_Controller()
 {
-	m_vecUnits_AI = nullptr;
-	m_vecUnits_Player = nullptr;
+	m_pVecUnits_AI = nullptr;
+	m_pVecUnits_Player = nullptr;
 }
 
+/// <summary>
+/// Get and store the pointers to the vector of units in the game
+/// </summary>
+/// <param name="_inPVecAI"></param>
+/// <param name="_inPVecPlayer"></param>
 void CAI_Controller::IntializeAi(std::vector<CUnit*>* _inPVecAI, std::vector<CUnit*>* _inPVecPlayer)
 {
-	m_vecUnits_AI = _inPVecAI;
-	m_vecUnits_Player = _inPVecPlayer;
+	m_pVecUnits_AI = _inPVecAI;
+	m_pVecUnits_Player = _inPVecPlayer;
 }
 
+/// <summary>
+/// Runs AI decision making code. For a unit that has not attack nor moved
+/// it will try to find a target to attack. Failing that it'll move then try again.
+/// if a unit moves or attacks, it'll return false as it's not finish and wait till its
+/// called again to repeat the process. If a unit can has no possible tile to move to or 
+/// has no MOV points or has already attacked, it'll move on the next unit. Once all units
+/// have been processed, then the function returns true.
+/// </summary>
+/// <returns></returns>
 bool CAI_Controller::StartAITurn()
 {
 	CUnit* targetUnit = nullptr;
-	for (auto& unit : *m_vecUnits_AI)
+	for (auto& unit : *m_pVecUnits_AI)
 	{
 		int dist = FindClosestEnemy(unit, targetUnit);
 		if (targetUnit != nullptr)
@@ -106,9 +142,7 @@ bool CAI_Controller::StartAITurn()
 					
 					//I hate This
 					sf::Vector2i posTry1(unitPosition.x + dir.x, unitPosition.y);
-					//sf::Vector2i posTry2(unitPosition.x , unitPosition.y + dir.y);
 					CSceneEnums::TILETYPE posTryTileType1 = CSceneManager::GetTileInScene(sf::Vector2u(posTry1))->GetTileType();
-					//CSceneEnums::TILETYPE posTryTileType2 = CSceneManager::GetTileInScene(sf::Vector2u(posTry2))->GetTileType();
 					if (CSceneManager::GetTileInScene(sf::Vector2u(posTry1))->GetUnitOnTile() !=nullptr || 
 						!CUnitManager::MoveUnit(unit, sf::Vector2u(posTry1), posTryTileType1))
 					{

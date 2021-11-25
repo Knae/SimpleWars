@@ -1,5 +1,10 @@
 #include "CGameManager.h"
 
+/// <summary>
+/// Mainly calls the update function in Debug
+/// and also to check if a unit is marked for death
+/// in the Debug window
+/// </summary>
 void CGameManager::UpdateDebugWorld()
 {
 	m_refDebug.Update();
@@ -33,6 +38,8 @@ CGameManager::CGameManager()
 	m_eCurrentState = CUIEnums::GAMESTATE::NONE;
 	m_eCurrentUIMouseState = CUIEnums::MOUSESTATE::NONE;
 	m_eCurrentTypeChosen = CUnitEnums::TYPE::NONE;
+	m_eChosenFaction_Blue = CUnitEnums::FACTION::NONE;
+	m_eChosenFaction_Red = CUnitEnums::FACTION::NONE;
 	m_bAttackOverlayShown = false;
 	m_bExecutingActions = false;
 	m_bWaitingForClick = false;
@@ -40,6 +47,8 @@ CGameManager::CGameManager()
 
 	m_uiSpawnAreaWidth = 0;
 	m_uiSpawnAreaHeight = 0;
+	m_uiWins_Blue = 0;
+	m_uiWins_Red = 0;
 }
 
 CGameManager::~CGameManager()
@@ -61,8 +70,17 @@ CGameManager::~CGameManager()
 	m_pUnitMgr = nullptr;
 	m_pOverlayMgr = nullptr;
 	m_pSelectedUnit = nullptr;
+
+	RecordGameStats();
 }
 
+/// <summary>
+/// Initializes game manager by reading the game.ini to get the 
+/// file paths of all the config files and also other
+/// settings. then initializes game UI and the debug window.
+/// Finally, sets the game state to Mode selection
+/// </summary>
+/// <returns></returns>
 bool CGameManager::IntializeGame()
 {
 	ParseGameSettings();
@@ -118,11 +136,17 @@ void CGameManager::SetPointersToOtherSystems(CUIManager* _inputUI,
 	m_pOverlayMgr = _inputOverlay;
 }
 
-bool CGameManager::UpdateManagers(double& _inElapsedTime)
+/// <summary>
+/// Runs various checks and updates necessary for other managers to function.
+/// eg: if end turn was clicked, if all enemies dead, for AI functionality, etc..
+/// </summary>
+/// <param name="_inElapsedTime"></param>
+/// <returns></returns>
+bool CGameManager::Update(double& _inElapsedTime)
 {
 	sf::Vector2f mousePosition = m_pGameWindow->mapPixelToCoords(sf::Mouse::getPosition(*(m_pGameWindow)));
 
-	if (m_eCurrentState != CUIEnums::GAMESTATE::MODE && m_eCurrentState != CUIEnums::GAMESTATE::MAPSELECTION)
+	if (m_eCurrentState != CUIEnums::GAMESTATE::MODE && m_eCurrentState != CUIEnums::GAMESTATE::MAPSELECTION && m_eCurrentState != CUIEnums::GAMESTATE::GAMEEND)
 	{
 		if (m_bAIEnabled && m_eCurrentTurn == CUIEnums::TURN::RED /*&& m_eCurrentState == CUIEnums::GAMESTATE::GAMELOOP*/)
 		{
@@ -162,21 +186,21 @@ bool CGameManager::UpdateManagers(double& _inElapsedTime)
 				{
 					case CUIEnums::TURN::BLUE:
 					{
-						CUIManager::VictoryAchieved(CUIEnums::TURN::RED);
+						EndGame(CUIEnums::TURN::RED);
 						break;
 					}
 					case CUIEnums::TURN::RED:
 					{
-						CUIManager::VictoryAchieved(CUIEnums::TURN::BLUE);
+						EndGame(CUIEnums::TURN::BLUE);
 						break;
 					}
 					default:
 					case CUIEnums::TURN::NONE:
 					{
+						std::cout << "\nERROR:Someone forfeited...but we don't know who." << std::endl;
 						break;
 					}
 				}
-				ChangeCurrentState(CUIEnums::GAMESTATE::GAMEEND);
 			}
 			else if (CUIManager::GetIfTurnEndClicked())
 			{
@@ -188,13 +212,12 @@ bool CGameManager::UpdateManagers(double& _inElapsedTime)
 			{
 				//GameEnds
 				std::cout << "\nAll Enemy units  have died!" << std::endl;
-				m_bExecutingActions = false;
-				CUIManager::VictoryAchieved(m_eCurrentTurn);
-				ChangeCurrentState(CUIEnums::GAMESTATE::GAMEEND);
+				EndGame(m_eCurrentTurn);
 			}
 
 			m_eCurrentUIMouseState = CUIManager::GetMouseCurrentState();
 
+			//Updates the sidepanel based on the tile under the mouse
 			if (CheckIfMouseOverTile(mousePosition))
 			{
 				CTile* tileUnderMouse = CSceneManager::GetTileInScene(mousePosition);
@@ -319,6 +342,11 @@ bool CGameManager::ChangeCurrentState(CUIEnums::GAMESTATE _inState)
 	return false;
 }
 
+/// <summary>
+/// Switch turns. Runs additional functions based on current game state
+/// eg: showing overlay for unit placement area, update number of units
+/// to place
+/// </summary>
 void CGameManager::SwitchTurns()
 {
 	switch (m_eCurrentState)
@@ -370,10 +398,34 @@ void CGameManager::SwitchTurns()
 	}
 }
 
+/// <summary>
+/// Shows the corresponding victory banner
+/// and updates game stats. Then moves game state to 
+/// GameEnd
+/// </summary>
+/// <param name="_inWinSide"></param>
+void CGameManager::EndGame(CUIEnums::TURN _inWinSide)
+{
+	m_bExecutingActions = false;
+	CUIManager::VictoryAchieved(_inWinSide);
+	if (_inWinSide == CUIEnums::TURN::BLUE)
+	{
+		m_uiWins_Blue++;
+	}
+	else if (_inWinSide == CUIEnums::TURN::RED)
+	{
+		m_uiWins_Red++;
+	}
+	ChangeCurrentState(CUIEnums::GAMESTATE::GAMEEND);
+}
+
 void CGameManager::DrawObject(sf::Drawable* _object)
 {
 }
 
+/// <summary>
+/// Clears window to black and then displays the scene and UI
+/// </summary>
 void CGameManager::DisplayGameWorld()
 {
 	m_pGameWindow -> clear(sf::Color::Black);
@@ -382,6 +434,9 @@ void CGameManager::DisplayGameWorld()
 	m_pGameWindow->display();
 }
 
+/// <summary>
+/// Game go boom
+/// </summary>
 void CGameManager::DestroyGameWorld()
 {
 	m_refDebug.GetWindows()->close();
@@ -392,12 +447,20 @@ void CGameManager::DisplayDebug()
 {
 }
 
+/// <summary>
+/// Clear the record of units to place
+/// </summary>
 void CGameManager::ClearUnitsToPlace()
 {
 	m_mapUnitsToPlaced_B.clear();
 	m_mapUnitsToPlaced_R.clear();
 }
 
+/// <summary>
+/// Load the selected scene map or the main menu
+/// </summary>
+/// <param name="_inScene"></param>
+/// <returns></returns>
 bool CGameManager::LoadScene(CSceneEnums::SCENETYPE _inScene)
 {
 	std::string configPath;
@@ -452,6 +515,11 @@ void CGameManager::DisplayScene()
 	COverlayManager::DisplayOverlays(*m_pGameWindow);
 }
 
+/// <summary>
+/// Runs the UI manager intialize function. Must be run
+/// after the scene manager is initialize.
+/// </summary>
+/// <returns></returns>
 bool CGameManager::InitializeUI()
 {
 	if (m_pSceneMgr != nullptr)
@@ -551,7 +619,7 @@ void CGameManager::ProcessMouseClick()
 						{
 							sf::Vector2u currentUnitPosition = m_pSelectedUnit->GetCurrentTile();
 							int unitRange = CUnitManager::GetUnitRange(m_pSelectedUnit);
-							COverlayManager::CreateUnitOverlay(currentUnitPosition, unitRange);
+							COverlayManager::CreateRangeOverlay(currentUnitPosition, unitRange);
 							COverlayManager::ShowAttackSelector(mousePosition);
 							COverlayManager::HideMoveSelector();
 							m_bAttackOverlayShown = true;
@@ -753,7 +821,7 @@ void CGameManager::ProcessMouseClick()
 										{
 											unitRange = CUnitManager::GetUnitRange(m_pSelectedUnit);
 											COverlayManager::ClearRangePlacementOverlay();
-											COverlayManager::CreateUnitOverlay(currentUnitPosition, unitRange);
+											COverlayManager::CreateRangeOverlay(currentUnitPosition, unitRange);
 											m_bAttackOverlayShown = true;
 										}
 										else
@@ -822,13 +890,20 @@ void CGameManager::ProcessMouseClick()
 	}
 }
 
+/// <summary>
+/// Set the sidepanel to Mode selection
+/// </summary>
 void CGameManager::SetUIToModeSelection()
 {
 	CUIManager::SetUpModeSelectionPanel();
 	CUIManager::SetCurrentGameState(m_eCurrentState);
 	CUIManager::SetCurrentTurn(m_eCurrentTurn);
+	CUIManager::SetToDisplayStats(m_uiWins_Blue, m_uiWins_Red);
 }
 
+/// <summary>
+/// Set sidepanel to map selection
+/// </summary>
 void CGameManager::SetUIToMapSelection()
 {
 	CUIManager::SetUpMapSelection();
@@ -844,7 +919,8 @@ void CGameManager::SetUIToMapSelection()
 /// </summary>
 void CGameManager::SetUIToUnitPlacement()
 {
-	m_pUIMgr->ClearUIElements();
+	CUIManager::ClearUIElements();
+	CUIManager::SetToHideStats();
 	//For now there are only 3 buttons to place,
 	//Infantry, tanks and artillery in that order
 	int* infantryAmount = &(m_pUnitsToPlace->find(CUnitEnums::TYPE::INFANTRY)->second);
@@ -854,16 +930,26 @@ void CGameManager::SetUIToUnitPlacement()
 	CUIManager::SetUpUnitPlacementPanel(infantryAmount, tankAmount, artilleryAmount);
 }
 
+/// <summary>
+/// Set to side panel to game loop mode
+/// </summary>
 void CGameManager::SetUIToGameLoop()
 {
 	CUIManager::SetUpGameLoopPanel();
 }
 
+/// <summary>
+/// Calls the disply funtion of the UI manager
+/// </summary>
 void CGameManager::DisplayUI()
 {
 	CUIManager::DisplayUI(*m_pGameWindow);
 }
 
+/// <summary>
+/// updates the information in the side panel
+/// </summary>
+/// <param name="_inViewedUnit"></param>
 void CGameManager::UpdateSidePanelInfo(	CUnit* _inViewedUnit)
 {
 	if (m_eCurrentState == CUIEnums::GAMESTATE::UNITPLACEMENT)
@@ -895,6 +981,11 @@ void CGameManager::UpdateSidePanelInfo(	CUnit* _inViewedUnit)
 	}
 }
 
+/// <summary>
+/// Checks if a tile exists under the mouse
+/// </summary>
+/// <param name="_inPosition"></param>
+/// <returns></returns>
 bool CGameManager::CheckIfMouseOverTile(sf::Vector2f _inPosition)
 {
 	if (CSceneManager::GetTileInScene(_inPosition) != nullptr)
@@ -907,13 +998,22 @@ bool CGameManager::CheckIfMouseOverTile(sf::Vector2f _inPosition)
 	}
 }
 
+/// <summary>
+/// Proceses the currently unit as dead and removes it
+/// from the tile's record
+/// </summary>
+/// <param name="_inUnit"></param>
 void CGameManager::ProcessUnitAsDead(CUnit* _inUnit)
 {
-	//_inUnit->ExplodeInFlamingGlory();
+	_inUnit->ExplodeInFlamingGlory();
 	sf::Vector2u targetTilePosition = _inUnit->GetCurrentTile();
 	CSceneManager::GetTileInScene(targetTilePosition)->UnitLeavesTile();
 }
 
+/// <summary>
+/// Parse the text in the game settings file into
+/// usable data.
+/// </summary>
 void CGameManager::ParseGameSettings()
 {
 	std::fstream gameSettings;
@@ -1011,11 +1111,68 @@ void CGameManager::ParseGameSettings()
 					{
 						m_strBridgeConfig = currentValue;
 					}
+					else if (currentType.compare("Bridge") == 0)
+					{
+						m_strGameStatsConfig = currentValue;
+					}
 					std::getline(gameSettings, currentLine);
 				}
 			}
 
 			std::getline(gameSettings, currentLine);
 		}
+	}
+
+	ParseGameStats();
+}
+
+/// <summary>
+/// Parse the gamestats.ini into usable data
+/// </summary>
+void CGameManager::ParseGameStats()
+{
+	std::fstream gameStats;
+
+	gameStats.open(m_strGameStatsConfig);
+	if (gameStats.is_open())
+	{
+		std::string currentLine;
+		std::string currentLabel;
+		std::string currentValue;
+		while (std::getline(gameStats, currentLine))
+		{
+			currentLabel = CParseConfigCommon::ParseLineGetLabel(currentLine,currentValue);
+			if (currentLabel.compare("Red") == 0)
+			{
+				m_uiWins_Red = std::stol(currentValue);
+			}
+			else if(currentLabel.compare("Blue") == 0)
+			{
+				m_uiWins_Blue = std::stol(currentValue);
+			}
+		}
+	}
+	else
+	{
+		m_uiWins_Blue = 0;
+		m_uiWins_Red = 0;
+	}
+}
+
+/// <summary>
+/// Write the gamestats into file
+/// </summary>
+void CGameManager::RecordGameStats()
+{
+	std::ofstream gameStats;
+
+	gameStats.open(m_strGameStatsConfig, std::ios::trunc);
+	if (gameStats.is_open())
+	{
+		std::string currentLine;
+
+		gameStats << "Blue=" << m_uiWins_Blue << std::endl;
+		gameStats << "Red=" << m_uiWins_Red << std::endl;
+
 	}
 }

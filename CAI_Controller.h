@@ -27,8 +27,8 @@ private:
 	static int FindDistanceBetweenTiles(sf::Vector2u& _inCurrentTile, sf::Vector2u& _targetTile);
 	static sf::Vector2i GetDirectionToTarget(sf::Vector2u& _inCurrentTile, sf::Vector2u& _targetTile);
 
-	static std::vector<CUnit*>* m_vecUnits_AI;
-	static std::vector<CUnit*>* m_vecUnits_Player;
+	static std::vector<CUnit*>* m_pVecUnits_AI;
+	static std::vector<CUnit*>* m_pVecUnits_Player;
 };
 
 #endif // !__CAICONTROLLER_H__

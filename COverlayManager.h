@@ -22,7 +22,7 @@ public:
 	static void CreateUnitPlacementOverlay(	sf::Vector2u& _tileTopLeft,
 											unsigned int& _inAreaWidth,
 											unsigned int& _inAreaHeight);
-	static void CreateUnitOverlay(sf::Vector2u& _tilePosition, int _inRange);
+	static void CreateRangeOverlay(sf::Vector2u& _tilePosition, int _inRange);
 	static void ClearRangePlacementOverlay();
 	static void ShowUnitSelector(sf::Vector2u& _inTileLocation);
 	static void ShowMoveSelector(sf::Vector2f& _mouseLocation);

@@ -351,6 +351,10 @@ void CUnitManager::ParseConfig(const std::string& _inUnitConfigPath, const std::
 	}
 }
 
+/// <summary>
+/// Displays all units
+/// </summary>
+/// <param name="_inWindow"></param>
 void CUnitManager::DisplayUnits(sf::RenderWindow& _inWindow)
 {
 	for (auto& element : m_vecCurrentUnits_Blue)
@@ -370,6 +374,13 @@ void CUnitManager::DisplayUnits(sf::RenderWindow& _inWindow)
 	}
 }
 
+/// <summary>
+/// 
+/// </summary>
+/// <param name="_inType"></param>
+/// <param name="_inFaction"></param>
+/// <param name="_inSide"></param>
+/// <returns></returns>
 CUnit* CUnitManager::CreateUnit(CUnitEnums::TYPE _inType,CUnitEnums::FACTION _inFaction, CUnitEnums::SIDE _inSide)
 {
 	std::map<CUnitEnums::TYPE, CUnitEnums::UnitRecord*>::iterator mapIter;
@@ -468,6 +479,13 @@ bool CUnitManager::MoveUnit(CUnit* _inUnit, sf::Vector2f _inPosition, CSceneEnum
 	return MoveUnit(_inUnit, tilePosition, _inTile);
 }
 
+/// <summary>
+/// Processes the attack action of a unit against another
+/// unit
+/// </summary>
+/// <param name="_inAttackinUnit"></param>
+/// <param name="_inDefendingUnit"></param>
+/// <returns></returns>
 bool CUnitManager::Attack(CUnit* _inAttackinUnit, CUnit* _inDefendingUnit)
 {
 	float damageDealtModifier = ResolveTerrainEffects(_inAttackinUnit->GetType(),_inAttackinUnit->GetCurrentTileType())->GetModifierDamageDealt();
@@ -490,6 +508,11 @@ bool CUnitManager::Attack(CUnit* _inAttackinUnit, CUnit* _inDefendingUnit)
 	}
 }
 
+/// <summary>
+/// Find the unit's resulant range modified by terrain
+/// </summary>
+/// <param name="_inUnit"></param>
+/// <returns></returns>
 int CUnitManager::GetUnitRange(CUnit* _inUnit)
 {
 	int baseRange = _inUnit->GetRange();
@@ -499,6 +522,9 @@ int CUnitManager::GetUnitRange(CUnit* _inUnit)
 	return adjustedRange;
 }
 
+/// <summary>
+/// Destroy everything
+/// </summary>
 void CUnitManager::ClearUnits()
 {
 	/// <summary>
@@ -520,6 +546,11 @@ void CUnitManager::ClearUnits()
 	m_vecCurrentUnits_Red.clear();
 }
 
+/// <summary>
+/// Run the update function in each unit.
+/// Started as a enabler for animations
+/// </summary>
+/// <param name="_inElapsedTime"></param>
 void CUnitManager::Update(double& _inElapsedTime)
 {
 	for (auto& element : m_vecCurrentUnits_Blue)

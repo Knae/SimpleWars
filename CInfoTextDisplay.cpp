@@ -9,6 +9,14 @@ CInfoTextDisplay::~CInfoTextDisplay()
 	Clear();
 }
 
+/// <summary>
+/// Initializes the InfoDisplay class with info of 
+/// where to place and how many items to display
+/// </summary>
+/// <param name="_inTopLeftPosX"></param>
+/// <param name="_inTopLeftPosY"></param>
+/// <param name="_inFont"></param>
+/// <param name="_inNumberOfText"></param>
 void CInfoTextDisplay::Initialize(float _inTopLeftPosX, float _inTopLeftPosY, sf::Font* _inFont, unsigned int _inNumberOfText)
 {
 	
@@ -35,6 +43,13 @@ void CInfoTextDisplay::Initialize(float _inTopLeftPosX, float _inTopLeftPosY, sf
 	}
 }
 
+/// <summary>
+/// Set the label and value of a specific display item
+/// </summary>
+/// <param name="_inIndex"></param>
+/// <param name="_inLabel"></param>
+/// <param name="_inValue"></param>
+/// <returns></returns>
 bool CInfoTextDisplay::SetTextAtIndex(int _inIndex, std::string _inLabel, std::string _inValue)
 {
 	size_t givenIndex = _inIndex;
@@ -51,6 +66,12 @@ bool CInfoTextDisplay::SetTextAtIndex(int _inIndex, std::string _inLabel, std::s
 	}
 }
 
+/// <summary>
+///	Set the value of a specific item to display
+/// </summary>
+/// <param name="_inIndex"></param>
+/// <param name="_inValue"></param>
+/// <returns></returns>
 bool CInfoTextDisplay::SetValueDisplayAtIndex(int _inIndex, std::string _inValue)
 {
 	size_t givenIndex = _inIndex;
@@ -66,6 +87,7 @@ bool CInfoTextDisplay::SetValueDisplayAtIndex(int _inIndex, std::string _inValue
 	}
 }
 
+//Display all the items
 void CInfoTextDisplay::DisplayInfo(sf::RenderWindow& _inWindow)
 {
 	for (auto& label : m_vecLabels)
@@ -81,6 +103,9 @@ void CInfoTextDisplay::DisplayInfo(sf::RenderWindow& _inWindow)
 	}
 }
 
+/// <summary>
+/// Destroy everything
+/// </summary>
 void CInfoTextDisplay::Clear()
 {
 	for (auto& label : m_vecLabels)
