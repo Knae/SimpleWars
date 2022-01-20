@@ -1,5 +1,9 @@
 #include "CVFXManager.h"
 
+const double CVFXManager::m_iAnimFrameTimeMax = 200.0f;
+double CVFXManager::m_iAnimFrameTime;
+float CVFXManager::m_fTileSize;
+
 sf::Texture* CVFXManager::m_pVFXTex_Bullet;
 sf::Texture* CVFXManager::m_pVFXTex_Shell;
 sf::Texture* CVFXManager::m_pVFXTex_Explode;
@@ -10,6 +14,7 @@ std::string CVFXManager::m_strTexture_ShellEff;
 std::string CVFXManager::m_strTexture_ExplosEff;
 
 sf::IntRect CVFXManager::m_VFXIntRect;
+sf::IntRect CVFXManager::m_VFXIntRectBase;
 
 CVFXManager::CVFXManager()
 {
@@ -17,19 +22,26 @@ CVFXManager::CVFXManager()
 	m_pVFXTex_Bullet = nullptr;
 	m_pVFXTex_Shell = nullptr;
 	m_pVFXTex_Explode = nullptr;
+	m_iAnimFrameTime = 0;
+	m_fTileSize = 0;
 }
 
 CVFXManager::~CVFXManager()
 {
-	delete m_pVFXSprite;
+
 	delete m_pVFXTex_Bullet;
 	delete m_pVFXTex_Shell;
 	delete m_pVFXTex_Explode;
 
-	m_pVFXSprite = nullptr;
 	m_pVFXTex_Bullet = nullptr;
 	m_pVFXTex_Shell = nullptr;
 	m_pVFXTex_Explode = nullptr;
+
+	if (m_pVFXSprite != nullptr)
+	{
+		delete m_pVFXSprite;
+		m_pVFXSprite = nullptr;
+	}
 }
 
 /// <summary>
@@ -76,7 +88,9 @@ void CVFXManager::Initialize(std::string& _inConfigPath)
 	}
 
 	m_VFXIntRect = sf::IntRect(0, 0, 32, 32);
-
+	m_VFXIntRectBase = m_VFXIntRect;
+	//Set this through game manager?
+	m_fTileSize = 32.0f;
 }
 
 /// <summary>
@@ -87,15 +101,17 @@ void CVFXManager::Initialize(std::string& _inConfigPath)
 /// <param name="_inWindow">Window to diplay the sprite. sf::Window&</param>
 /// <param name="_inElapsedTime">Elapsed time since last call, in microseconds. double&</param>
 /// <returns></returns>
-bool CVFXManager::Display(sf::RenderWindow& _inWindow, double& _inElapsedTime)
+bool CVFXManager::Display(sf::RenderWindow& _inWindow)
 {
 	if (m_pVFXSprite != nullptr)
 	{
-		return false;
+		_inWindow.draw(*m_pVFXSprite);
+		return true;
 	}
 	else
 	{
-		return true;
+		//ERROR: No VFX to generate
+		return false;
 	}
 
 }
@@ -107,22 +123,76 @@ bool CVFXManager::Display(sf::RenderWindow& _inWindow, double& _inElapsedTime)
 /// <returns></returns>
 bool CVFXManager::UpdateVFX(double& _inElapsedTime)
 {
+	m_iAnimFrameTime += _inElapsedTime;
+	if (m_iAnimFrameTime >= m_iAnimFrameTimeMax)
+	{
+		m_iAnimFrameTime -= m_iAnimFrameTimeMax;
+		int rectLeft = m_VFXIntRect.left + 32;
+		if (rectLeft >= 96)
+		{
+			m_VFXIntRect = m_VFXIntRectBase;
+			delete m_pVFXSprite;
+			m_pVFXSprite = nullptr;
+		}
+		else
+		{
+			m_VFXIntRect.left = rectLeft;
+			m_pVFXSprite->setTextureRect(m_VFXIntRect);
+		}
+	}
+
 	return false;
 }
 
 
-void CVFXManager::AddAttackParticles_Bullet(sf::Vector2u& _inTilePosition)
+bool CVFXManager::AddAttackParticles_Bullet(sf::Vector2u& _inTilePosition)
 {
-	m_pVFXSprite = new sf::Sprite;
+	if (m_pVFXSprite == nullptr)
+	{
+		m_pVFXSprite = new sf::Sprite;
+		m_pVFXSprite->setTexture(*m_pVFXTex_Bullet);
+		m_pVFXSprite->setTextureRect(m_VFXIntRect);
+		SetVFXPosition(_inTilePosition);
+		return true;
+	}
+	else
+	{
+		//ERROR: Existing VFX in queue to play
+		return false;
+	}
 }
 
-void CVFXManager::AddAttackParticles_Shell(sf::Vector2u& _inTilePosition)
+bool CVFXManager::AddAttackParticles_Shell(sf::Vector2u& _inTilePosition)
 {
-	m_pVFXSprite = new sf::Sprite;
+	if (m_pVFXSprite == nullptr)
+	{
+		m_pVFXSprite = new sf::Sprite;
+		m_pVFXSprite->setTexture(*m_pVFXTex_Shell);
+		m_pVFXSprite->setTextureRect(m_VFXIntRect);
+		SetVFXPosition(_inTilePosition);
+		return true;
+	}
+	else
+	{
+		//ERROR: Existing VFX in queue to play
+		return false;
+	}
 }
 
-void CVFXManager::AddDeathParticles_Explosive(sf::Vector2u& _inTilePosition)
+bool CVFXManager::AddDeathParticles_Explosive(sf::Vector2u& _inTilePosition)
 {
-	m_pVFXSprite = new sf::Sprite;
+	if (m_pVFXSprite == nullptr)
+	{
+		m_pVFXSprite = new sf::Sprite;
+		m_pVFXSprite->setTexture(*m_pVFXTex_Explode);
+		m_pVFXSprite->setTextureRect(m_VFXIntRect);
+		SetVFXPosition(_inTilePosition);
+		return true;
+	}
+	else
+	{
+		//ERROR: Existing VFX in queue to play
+		return false;
+	}
 }
 

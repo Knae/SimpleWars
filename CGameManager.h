@@ -11,8 +11,9 @@
 #include "CSceneManager.h"
 #include "CDebug.h"
 #include "CUnitManager.h"
-#include "CAI_Controller.h"
 #include "COverlayManager.h"
+#include "CVFXManager.h"
+#include "CAI_Controller.h"
 #include "CParseConfigCommon.h"
 
 /// <summary>
@@ -93,6 +94,7 @@ private:
 	CSceneManager* m_pSceneMgr;
 	CUnitManager* m_pUnitMgr;
 	COverlayManager* m_pOverlayMgr;
+	CVFXManager* m_pVFXMgr;
 	CDebug&  m_refDebug = CDebug::GetRef();
 
 	sf::RenderWindow* m_pGameWindow;

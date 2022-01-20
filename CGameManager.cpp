@@ -32,6 +32,7 @@ CGameManager::CGameManager()
 	m_pSceneMgr = nullptr;
 	m_pUnitMgr = nullptr;
 	m_pOverlayMgr = nullptr;
+	m_pVFXMgr = nullptr;
 	m_pUnitsToPlace = nullptr;
 	m_pSelectedUnit = nullptr;
 	m_eCurrentTurn = CUIEnums::TURN::NONE;
@@ -83,6 +84,21 @@ CGameManager::~CGameManager()
 /// <returns></returns>
 bool CGameManager::IntializeGame()
 {
+	//First set up pointers to other managers
+	CSceneManager& m_SMRef = CSceneManager::GetRef();
+	CUIManager& m_UIMRef = CUIManager::GetRef();
+	CUnitManager& m_UnitMRef = CUnitManager::GetRef();
+	COverlayManager& m_OverlayMRef = COverlayManager::GetRef();
+	CVFXManager& m_VFXMRef = CVFXManager::GetRef();
+
+	//SetPointersToOtherSystems(&m_UIMRef, &m_SMRef, &m_UnitMRef, &m_OverlayRef);
+	m_pUIMgr = &m_UIMRef;
+	m_pSceneMgr = &m_SMRef;
+	m_pUnitMgr = &m_UnitMRef;
+	m_pOverlayMgr = &m_OverlayMRef;
+	m_pVFXMgr = &m_VFXMRef;
+	//=========================================================================
+
 	ParseGameSettings();
 
 	m_pFont = new sf::Font();
@@ -255,6 +271,7 @@ bool CGameManager::Update(double& _inElapsedTime)
 	}
 
 	CUnitManager::Update(_inElapsedTime);
+	CVFXManager::UpdateVFX(_inElapsedTime);
 
 	return true;
 }

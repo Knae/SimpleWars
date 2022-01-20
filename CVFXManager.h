@@ -12,17 +12,25 @@ public:
 	~CVFXManager();
 
 	static void Initialize(std::string& _inConfigPath);
-	static bool Display(sf::RenderWindow& _inWindow, double& _inElapsedTime);
-	static void AddAttackParticles_Bullet(sf::Vector2u& _inTilePosition);
-	static void AddAttackParticles_Shell(sf::Vector2u& _inTilePosition);
-	static void AddDeathParticles_Explosive(sf::Vector2u& _inTilePosition);
+	static bool UpdateVFX(double& _inElapsedTime);
+	static bool Display(sf::RenderWindow& _inWindow);
+	static bool AddAttackParticles_Bullet(sf::Vector2u& _inTilePosition);
+	static bool AddAttackParticles_Shell(sf::Vector2u& _inTilePosition);
+	static bool AddDeathParticles_Explosive(sf::Vector2u& _inTilePosition);
 
 private:
 	CVFXManager();
 	CVFXManager(CVFXManager const&) = delete;
 	void operator=(CVFXManager const&) = delete;
 
-	static bool UpdateVFX(double& _inElapsedTime);
+	static void SetVFXPosition(sf::Vector2u& _inTilePosition) 
+	{
+		m_pVFXSprite->setPosition(_inTilePosition.x * m_fTileSize, _inTilePosition.y * m_fTileSize);
+	};
+
+	static const double m_iAnimFrameTimeMax;
+	static double m_iAnimFrameTime;
+	static float m_fTileSize;
 
 	static sf::Texture* m_pVFXTex_Bullet;
 	static sf::Texture* m_pVFXTex_Shell;
@@ -34,6 +42,7 @@ private:
 	static std::string m_strTexture_ExplosEff;
 
 	static sf::IntRect m_VFXIntRect;
+	static sf::IntRect m_VFXIntRectBase;
 };
 
 #endif // !__CVFXMANAGER_H__
