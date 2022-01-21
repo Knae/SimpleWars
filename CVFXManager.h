@@ -14,14 +14,16 @@ public:
 	static void Initialize(std::string& _inConfigPath);
 	static bool UpdateVFX(double& _inElapsedTime);
 	static bool Display(sf::RenderWindow& _inWindow);
-	static bool AddAttackParticles_Bullet(sf::Vector2u& _inTilePosition);
-	static bool AddAttackParticles_Shell(sf::Vector2u& _inTilePosition);
-	static bool AddDeathParticles_Explosive(sf::Vector2u& _inTilePosition);
+	static bool ProcessAttackVFX(sf::Vector2u& _inTilePosition, CUnitEnums::TYPE _inUnitType, bool _inIsDead);
 
 private:
 	CVFXManager();
 	CVFXManager(CVFXManager const&) = delete;
 	void operator=(CVFXManager const&) = delete;
+
+	static bool AddAttackParticles_Bullet(sf::Vector2u& _inTilePosition);
+	static bool AddAttackParticles_Shell(sf::Vector2u& _inTilePosition);
+	static bool AddDeathParticles_Explosive(sf::Vector2u& _inTilePosition);
 
 	static void SetVFXPosition(sf::Vector2u& _inTilePosition) 
 	{

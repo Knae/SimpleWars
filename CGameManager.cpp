@@ -126,6 +126,8 @@ bool CGameManager::IntializeGame()
 	m_pGameWindow->clear();
 	m_pGameWindow->display();
 
+	CVFXManager::Initialize(m_strVFXSettings);
+
 	m_refDebug.Initialize(m_pFont);
 
 	return true;
@@ -529,6 +531,7 @@ void CGameManager::DisplayScene()
 {
 	CSceneManager::DisplayScene(*m_pGameWindow);
 	CUnitManager::DisplayUnits(*m_pGameWindow);
+	CVFXManager::Display(*m_pGameWindow);
 	COverlayManager::DisplayOverlays(*m_pGameWindow);
 }
 
@@ -626,10 +629,14 @@ void CGameManager::ProcessMouseClick()
 					}
 					break;
 				}
+				//This may need to be reexamined
+				//Need to change to use buttonindex to do something
 				case CUIEnums::GAMESTATE::GAMELOOP:
 				{
 					if (m_pSelectedUnit != nullptr)
 					{
+						//If a unit has already been selected, then we're trying to 
+						//either select attack or move or deselect the unit
 						m_eCurrentUIMouseState = CUIManager::GetMouseCurrentState();
 						//Need to move overlay toggling to its own function
 						if (m_eCurrentUIMouseState == CUIEnums::MOUSESTATE::ATTACK && !m_bAttackOverlayShown)
@@ -869,6 +876,7 @@ void CGameManager::ProcessMouseClick()
 											std::cout << "\nTarget was destroyed!" << std::endl;
 											ProcessUnitAsDead(targetUnit);
 										}
+
 										CUIManager::SetCurrentMouseState(CUIEnums::MOUSESTATE::SELECT);
 										COverlayManager::ClearRangePlacementOverlay();
 										m_bAttackOverlayShown = false;

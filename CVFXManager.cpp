@@ -60,6 +60,7 @@ void CVFXManager::Initialize(std::string& _inConfigPath)
 		m_pVFXTex_Bullet = nullptr;
 	}
 
+	m_pVFXTex_Bullet = new sf::Texture;
 	if (!m_pVFXTex_Bullet->loadFromFile(m_strTexture_BulletEff))
 	{
 		//ERROR:Unable to load bullet vfx spritemap
@@ -71,6 +72,7 @@ void CVFXManager::Initialize(std::string& _inConfigPath)
 		m_pVFXTex_Shell = nullptr;
 	}
 
+	m_pVFXTex_Shell = new sf::Texture;
 	if (!m_pVFXTex_Shell->loadFromFile(m_strTexture_ShellEff))
 	{
 		//ERROR:Unable to load shell vfx spritemap
@@ -82,6 +84,7 @@ void CVFXManager::Initialize(std::string& _inConfigPath)
 		m_pVFXTex_Explode = nullptr;
 	}
 
+	m_pVFXTex_Explode = new sf::Texture();
 	if (!m_pVFXTex_Explode->loadFromFile(m_strTexture_ExplosEff))
 	{
 		//ERROR:Unable to load bullet vfx spritemap
@@ -116,35 +119,80 @@ bool CVFXManager::Display(sf::RenderWindow& _inWindow)
 
 }
 
+bool CVFXManager::ProcessAttackVFX(sf::Vector2u& _inTilePosition, CUnitEnums::TYPE _inUnitType, bool _inIsDead)
+{
+	//Only proceed if there's no existing VFXSprite
+	if (m_pVFXSprite == nullptr)
+	{
+		switch (_inUnitType)
+		{
+			case CUnitEnums::TYPE::INFANTRY:
+			{
+				AddAttackParticles_Bullet(_inTilePosition);
+				break;
+			}
+			case CUnitEnums::TYPE::TANK:
+			case CUnitEnums::TYPE::ARTILLERY:
+			{
+				AddAttackParticles_Shell(_inTilePosition);
+				break;
+			}
+			case CUnitEnums::TYPE::NONE:
+			default:
+				break;
+		}
+
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
 /// <summary>
-/// UpdateInfoDisplay the animation frame of the VFX sprite
+/// Update the animation frame of the VFX sprite
 /// </summary>
 /// <param name="_inElapsedTime"></param>
-/// <returns></returns>
+/// <returns>true if a VFX sprite is displayed</returns>
 bool CVFXManager::UpdateVFX(double& _inElapsedTime)
 {
-	m_iAnimFrameTime += _inElapsedTime;
+	//If there's a VFXsprite to display, increase
+	//the animation timer
+	if (m_pVFXSprite != nullptr)
+	{
+		m_iAnimFrameTime += _inElapsedTime;
+	}
+
+	//If the timer has reached the animation frame time,
+	//move to the next frame and subtract the frame time
+	//from the timer
 	if (m_iAnimFrameTime >= m_iAnimFrameTimeMax)
 	{
 		m_iAnimFrameTime -= m_iAnimFrameTimeMax;
 		int rectLeft = m_VFXIntRect.left + 32;
+		//If we've gone past the last frame,
+		//delete the sprite and reset the timer to 0
 		if (rectLeft >= 96)
 		{
 			m_VFXIntRect = m_VFXIntRectBase;
 			delete m_pVFXSprite;
-			m_pVFXSprite = nullptr;
+
+			m_iAnimFrameTime = 0;
+			return false;
 		}
 		else
 		{
 			m_VFXIntRect.left = rectLeft;
 			m_pVFXSprite->setTextureRect(m_VFXIntRect);
+			return true;
 		}
 	}
 
 	return false;
 }
 
-
+//Create a new VFX sprite, set it to the bullet effect animation
 bool CVFXManager::AddAttackParticles_Bullet(sf::Vector2u& _inTilePosition)
 {
 	if (m_pVFXSprite == nullptr)
@@ -162,6 +210,7 @@ bool CVFXManager::AddAttackParticles_Bullet(sf::Vector2u& _inTilePosition)
 	}
 }
 
+//Create a new VFX sprite, set it to the smoke effect animation
 bool CVFXManager::AddAttackParticles_Shell(sf::Vector2u& _inTilePosition)
 {
 	if (m_pVFXSprite == nullptr)
@@ -179,6 +228,7 @@ bool CVFXManager::AddAttackParticles_Shell(sf::Vector2u& _inTilePosition)
 	}
 }
 
+//Create a new VFX sprite, set it to the explosive effect animation
 bool CVFXManager::AddDeathParticles_Explosive(sf::Vector2u& _inTilePosition)
 {
 	if (m_pVFXSprite == nullptr)

@@ -83,6 +83,7 @@ private:
 	const std::string m_strGameConfig = "configs/game.ini";
 	std::string m_strFontFile = "font/OpenSans-Regular.ttf";
 	std::string m_strGameStatsConfig = "configs/stats.ini";
+	std::string m_strVFXSettings = "configs/vfx.ini";
 	std::string m_strMainMenuConfig = "configs/maps/MainMenu.ini";
 	std::string m_strMountainVillageConfig= "configs/maps/MountainVillage.ini";
 	std::string m_strMountainPassConfig = "configs/maps/MountainPass.ini";
