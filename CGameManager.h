@@ -44,6 +44,9 @@ public:
 	virtual void DisplayGameWorld();
 	virtual void DestroyGameWorld();
 	virtual void DisplayDebug();
+	//====================================
+	//Unit functions
+	//====================================
 	virtual void ClearUnitsToPlace();
 	virtual CUnit* GetCurrentSelectedUnit() { return m_pSelectedUnit; }
 	//====================================
@@ -73,6 +76,8 @@ private:
 	void operator=(CGameManager const&) = delete;
 
 	bool CheckIfMouseOverTile(sf::Vector2f _inPosition);
+	
+	void ProcessUnitAttack(CUnit* _inAttacker, CUnit* _Defender);
 	void ProcessUnitAsDead(CUnit* _inUnit);
 	void ParseGameSettings();
 	void ParseGameStats();

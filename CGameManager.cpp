@@ -400,11 +400,11 @@ void CGameManager::SwitchTurns()
 		case CUIEnums::GAMESTATE::GAMELOOP:
 		{
 			m_eCurrentTurn = ((m_eCurrentTurn == CUIEnums::TURN::BLUE) ? (CUIEnums::TURN::RED) : (CUIEnums::TURN::BLUE));
-			CUnitManager::SwitchTurns();
+			CUnitManager::EndTurnReplenishUnits();
 			/*if (m_bAIEnabled && m_eCurrentTurn == CUIEnums::TURN::RED)
 			{
 				CAI_Controller::StartAITurn();
-				SwitchTurns();
+				EndTurnReplenishUnits();
 			}*/
 			break;
 		}
@@ -869,18 +869,7 @@ void CGameManager::ProcessMouseClick()
 										std::cout << "\nTile In Range!" << std::endl;
 										std::cout << "\nAttacking target in tile." << std::endl;
 
-										//If the target is destroyed, set the tile to have no
-										//units. UnitManager should be doing this
-										if (CUnitManager::Attack(m_pSelectedUnit, targetUnit))
-										{
-											std::cout << "\nTarget was destroyed!" << std::endl;
-											ProcessUnitAsDead(targetUnit);
-										}
-
-										CUIManager::SetCurrentMouseState(CUIEnums::MOUSESTATE::SELECT);
-										COverlayManager::ClearRangePlacementOverlay();
-										m_bAttackOverlayShown = false;
-										CUIManager::UpdateUI();
+										ProcessUnitAttack(m_pSelectedUnit, targetUnit);
 									}
 								}
 								targetUnit = nullptr;
@@ -1030,15 +1019,39 @@ bool CGameManager::CheckIfMouseOverTile(sf::Vector2f _inPosition)
 }
 
 /// <summary>
+/// Process attack move, and the necessary steps after
+/// </summary>
+/// <param name="_inAttacker"></param>
+/// <param name="_Defender"></param>
+void CGameManager::ProcessUnitAttack(CUnit* _inAttacker, CUnit* _Defender)
+{
+	sf::Vector2u targetTilePosition = _Defender->GetCurrentTile();
+	CUnitEnums::TYPE unitType = _inAttacker->GetType();
+	CVFXManager::AddAttackVFX(targetTilePosition, unitType);
+	if (CUnitManager::Attack(_inAttacker, _Defender))
+	{
+		std::cout << "\nTarget was destroyed!" << std::endl;
+		ProcessUnitAsDead(_Defender);
+	}
+
+	CUIManager::SetCurrentMouseState(CUIEnums::MOUSESTATE::SELECT);
+	COverlayManager::ClearRangePlacementOverlay();
+	m_bAttackOverlayShown = false;
+	CUIManager::UpdateUI();
+}
+
+/// <summary>
 /// Proceses the currently unit as dead and removes it
 /// from the tile's record
 /// </summary>
 /// <param name="_inUnit"></param>
 void CGameManager::ProcessUnitAsDead(CUnit* _inUnit)
 {
-	_inUnit->ExplodeInFlamingGlory();
 	sf::Vector2u targetTilePosition = _inUnit->GetCurrentTile();
+	CUnitEnums::SIDE unitSide = _inUnit->GetSide();
 	CSceneManager::GetTileInScene(targetTilePosition)->UnitLeavesTile();
+	CVFXManager::AddDeathVFX(targetTilePosition);
+	CUnitManager::DeleteUnit(_inUnit, unitSide);
 }
 
 /// <summary>

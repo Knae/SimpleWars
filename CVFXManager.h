@@ -14,7 +14,8 @@ public:
 	static void Initialize(std::string& _inConfigPath);
 	static bool UpdateVFX(double& _inElapsedTime);
 	static bool Display(sf::RenderWindow& _inWindow);
-	static bool ProcessAttackVFX(sf::Vector2u& _inTilePosition, CUnitEnums::TYPE _inUnitType, bool _inIsDead);
+	static bool AddAttackVFX(sf::Vector2u& _inTilePosition, CUnitEnums::TYPE _inUnitType);
+	static bool AddDeathVFX(sf::Vector2u& _inTilePosition );
 
 private:
 	CVFXManager();
@@ -30,6 +31,11 @@ private:
 		m_pVFXSprite->setPosition(_inTilePosition.x * m_fTileSize, _inTilePosition.y * m_fTileSize);
 	};
 
+	static void SetDeathVFXPosition(sf::Vector2u& _inTilePosition)
+	{
+		m_pVFXUnitDeath->setPosition(_inTilePosition.x * m_fTileSize, _inTilePosition.y * m_fTileSize);
+	};
+
 	static const double m_iAnimFrameTimeMax;
 	static double m_iAnimFrameTime;
 	static float m_fTileSize;
@@ -38,6 +44,7 @@ private:
 	static sf::Texture* m_pVFXTex_Shell;
 	static sf::Texture* m_pVFXTex_Explode;
 	static sf::Sprite* m_pVFXSprite;
+	static sf::Sprite* m_pVFXUnitDeath;
 
 	static std::string m_strTexture_BulletEff;
 	static std::string m_strTexture_ShellEff;

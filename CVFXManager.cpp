@@ -8,6 +8,7 @@ sf::Texture* CVFXManager::m_pVFXTex_Bullet;
 sf::Texture* CVFXManager::m_pVFXTex_Shell;
 sf::Texture* CVFXManager::m_pVFXTex_Explode;
 sf::Sprite* CVFXManager::m_pVFXSprite;
+sf::Sprite* CVFXManager::m_pVFXUnitDeath;
 
 std::string CVFXManager::m_strTexture_BulletEff;
 std::string CVFXManager::m_strTexture_ShellEff;
@@ -19,6 +20,7 @@ sf::IntRect CVFXManager::m_VFXIntRectBase;
 CVFXManager::CVFXManager()
 {
 	m_pVFXSprite = nullptr;
+	m_pVFXUnitDeath = nullptr;
 	m_pVFXTex_Bullet = nullptr;
 	m_pVFXTex_Shell = nullptr;
 	m_pVFXTex_Explode = nullptr;
@@ -41,6 +43,12 @@ CVFXManager::~CVFXManager()
 	{
 		delete m_pVFXSprite;
 		m_pVFXSprite = nullptr;
+	}
+
+	if (m_pVFXUnitDeath != nullptr)
+	{
+		delete m_pVFXUnitDeath;
+		m_pVFXUnitDeath = nullptr;
 	}
 }
 
@@ -108,7 +116,14 @@ bool CVFXManager::Display(sf::RenderWindow& _inWindow)
 {
 	if (m_pVFXSprite != nullptr)
 	{
+		std::cout << "\nDisplaying attack VFX!" << std::endl;
 		_inWindow.draw(*m_pVFXSprite);
+		return true;
+	}
+	else if (m_pVFXUnitDeath != nullptr)
+	{
+		std::cout << "\nDisplaying death VFX!" << std::endl;
+		_inWindow.draw(*m_pVFXUnitDeath);
 		return true;
 	}
 	else
@@ -119,7 +134,13 @@ bool CVFXManager::Display(sf::RenderWindow& _inWindow)
 
 }
 
-bool CVFXManager::ProcessAttackVFX(sf::Vector2u& _inTilePosition, CUnitEnums::TYPE _inUnitType, bool _inIsDead)
+/// <summary>
+/// Add an attack VFX to specified tile based on the unitType
+/// </summary>
+/// <param name="_inTilePosition"></param>
+/// <param name="_inUnitType"></param>
+/// <returns></returns>
+bool CVFXManager::AddAttackVFX(sf::Vector2u& _inTilePosition, CUnitEnums::TYPE _inUnitType)
 {
 	//Only proceed if there's no existing VFXSprite
 	if (m_pVFXSprite == nullptr)
@@ -151,15 +172,34 @@ bool CVFXManager::ProcessAttackVFX(sf::Vector2u& _inTilePosition, CUnitEnums::TY
 }
 
 /// <summary>
+/// Add a death explosion at the specified tile location
+/// </summary>
+/// <param name="_inTilePosition"></param>
+/// <returns></returns>
+bool CVFXManager::AddDeathVFX(sf::Vector2u& _inTilePosition)
+{
+	if (m_pVFXUnitDeath == nullptr)
+	{
+		AddDeathParticles_Explosive(_inTilePosition);
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+
+}
+
+/// <summary>
 /// Update the animation frame of the VFX sprite
 /// </summary>
 /// <param name="_inElapsedTime"></param>
-/// <returns>true if a VFX sprite is displayed</returns>
+/// <returns>true if there still some VFX sprite to be displayed</returns>
 bool CVFXManager::UpdateVFX(double& _inElapsedTime)
 {
 	//If there's a VFXsprite to display, increase
 	//the animation timer
-	if (m_pVFXSprite != nullptr)
+	if (m_pVFXSprite != nullptr || m_pVFXUnitDeath != nullptr)
 	{
 		m_iAnimFrameTime += _inElapsedTime;
 	}
@@ -173,18 +213,42 @@ bool CVFXManager::UpdateVFX(double& _inElapsedTime)
 		int rectLeft = m_VFXIntRect.left + 32;
 		//If we've gone past the last frame,
 		//delete the sprite and reset the timer to 0
+		//Only return false if both VFX and deathVFX are
+		//nullptr
 		if (rectLeft >= 96)
 		{
 			m_VFXIntRect = m_VFXIntRectBase;
-			delete m_pVFXSprite;
-
 			m_iAnimFrameTime = 0;
-			return false;
+			if (m_pVFXSprite != nullptr)
+			{
+				delete m_pVFXSprite;
+				m_pVFXSprite = nullptr;
+			}
+			else if (m_pVFXUnitDeath != nullptr)
+			{
+				delete m_pVFXUnitDeath;
+				m_pVFXUnitDeath = nullptr;
+			}
+
+			if (m_pVFXSprite == nullptr && m_pVFXUnitDeath == nullptr)
+			{
+				return false;
+			}
 		}
 		else
 		{
+			//We're updating the frame positions, so the 
+			//sprite we're updating better not be a nullptr
 			m_VFXIntRect.left = rectLeft;
-			m_pVFXSprite->setTextureRect(m_VFXIntRect);
+			if (m_pVFXSprite != nullptr)
+			{
+				m_pVFXSprite->setTextureRect(m_VFXIntRect);
+			}
+			else if (m_pVFXUnitDeath != nullptr)
+			{
+				m_pVFXUnitDeath->setTextureRect(m_VFXIntRect);
+			}
+
 			return true;
 		}
 	}
@@ -231,12 +295,12 @@ bool CVFXManager::AddAttackParticles_Shell(sf::Vector2u& _inTilePosition)
 //Create a new VFX sprite, set it to the explosive effect animation
 bool CVFXManager::AddDeathParticles_Explosive(sf::Vector2u& _inTilePosition)
 {
-	if (m_pVFXSprite == nullptr)
+	if (m_pVFXUnitDeath == nullptr)
 	{
-		m_pVFXSprite = new sf::Sprite;
-		m_pVFXSprite->setTexture(*m_pVFXTex_Explode);
-		m_pVFXSprite->setTextureRect(m_VFXIntRect);
-		SetVFXPosition(_inTilePosition);
+		m_pVFXUnitDeath = new sf::Sprite;
+		m_pVFXUnitDeath->setTexture(*m_pVFXTex_Explode);
+		m_pVFXUnitDeath->setTextureRect(m_VFXIntRect);
+		SetDeathVFXPosition(_inTilePosition);
 		return true;
 	}
 	else

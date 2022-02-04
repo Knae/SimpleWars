@@ -1,9 +1,13 @@
 #include "CAI_Controller.h"
 #include "CUnitManager.h"
 #include "CSceneManager.h"
+#include "CVFXManager.h"
 
 std::vector<CUnit*>* CAI_Controller::m_pVecUnits_AI;
 std::vector<CUnit*>* CAI_Controller::m_pVecUnits_Player;
+
+//Note:This module would be better served as calculating actions for a single unit
+//instead of the whole list. Then Gamemanager can process the VFX stuff as well
 
 CAI_Controller::CAI_Controller()
 {
@@ -114,13 +118,21 @@ bool CAI_Controller::StartAITurn()
 				int range = CUnitManager::GetUnitRange(unit);
 				if (dist <= range && !unit->GetHasAtacked())
 				{
-					CUnitEnums::TYPE typeEnum = unit->GetType();
+					//AI trying to attack. Process the VFX stuff as well
+					CUnitEnums::TYPE unitType = unit->GetType();
 					std::string typeString;
-					CParseConfigCommon::ConvertUnitTypeToString(typeEnum, typeString);
+					CParseConfigCommon::ConvertUnitTypeToString(unitType, typeString);
 					std::cout << "\nAI's " << typeString << " is attacking!" << std::endl;
+					sf::Vector2u targetLocation = targetUnit->GetCurrentTile();
+					CVFXManager::AddAttackVFX(targetLocation, unitType);
 					if (CUnitManager::Attack(unit, targetUnit))
 					{
-						CSceneManager::GetTileInScene(targetUnit->GetCurrentTile())->UnitLeavesTile();
+						//If the target is dead, process it's removal
+						//from game system
+						CUnitEnums::SIDE targetSide = targetUnit->GetSide();
+						CVFXManager::AddDeathVFX(targetLocation);
+						CSceneManager::GetTileInScene(targetLocation)->UnitLeavesTile();
+						CUnitManager::DeleteUnit(targetUnit,targetSide);
 					}
 					hasTriedToAttack = true;
 					return false;
@@ -171,6 +183,8 @@ bool CAI_Controller::StartAITurn()
 
 					}
 
+					//If cannotMove is false, then the AI has moved the unit and we need 
+					//to update the that unit was in and is now in
 					if(!cannotMove)
 					{
 						CSceneManager::GetTileInScene(unitPosition)->UnitLeavesTile();

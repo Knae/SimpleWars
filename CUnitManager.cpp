@@ -512,6 +512,8 @@ bool CUnitManager::Attack(CUnit* _inAttackinUnit, CUnit* _inDefendingUnit)
 	std::cout << "\nDamage dealt: (base damage)" << damageDealt << " * (AttackerTerrainBonus)" << damageDealtModifier << " * (DefenderTerrainBonus)" << damageReceivedModifier;
 	std::cout << "\nTotal: " << totalDamage << ". Defender remaining HP: " << remainingHP << std::endl;
 	_inAttackinUnit->SetHasAttacked();
+	//Make unit unable to move after attacking
+	_inAttackinUnit->IncrementMovementPoints(-10);
 	if (remainingHP <= 0)
 	{
 		_inDefendingUnit->ExplodeInFlamingGlory();
@@ -524,7 +526,7 @@ bool CUnitManager::Attack(CUnit* _inAttackinUnit, CUnit* _inDefendingUnit)
 }
 
 /// <summary>
-/// Find the unit's resulant range modified by terrain
+/// Find the unit's resultant range modified by terrain
 /// </summary>
 /// <param name="_inUnit"></param>
 /// <returns></returns>
@@ -559,6 +561,40 @@ void CUnitManager::ClearUnits()
 
 	m_vecCurrentUnits_Blue.clear();
 	m_vecCurrentUnits_Red.clear();
+}
+
+bool CUnitManager::DeleteUnit(CUnit* _inUnit, CUnitEnums::SIDE _inSide)
+{
+	std::vector<CUnit*>* pTargetVector = nullptr;
+	if (_inSide == CUnitEnums::SIDE::BLUE)
+	{
+		pTargetVector = &m_vecCurrentUnits_Blue;
+	}
+	else if(_inSide == CUnitEnums::SIDE::RED)
+	{
+		pTargetVector = &m_vecCurrentUnits_Red;
+	}
+	else
+	{
+		//ERROR::Unable to determine which vector search
+		return false;
+	}
+
+	std::vector<CUnit*>::iterator unitIterator;
+	for (unitIterator = (*pTargetVector).begin(); unitIterator < (*pTargetVector).end(); unitIterator++)
+	{
+		if ( (*unitIterator) == _inUnit)
+		{
+			pTargetVector->erase(unitIterator);
+			delete _inUnit;
+			_inUnit = nullptr;
+			return true;
+		}
+	}
+
+	//ERROR: Unable to find unit to delete
+	return false;
+
 }
 
 /// <summary>
@@ -605,7 +641,7 @@ bool CUnitManager::CheckIfAnyUnitsLeft(CUnitEnums::SIDE _inSide)
 	return false;
 }
 
-void CUnitManager::SwitchTurns()
+void CUnitManager::EndTurnReplenishUnits()
 {
 	for (auto& element : m_vecCurrentUnits_Blue)
 	{
