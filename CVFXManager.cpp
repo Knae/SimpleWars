@@ -116,13 +116,13 @@ bool CVFXManager::Display(sf::RenderWindow& _inWindow)
 {
 	if (m_pVFXSprite != nullptr)
 	{
-		std::cout << "\nDisplaying attack VFX!" << std::endl;
+		//std::cout << "\nDisplaying attack VFX!" << std::endl;
 		_inWindow.draw(*m_pVFXSprite);
 		return true;
 	}
 	else if (m_pVFXUnitDeath != nullptr)
 	{
-		std::cout << "\nDisplaying death VFX!" << std::endl;
+		//std::cout << "\nDisplaying death VFX!" << std::endl;
 		_inWindow.draw(*m_pVFXUnitDeath);
 		return true;
 	}
@@ -162,7 +162,7 @@ bool CVFXManager::AddAttackVFX(sf::Vector2u& _inTilePosition, CUnitEnums::TYPE _
 			default:
 				break;
 		}
-
+		std::cout << "\nAdding attack VFX to tile (" << _inTilePosition.x << ", " << _inTilePosition.y + ")!" << std::endl;
 		return true;
 	}
 	else

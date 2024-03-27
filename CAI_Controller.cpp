@@ -105,6 +105,7 @@ void CAI_Controller::IntializeAi(std::vector<CUnit*>* _inPVecAI, std::vector<CUn
 /// <returns></returns>
 bool CAI_Controller::StartAITurn()
 {
+	//TODO: Switch to doing one unit at a time each time instead of a for loop
 	CUnit* targetUnit = nullptr;
 	for (auto& unit : *m_pVecUnits_AI)
 	{
@@ -153,6 +154,8 @@ bool CAI_Controller::StartAITurn()
 					}
 					
 					//I hate This
+					//TODO: change to check possible tiles and distance to target instead
+					//of actually moving them.
 					sf::Vector2i posTry1(unitPosition.x + dir.x, unitPosition.y);
 					CSceneEnums::TILETYPE posTryTileType1 = CSceneManager::GetTileInScene(sf::Vector2u(posTry1))->GetTileType();
 					if (CSceneManager::GetTileInScene(sf::Vector2u(posTry1))->GetUnitOnTile() !=nullptr || 
@@ -184,7 +187,7 @@ bool CAI_Controller::StartAITurn()
 					}
 
 					//If cannotMove is false, then the AI has moved the unit and we need 
-					//to update the that unit was in and is now in
+					//to update the tile that unit was in and is now in
 					if(!cannotMove)
 					{
 						CSceneManager::GetTileInScene(unitPosition)->UnitLeavesTile();
@@ -200,6 +203,7 @@ bool CAI_Controller::StartAITurn()
 		}
 	}
 
+	//Should only reach here if there are no units to prrocess
 	targetUnit = nullptr;
 	return true;
 }

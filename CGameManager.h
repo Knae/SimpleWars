@@ -23,8 +23,8 @@
 class CGameManager
 {
 public:
-	static CGameManager& GetRef()				{ static CGameManager m_gmThis; return m_gmThis; }
-	virtual sf::RenderWindow* GetGameWindow()	{ return m_pGameWindow; }
+	static CGameManager& GetRef() { static CGameManager m_gmThis; return m_gmThis; }
+	virtual sf::RenderWindow* GetGameWindow() { return m_pGameWindow; }
 	virtual ~CGameManager();
 	//====================================
 	//General functions
@@ -35,11 +35,11 @@ public:
 	virtual void SwitchTurns();
 	virtual void EndGame(CUIEnums::TURN _inWinSide);
 	virtual void SetPointersToOtherSystems(
-							CUIManager* _inputUI,
-							CSceneManager* _inputScene,
-							CUnitManager* _inputUnit,
-							COverlayManager* _inputOverlay
-						);
+		CUIManager* _inputUI,
+		CSceneManager* _inputScene,
+		CUnitManager* _inputUnit,
+		COverlayManager* _inputOverlay
+	);
 	virtual void DrawObject(sf::Drawable* _object);
 	virtual void DisplayGameWorld();
 	virtual void DestroyGameWorld();
@@ -60,11 +60,12 @@ public:
 	virtual bool InitializeUI();
 	virtual void ProcessMouseClick();
 	virtual void SetUIToModeSelection();
+	virtual void SetUIToFactionSelection();
 	virtual void SetUIToMapSelection();
 	virtual void SetUIToUnitPlacement();
 	virtual void SetUIToGameLoop();
 	virtual void DisplayUI();
-	virtual void UpdateSidePanelInfo(	CUnit* _inViewedUnit = nullptr);
+	virtual void UpdateSidePanelInfo(CUnit* _inViewedUnit = nullptr);
 	//====================================
 	//Debug related
 	//====================================
@@ -75,8 +76,11 @@ private:
 	CGameManager(CGameManager const&) = delete;
 	void operator=(CGameManager const&) = delete;
 
+	void OnMouseClick_SidePanel(sf::Vector2f& _inMousePosition);
+	void OnMouseClick_Map(sf::Vector2f& _inMousePosition);
+
 	bool CheckIfMouseOverTile(sf::Vector2f _inPosition);
-	
+
 	void ProcessUnitAttack(CUnit* _inAttacker, CUnit* _Defender);
 	void ProcessUnitAsDead(CUnit* _inUnit);
 	void ParseGameSettings();
@@ -90,18 +94,18 @@ private:
 	std::string m_strGameStatsConfig = "configs/stats.ini";
 	std::string m_strVFXSettings = "configs/vfx.ini";
 	std::string m_strMainMenuConfig = "configs/maps/MainMenu.ini";
-	std::string m_strMountainVillageConfig= "configs/maps/MountainVillage.ini";
+	std::string m_strMountainVillageConfig = "configs/maps/MountainVillage.ini";
 	std::string m_strMountainPassConfig = "configs/maps/MountainPass.ini";
 	std::string m_strBridgeConfig = "configs/maps/Bridge.ini";
 	std::string m_strUnitConfig = "configs/units/BaseSettings.ini";
 	std::string m_strFactionConfig = "configs/factions.ini";
-	
+
 	CUIManager* m_pUIMgr;
 	CSceneManager* m_pSceneMgr;
 	CUnitManager* m_pUnitMgr;
 	COverlayManager* m_pOverlayMgr;
 	CVFXManager* m_pVFXMgr;
-	CDebug&  m_refDebug = CDebug::GetRef();
+	CDebug& m_refDebug = CDebug::GetRef();
 
 	sf::RenderWindow* m_pGameWindow;
 	sf::RenderTexture* m_pGameBackground;
@@ -118,11 +122,12 @@ private:
 	bool m_bAttackOverlayShown;
 	bool m_bWaitingForClick;
 	bool m_bAIEnabled;
+	bool m_bUnitActionInProgress = false;
 
 	CSceneEnums::SCENETYPE m_eCurrentSelectedMap = CSceneEnums::SCENETYPE::MOUNTAINVILLAGE;
 	CUIEnums::TURN m_eCurrentTurn;
 	CUIEnums::GAMESTATE m_eCurrentState;
-	CUIEnums::MOUSESTATE m_eCurrentUIMouseState;
+	//CUIEnums::MOUSESTATE m_eCurrentUIMouseState;
 	CUnitEnums::TYPE m_eCurrentTypeChosen;
 	CUnit* m_pSelectedUnit;
 

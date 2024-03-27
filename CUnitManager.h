@@ -36,6 +36,7 @@ public:
 	static bool DeleteUnit(CUnit* _inUnit, CUnitEnums::SIDE _inSide);
 	static void Update(double& _inElapsedTime);
 	static bool CheckIfAnyUnitsLeft(CUnitEnums::SIDE _inSide);
+	bool CheckIfAnyActingUnits();
 	static void EndTurnReplenishUnits();
 	static CTerrainEffects* ResolveTerrainEffects(const CUnitEnums::TYPE _inType, const CSceneEnums::TILETYPE _inTile);
 	static CUnitEnums::StatBonus_Add* GetFactionBonuses( CUnitEnums::FACTION _input)
@@ -66,5 +67,7 @@ private:
 	static std::map<CUnitEnums::FACTION, CUnitEnums::StatBonus_Add*> m_mapFactionsBonuses;
 
 	static CTerrainEffects m_defaultTerrainEffects;
+
+	static CUnit* m_ptrActingUnit;
 };
 #endif // ! _CUNITMANAGER_H__

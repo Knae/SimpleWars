@@ -34,8 +34,9 @@ public:
 		_outMoveBase = m_fMovementPoints_Base;
 		_outMovePoints = m_fMovementPoints;
 	}
-	float GetMovePoints()						{ return m_fMovementPoints; };
+	float GetMovePoints()						{ return m_fMovementPoints; }
 	bool GetHasAtacked()						{ return m_bHasAttacked; }
+	bool GetIfActing()							{ return m_bIsActing; }
 	sf::Vector2u GetCurrentTile()				{ return m_CurrentTileLocation; }
 	CSceneEnums::TILETYPE GetCurrentTileType()	{ return m_eCurrentTileType; }
 	CUnitEnums::STATE GetState()				{ return m_eCurrentState; }
@@ -77,6 +78,7 @@ private:
 	bool m_bHasAttacked;
 	const double m_dAnimeFrameTime = 200.0f;
 	double m_dAnimProgress = 0.0f;
+	bool m_bIsActing = false;
 
 	sf::Sprite* m_UnitSprite;
 	sf::Vector2u m_CurrentTileLocation;

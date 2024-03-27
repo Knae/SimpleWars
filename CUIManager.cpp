@@ -268,6 +268,11 @@ void CUIManager::UpdateUI()
 
 	switch (m_eCurrentUIState)
 	{
+		case CUIEnums::GAMESTATE::FACTION:
+		{
+			//TODO::Updating emblem buttons to reflect if selected or not
+			break;
+		}
 		case CUIEnums::GAMESTATE::UNITPLACEMENT:
 		{
 			for (unsigned short i = 0; i < 3; i++)
@@ -458,6 +463,7 @@ bool CUIManager::ProcessClick(sf::Vector2f& _inCoords, int& _outIndex)
 		switch (m_eCurrentUIState)
 		{
 			case CUIEnums::GAMESTATE::MODE:
+			case CUIEnums::GAMESTATE::FACTION:
 			case CUIEnums::GAMESTATE::MAPSELECTION:
 			{
 				return GetCButtonClicked(_inCoords, _outIndex);
@@ -497,6 +503,7 @@ bool CUIManager::ProcessClick(sf::Vector2f& _inCoords, int& _outIndex)
 						case 2:
 						{
 							m_bEndTurn = true;
+							m_bUnitControllable = false;
 							break;
 						}
 						case 3:
@@ -657,7 +664,7 @@ void CUIManager::SetUpFactionSelection()
 	currentRect = m_ButtonUnitRect_Blue;
 	currentButton->setTextureRect(currentRect);
 	currentButton->setScale(3.0f, 3.0f);
-	currentButton->setPosition(sf::Vector2f((float)(m_uSceneWidth + 96.0f), 112.0f));
+	currentButton->setPosition(sf::Vector2f((float)(m_uSceneWidth), 112.0f));
 	m_vecButtons_ControlPanel.push_back(currentButton);
 
 	currentButton = new sf::Sprite;
@@ -665,14 +672,17 @@ void CUIManager::SetUpFactionSelection()
 	currentRect = m_ButtonUnitRect_Blue;
 	currentButton->setTextureRect(currentRect);
 	currentButton->setScale(3.0f, 3.0f);
-	currentButton->setPosition(sf::Vector2f((float)(m_uSceneWidth + 96.0f), 208.0f));
+	currentButton->setPosition(sf::Vector2f((float)(m_uSceneWidth), 208.0f));
 	m_vecButtons_ControlPanel.push_back(currentButton);
+
+	//TODO: Setup images to describe faction buffs/debuffs
+
 
 	m_eCurrentUIState = CUIEnums::GAMESTATE::FACTION;
 	m_eCurrentTurn = CUIEnums::TURN::BLUE;
 	m_eCurrentMouseState = CUIEnums::MOUSESTATE::SELECT;
 
-	m_bDisplayInfoText = true;
+	m_bDisplayInfoText = false;
 	currentButton = nullptr;
 	currentText = nullptr;
 }
@@ -1088,6 +1098,29 @@ void CUIManager::VictoryAchieved(CUIEnums::TURN _inSide)
 		}
 	}
 	m_bDisplayVictory = true;
+}
+
+/// <summary>
+/// Returns current mouse state. If is NONE, first sets it to SELECT
+/// </summary>
+/// <returns></returns>
+CUIEnums::MOUSESTATE CUIManager::GetMouseCurrentState()
+{
+	//Check if mouseState is None. If so, set to select and print a warning
+	if (m_eCurrentMouseState == CUIEnums::MOUSESTATE::NONE)
+	{
+		m_eCurrentMouseState = CUIEnums::MOUSESTATE::SELECT;
+	}
+	return m_eCurrentMouseState;
+}
+
+void CUIManager::SetCurrentMouseState(CUIEnums::MOUSESTATE _inState)
+{	
+	if (_inState == CUIEnums::MOUSESTATE::NONE)
+	{
+		printf("\nSetting mouse state to NONE. Possible issues may occur");
+	}
+	m_eCurrentMouseState = _inState;
 }
 
 /// <summary>

@@ -86,12 +86,14 @@ void CUnit::Update()
 			else
 			{
 				m_eCurrentState = CUnitEnums::STATE::IDLE;
+				m_bIsActing = false;
 			}
 			break;
 		}
 		case CUnitEnums::STATE::ATTACK:
 		{
 			m_eCurrentState = CUnitEnums::STATE::IDLE;
+			m_bIsActing = false;
 			break;
 		}
 		case CUnitEnums::STATE::DESTROYED:
@@ -107,6 +109,7 @@ void CUnit::Update()
 
 /// <summary>
 /// Expanded update function to enable animations
+/// TODO: change texture based on animProgress
 /// </summary>
 /// <param name="_inTimeElapsed"></param>
 void CUnit::Update(double& _inTimeElapsed)
@@ -124,6 +127,7 @@ void CUnit::Update(double& _inTimeElapsed)
 void CUnit::Attack()
 {
 	m_eCurrentState = CUnitEnums::STATE::ATTACK;
+	m_bIsActing = true;
 }
 
 /// <summary>
@@ -135,6 +139,7 @@ void CUnit::MoveTo(sf::Vector2u _inTileLocation)
 	m_CurrentTileLocation = _inTileLocation;
 	m_eCurrentState = CUnitEnums::STATE::MOVE;
 	IncrementMovementPoints(-1.0f);
+	m_bIsActing = true;
 }
 
 /// <summary>

@@ -11,6 +11,7 @@ std::map<CUnitEnums::TYPE, CUnitEnums::UnitRecord*> CUnitManager::m_mapUnitStats
 std::map<CUnitEnums::TYPE, std::map<CSceneEnums::TILETYPE, CTerrainEffects*>> CUnitManager::m_mapTileTerrainEffects;
 std::map<CUnitEnums::FACTION, CUnitEnums::StatBonus_Add*> CUnitManager::m_mapFactionsBonuses;
 CTerrainEffects CUnitManager::m_defaultTerrainEffects;
+CUnit* CUnitManager::m_ptrActingUnit = nullptr;
 
 CUnitManager::CUnitManager()
 {
@@ -40,7 +41,7 @@ void CUnitManager::ParseConfig(const std::string& _inUnitConfigPath, const std::
 	std::string currentLine;
 
 	currentConfig.open(_inUnitConfigPath);
-	if(currentConfig.is_open())
+	if (currentConfig.is_open())
 	{
 		while (std::getline(currentConfig, currentLine))
 		{
@@ -136,9 +137,9 @@ void CUnitManager::ParseConfig(const std::string& _inUnitConfigPath, const std::
 							std::getline(currentConfig, currentLine);
 						}
 					}
-					else if(currentLine.compare("<TerrainMod>") == 0)
+					else if (currentLine.compare("<TerrainMod>") == 0)
 					{
-						while (!currentLine.compare("</TerrainMod>") == 0)
+						while (!(currentLine.compare("</TerrainMod>") == 0))
 						{
 							readLabel = ParseLineGetLabel(currentLine, readValue);
 							if (readLabel.compare("Path") == 0)
@@ -246,82 +247,82 @@ void CUnitManager::ParseConfig(const std::string& _inUnitConfigPath, const std::
 		{
 			/*while (std::getline(currentConfig, currentLine))
 			{*/
-				CUnitEnums::TYPE currentType = CUnitEnums::TYPE::NONE;
-				CSceneEnums::TILETYPE currentTile = CSceneEnums::TILETYPE::NONE;
-				std::string readValue;
-				std::string readLabel;
-				CTerrainEffects* newTerrainRecord = nullptr;
+			CUnitEnums::TYPE currentType = CUnitEnums::TYPE::NONE;
+			CSceneEnums::TILETYPE currentTile = CSceneEnums::TILETYPE::NONE;
+			std::string readValue;
+			std::string readLabel;
+			CTerrainEffects* newTerrainRecord = nullptr;
 
-				while (std::getline(currentConfig, currentLine))
+			while (std::getline(currentConfig, currentLine))
+			{
+				if (currentLine.compare("<TYPE>") == 0)
 				{
-					if (currentLine.compare("<TYPE>")==0)
+					while (currentLine.compare("</TYPE>") != 0)
 					{
-						while (currentLine.compare("</TYPE>")!=0)
+						ConvertToUnitType(currentLine, currentType);
+						if (currentType == CUnitEnums::TYPE::NONE)
 						{
-							ConvertToUnitType(currentLine, currentType);
-							if (currentType == CUnitEnums::TYPE::NONE)
-							{
-								std::cout << "\nUnknown type in this config file: " << element << std::endl;
-							}
-							std::getline(currentConfig, currentLine);
+							std::cout << "\nUnknown type in this config file: " << element << std::endl;
 						}
-						if (currentType != CUnitEnums::TYPE::NONE)
-						{
-							m_mapTileTerrainEffects.insert(std::make_pair(currentType,std::map<CSceneEnums::TILETYPE,CTerrainEffects*>()));
-						}
+						std::getline(currentConfig, currentLine);
 					}
-					else if(currentLine.compare("<TERRAIN>")==0)
+					if (currentType != CUnitEnums::TYPE::NONE)
 					{
-						while (currentLine.compare("</TERRAIN>")!=0)
-						{
-							if (currentLine.compare("<START>")==0)
-							{
-								newTerrainRecord = new CTerrainEffects();
-								CSceneEnums::TILETYPE terrainType = CSceneEnums::TILETYPE::NONE;
-								while (currentLine.compare("</STOP>") != 0)
-								{
-									readLabel = ParseLineGetLabel(currentLine,readValue);	
-									
-									if (readLabel.compare("TYPE") == 0)
-									{
-										if (!ConvertToTileType(readValue, terrainType))
-										{
-											std::cout << "\nUnrecognised tile type while parsing tile effects: " << readValue << std::endl;
-										}
-									}
-									else if (readLabel.compare("MOV") == 0)
-									{
-										newTerrainRecord->SetModifierMovement(std::stof(readValue));
-									}
-									else if (readLabel.compare("RGE") == 0)
-									{
-										newTerrainRecord->SetRangeOffset(std::stoi(readValue));
-									}
-									//Damage Taken
-									else if (readLabel.compare("DMG_T") == 0)
-									{
-										newTerrainRecord->SetModifierDamageTaken(std::stof(readValue));
-									}
-									//Damage dealt
-									else if (readLabel.compare("DMG_D") == 0)
-									{
-										newTerrainRecord->SetModifierDamageDealt(std::stof(readValue));
-									}
-									std::getline(currentConfig, currentLine);
-								}
-
-								if (m_mapTileTerrainEffects.find(currentType) != m_mapTileTerrainEffects.end())
-								{
-									(*m_mapTileTerrainEffects.find(currentType)).second.emplace(terrainType, newTerrainRecord);
-								}
-							}
-
-							std::getline(currentConfig, currentLine);
-						}
+						m_mapTileTerrainEffects.insert(std::make_pair(currentType, std::map<CSceneEnums::TILETYPE, CTerrainEffects*>()));
 					}
-					//std::getline(currentConfig, currentLine);
 				}
-				newTerrainRecord = nullptr;
+				else if (currentLine.compare("<TERRAIN>") == 0)
+				{
+					while (currentLine.compare("</TERRAIN>") != 0)
+					{
+						if (currentLine.compare("<START>") == 0)
+						{
+							newTerrainRecord = new CTerrainEffects();
+							CSceneEnums::TILETYPE terrainType = CSceneEnums::TILETYPE::NONE;
+							while (currentLine.compare("</STOP>") != 0)
+							{
+								readLabel = ParseLineGetLabel(currentLine, readValue);
+
+								if (readLabel.compare("TYPE") == 0)
+								{
+									if (!ConvertToTileType(readValue, terrainType))
+									{
+										std::cout << "\nUnrecognised tile type while parsing tile effects: " << readValue << std::endl;
+									}
+								}
+								else if (readLabel.compare("MOV") == 0)
+								{
+									newTerrainRecord->SetModifierMovement(std::stof(readValue));
+								}
+								else if (readLabel.compare("RGE") == 0)
+								{
+									newTerrainRecord->SetRangeOffset(std::stoi(readValue));
+								}
+								//Damage Taken
+								else if (readLabel.compare("DMG_T") == 0)
+								{
+									newTerrainRecord->SetModifierDamageTaken(std::stof(readValue));
+								}
+								//Damage dealt
+								else if (readLabel.compare("DMG_D") == 0)
+								{
+									newTerrainRecord->SetModifierDamageDealt(std::stof(readValue));
+								}
+								std::getline(currentConfig, currentLine);
+							}
+
+							if (m_mapTileTerrainEffects.find(currentType) != m_mapTileTerrainEffects.end())
+							{
+								(*m_mapTileTerrainEffects.find(currentType)).second.emplace(terrainType, newTerrainRecord);
+							}
+						}
+
+						std::getline(currentConfig, currentLine);
+					}
+				}
+				//std::getline(currentConfig, currentLine);
+			}
+			newTerrainRecord = nullptr;
 			//}
 		}
 		currentConfig.close();
@@ -383,12 +384,12 @@ void CUnitManager::DisplayUnits(sf::RenderWindow& _inWindow)
 /// <param name="_inFaction"></param>
 /// <param name="_inSide"></param>
 /// <returns></returns>
-CUnit* CUnitManager::CreateUnit(CUnitEnums::TYPE _inType,CUnitEnums::FACTION _inFaction, CUnitEnums::SIDE _inSide)
+CUnit* CUnitManager::CreateUnit(CUnitEnums::TYPE _inType, CUnitEnums::FACTION _inFaction, CUnitEnums::SIDE _inSide)
 {
 	std::map<CUnitEnums::TYPE, CUnitEnums::UnitRecord*>::iterator mapIter;
 	mapIter = m_mapUnitStats.find(_inType);
 	CUnitEnums::UnitRecord* newUnitStats = (*mapIter).second;
-	CUnit* newUnit = new CUnit(	
+	CUnit* newUnit = new CUnit(
 		_inType,
 		_inSide,
 		newUnitStats->m_tiSpriteHeight,
@@ -397,6 +398,7 @@ CUnit* CUnitManager::CreateUnit(CUnitEnums::TYPE _inType,CUnitEnums::FACTION _in
 		newUnitStats->m_tfAtk,
 		newUnitStats->m_tiRange);
 	newUnit->SetFaction(_inFaction);
+	//TODO: Check for if no faction exists
 	CUnitEnums::StatBonus_Add* factionBonus = (*m_mapFactionsBonuses.find(_inFaction)).second;
 	//increase HP by doing negative damage to it
 	float factionAdjusted = -1 * factionBonus->m_tfHPBonus;
@@ -444,7 +446,7 @@ CUnit* CUnitManager::CreateUnit(CUnitEnums::TYPE _inType,CUnitEnums::FACTION _in
 /// <param name="_inUnit">Pointer to unit being moved. CUnit*</param>
 /// <param name="_inPosition">New position to move to. sf::Vector2u</param>
 /// <returns>whether the unit will be moved or not</returns>
-bool CUnitManager::MoveUnit(CUnit* _inUnit, sf::Vector2u _inPosition,CSceneEnums::TILETYPE _inTile )
+bool CUnitManager::MoveUnit(CUnit* _inUnit, sf::Vector2u _inPosition, CSceneEnums::TILETYPE _inTile)
 {
 	sf::Vector2i distanceToCurrentTile(0, 0);
 	sf::Vector2u unitPosition = _inUnit->GetCurrentTile();
@@ -464,6 +466,7 @@ bool CUnitManager::MoveUnit(CUnit* _inUnit, sf::Vector2u _inPosition,CSceneEnums
 			_inUnit->IncrementMovementPoints(targetTileMoveBonus);
 			_inUnit->MoveTo(_inPosition);
 			_inUnit->SetCurrentTileType(_inTile);
+			m_ptrActingUnit = _inUnit;
 			return true;
 		}
 		else
@@ -488,9 +491,9 @@ bool CUnitManager::MoveUnit(CUnit* _inUnit, sf::Vector2f _inPosition, CSceneEnum
 {
 	sf::IntRect unitSpriteRect = _inUnit->GetSprite()->getTextureRect();
 	int m_fTileSize = unitSpriteRect.width;
-	sf::Vector2u tilePosition(	(unsigned int)(_inPosition.x / m_fTileSize),
-								(unsigned int)(_inPosition.y / m_fTileSize));
-	
+	sf::Vector2u tilePosition((unsigned int)(_inPosition.x / m_fTileSize),
+		(unsigned int)(_inPosition.y / m_fTileSize));
+
 	return MoveUnit(_inUnit, tilePosition, _inTile);
 }
 
@@ -503,7 +506,7 @@ bool CUnitManager::MoveUnit(CUnit* _inUnit, sf::Vector2f _inPosition, CSceneEnum
 /// <returns></returns>
 bool CUnitManager::Attack(CUnit* _inAttackinUnit, CUnit* _inDefendingUnit)
 {
-	float damageDealtModifier = ResolveTerrainEffects(_inAttackinUnit->GetType(),_inAttackinUnit->GetCurrentTileType())->GetModifierDamageDealt();
+	float damageDealtModifier = ResolveTerrainEffects(_inAttackinUnit->GetType(), _inAttackinUnit->GetCurrentTileType())->GetModifierDamageDealt();
 	float damageReceivedModifier = ResolveTerrainEffects(_inDefendingUnit->GetType(), _inDefendingUnit->GetCurrentTileType())->GetModifierDamageTaken();
 	float damageDealt = _inAttackinUnit->GetDamageDealt();
 	float totalDamage = damageDealt * damageDealtModifier * damageReceivedModifier;
@@ -514,6 +517,7 @@ bool CUnitManager::Attack(CUnit* _inAttackinUnit, CUnit* _inDefendingUnit)
 	_inAttackinUnit->SetHasAttacked();
 	//Make unit unable to move after attacking
 	_inAttackinUnit->IncrementMovementPoints(-10);
+	m_ptrActingUnit = _inAttackinUnit;
 	if (remainingHP <= 0)
 	{
 		_inDefendingUnit->ExplodeInFlamingGlory();
@@ -570,20 +574,22 @@ bool CUnitManager::DeleteUnit(CUnit* _inUnit, CUnitEnums::SIDE _inSide)
 	{
 		pTargetVector = &m_vecCurrentUnits_Blue;
 	}
-	else if(_inSide == CUnitEnums::SIDE::RED)
+	else if (_inSide == CUnitEnums::SIDE::RED)
 	{
 		pTargetVector = &m_vecCurrentUnits_Red;
 	}
 	else
 	{
 		//ERROR::Unable to determine which vector search
+		//TODO: figure out way to convert enum value to string
+		printf("\nUnable to find unit to delete. Target side was set to \"NONE\"");
 		return false;
 	}
 
 	std::vector<CUnit*>::iterator unitIterator;
 	for (unitIterator = (*pTargetVector).begin(); unitIterator < (*pTargetVector).end(); unitIterator++)
 	{
-		if ( (*unitIterator) == _inUnit)
+		if ((*unitIterator) == _inUnit)
 		{
 			pTargetVector->erase(unitIterator);
 			delete _inUnit;
@@ -593,6 +599,8 @@ bool CUnitManager::DeleteUnit(CUnit* _inUnit, CUnitEnums::SIDE _inSide)
 	}
 
 	//ERROR: Unable to find unit to delete
+	//TODO: figure out way to convert enum value to string
+	printf("\nUnable to find unit to delete. Target was of %s side", _inSide == CUnitEnums::SIDE::BLUE ? "Blue" : "Red");
 	return false;
 
 }
@@ -641,6 +649,31 @@ bool CUnitManager::CheckIfAnyUnitsLeft(CUnitEnums::SIDE _inSide)
 	return false;
 }
 
+/// <summary>
+/// Check if there are any previous units acting that require
+/// others to wait
+/// </summary>
+/// <returns></returns>
+bool CUnitManager::CheckIfAnyActingUnits()
+{
+	if (m_ptrActingUnit != nullptr)
+	{
+		if (!(m_ptrActingUnit->GetIfActing()))
+		{
+			m_ptrActingUnit = nullptr;
+			return false;
+		}
+		else
+		{
+			return true;
+		}
+	}
+	else
+	{
+		return false;
+	}
+}
+
 void CUnitManager::EndTurnReplenishUnits()
 {
 	for (auto& element : m_vecCurrentUnits_Blue)
@@ -676,5 +709,5 @@ CTerrainEffects* CUnitManager::ResolveTerrainEffects(const CUnitEnums::TYPE _inT
 			return (*searchTerrain).second;
 		}
 	}
-	
+
 }

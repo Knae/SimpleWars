@@ -62,12 +62,13 @@ public:
 		m_bForfeitChosen = false; 
 		m_bDisplayVictory = false;
 	}
+	static CUIEnums::MOUSESTATE GetMouseCurrentState();
+	static void SetCurrentMouseState(CUIEnums::MOUSESTATE _inState);
+
 	static void SetCurrentGameState(CUIEnums::GAMESTATE _inState)	{ m_eCurrentUIState = _inState; }
-	static void SetCurrentMouseState(CUIEnums::MOUSESTATE _inState) { m_eCurrentMouseState = _inState; }
 	static void SetCurrentTurn(CUIEnums::TURN _inTurn)				{ m_eCurrentTurn = _inTurn; m_bEndTurn = false; }
 	static void SetChosenUnitToNone()								{ m_eCurrentTypeChosen = CUnitEnums::TYPE::NONE; }
 	static CUnitEnums::TYPE GetChosenUnit()							{ return m_eCurrentTypeChosen; }
-	static CUIEnums::MOUSESTATE GetMouseCurrentState()				{ return m_eCurrentMouseState; }
 	static void SetCurrentUnitHasNoMovePoints(bool _inHasNoPoints)	{ m_bUnitHasNoMovePoints = _inHasNoPoints; }
 	static void SetCurrentUnitHasAttacked(bool _inHasAttacked)		{ m_bUnitHasAttacked = _inHasAttacked; }
 	static void SetToHideStats()									{ m_bDisplayStats = false; }

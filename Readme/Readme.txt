@@ -1,5 +1,5 @@
 Simple Wars by Chuang Sing, Kee
-
+-https://github.com/Knae/SimpleWars
 Credits:
 Elite Command Art Units by Chris Vincent (https://opengameart.org/content/pixel-art-units-from-elite-command)
 Smoke particle pack by Kenney Vleugels (www.kenney.nl)
@@ -25,9 +25,11 @@ Smoke particle pack by Kenney Vleugels (www.kenney.nl)
 *Known Issues
 -When switching between units with attack selected, overlay sometimes does not apear.
 -When attacking, overlay sometimes stops reverting back to the green movement overlay
+-enemy units sometimes look like they are in between grids
 -Factions buffs are implemented but only 2 factions are accessible. No way to select the factions at the start
 -Wins are only recorded when a game ends, not when the game closed midway.
 -particles were planned with base class and sprites already setup but not implemented
+-Some errors in reading config files which haven't resulted in gameplay errors
 
 *Possible expansions
 -animations for particle effects
