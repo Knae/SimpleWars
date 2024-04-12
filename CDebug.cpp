@@ -206,13 +206,13 @@ void CDebug::Update()
 					//remove MOV point
 					case 2:
 					{
-						m_pCurrentUnit->IncrementMovementPoints(-1.0f);
+						m_pCurrentUnit->IncrementMovePoints(-1.0f);
 						break;
 					}
 					//add MOV point
 					case 3:
 					{
-						m_pCurrentUnit->IncrementMovementPoints(1.0f);
+						m_pCurrentUnit->IncrementMovePoints(1.0f);
 						break;
 					}
 					//Reduce damage dealt

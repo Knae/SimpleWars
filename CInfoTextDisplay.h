@@ -15,6 +15,7 @@ public:
 	void Initialize(float _inTopLeftPosX, float _inTopLeftPosY, sf::Font* _inFont,unsigned int _inNumberOfText);
 	bool SetTextAtIndex(int _inIndex, std::string _inabel, std::string _inValue);
 	bool SetValueDisplayAtIndex(int _inIndex, std::string _inValue);
+	void AdjustPosition(sf::Vector2f _inChange);
 	void DisplayInfo(sf::RenderWindow& _inWindow);
 	void Clear();
 private:

@@ -29,6 +29,7 @@ bool CUIManager::m_bForfeitChosen;
 bool CUIManager::m_bDisplayVictory;
 bool CUIManager::m_bDisplayInfoText;
 bool CUIManager::m_bDisplayStats;
+bool CUIManager::m_bDisplayFactionButtons;
 
 CUIEnums::TURN CUIManager::m_eCurrentTurn;
 CUIEnums::GAMESTATE CUIManager::m_eCurrentUIState;
@@ -56,6 +57,7 @@ const sf::IntRect CUIManager::m_ButtonUnitRect_Blue({ 0, 0, 32, 32 });
 const sf::IntRect CUIManager::m_ButtonUnitRect_Red({ 0, 32, 32, 32 });
 const sf::IntRect CUIManager::m_ButtonFactionEmblem({ 0, 0, 32, 32 });
 const sf::IntRect CUIManager::m_ButtonGameLoop({ 0, 0, 64, 32 });
+const sf::Vector2f CUIManager::m_v2fFactionSelectInfoAdjust(sf::Vector2f(-45.0f,348.0f));
 
 CUIManager::CUIManager()
 {
@@ -73,6 +75,7 @@ CUIManager::CUIManager()
 	m_bEndTurn = false;
 	m_bDisplayVictory = false;
 	m_bDisplayInfoText = false;
+	m_bDisplayFactionButtons = false;
 	m_eCurrentTurn = CUIEnums::TURN::BLUE;
 	m_eCurrentUnitSide = CUnitEnums::SIDE::NONE;
 }
@@ -221,6 +224,7 @@ bool CUIManager::IntializeUI(sf::Vector2u _inWindowSize, sf::Font* _inFont, cons
 	m_Info_UnitStats.SetTextAtIndex(3, "DMG:", "N/A");
 	m_Info_UnitStats.SetTextAtIndex(4, "RGE:", "N/A");
 
+	//multiply with a float so i don't see the warning
 	m_Info_OccupiedTerrain.Initialize(m_uSceneWidth * 1.0f, 192.0f, m_pFont, 5);
 	m_Info_OccupiedTerrain.SetTextAtIndex(0, "UnitTerrBonus", "");
 	m_Info_OccupiedTerrain.SetTextAtIndex(1, "MOV:", "N/A");
@@ -394,10 +398,14 @@ void CUIManager::DisplayUI(sf::RenderWindow& _inWindow)
 	{
 		button->Display(_inWindow);
 	}
+	
+	if (m_bDisplayFactionButtons || m_bDisplayInfoText)
+	{
+		m_Info_FactionBonus.DisplayInfo(_inWindow);
+	}
 
 	if (m_bDisplayInfoText)
 	{
-		m_Info_FactionBonus.DisplayInfo(_inWindow);
 		m_Info_UnitStats.DisplayInfo(_inWindow);
 		m_Info_OccupiedTerrain.DisplayInfo(_inWindow);
 		m_Info_ViewedTerrain.DisplayInfo(_inWindow);
@@ -439,12 +447,15 @@ void CUIManager::ClearUIElements()
 		element = nullptr;
 	}
 
+	m_Info_FactionBonus.AdjustPosition(sf::Vector2f());
+
 	m_vecCustomButtons.clear();
 	m_vecButtons_ControlPanel.clear();
 	m_vecText_ControlPanel.clear();
 	m_vecOverlays.clear();
 
 	m_bDisplayInfoText = false;
+	m_bDisplayFactionButtons = false;
 }
 
 /// <summary>
@@ -463,8 +474,12 @@ bool CUIManager::ProcessClick(sf::Vector2f& _inCoords, int& _outIndex)
 		switch (m_eCurrentUIState)
 		{
 			case CUIEnums::GAMESTATE::MODE:
-			case CUIEnums::GAMESTATE::FACTION:
 			case CUIEnums::GAMESTATE::MAPSELECTION:
+			{
+				return GetCButtonClicked(_inCoords, _outIndex);
+				break;
+			}
+			case CUIEnums::GAMESTATE::FACTION:
 			{
 				return GetCButtonClicked(_inCoords, _outIndex);
 				break;
@@ -566,11 +581,25 @@ bool CUIManager::GetCButtonClicked(sf::Vector2f _inPosition, int& _outButtonInde
 		if (m_vecCustomButtons[i]->CheckIfClicked(_inPosition))
 		{
 			_outButtonIndex = i;
+			printf("\nCustom button pressed. Return button code %i\n", i);
 			return true;
 		}
 	}
 	_outButtonIndex = 0;
 	return false;
+}
+
+void CUIManager::SetCButtonActive(int _inButtonIndex, sf::Color _inBackgroundColor)
+{
+	m_vecCustomButtons[_inButtonIndex]->SetActive(true, _inBackgroundColor);
+}
+
+void CUIManager::ResetCButtons()
+{
+	for (auto& button:m_vecCustomButtons)
+	{
+		button->SetActive(false);
+	}
 }
 
 /// <summary>
@@ -591,15 +620,15 @@ void CUIManager::SetUpModeSelectionPanel()
 	m_vecText_ControlPanel.push_back(currentText);
 
 	newButton = new CButton;
-	newButton->Initialize(std::string("Solo"), m_pFont, std::string("1 Player"), sf::Vector2f(m_uSceneWidth + 32.0f, 128.0f), 32);
+	newButton->Initialize_Text(std::string("Solo"), m_pFont, std::string("1 Player"), sf::Vector2f(m_uSceneWidth + 32.0f, 128.0f));
 	m_vecCustomButtons.push_back(newButton);
 
 	newButton = new CButton;
-	newButton->Initialize(std::string("Vs"), m_pFont, std::string("2 Players"), sf::Vector2f(m_uSceneWidth + 32.0f, 208), 32);
+	newButton->Initialize_Text(std::string("Vs"), m_pFont, std::string("2 Players"), sf::Vector2f(m_uSceneWidth + 32.0f, 208));
 	m_vecCustomButtons.push_back(newButton);
 
 	newButton = new CButton;
-	newButton->Initialize(std::string("Exit"), m_pFont, std::string("Exit"), sf::Vector2f(m_uSceneWidth + 32.0f, 288.0f), 32);
+	newButton->Initialize_Text(std::string("Exit"), m_pFont, std::string("Exit"), sf::Vector2f(m_uSceneWidth + 32.0f, 288.0f));
 	m_vecCustomButtons.push_back(newButton);
 
 	newButton = nullptr;
@@ -623,19 +652,19 @@ void CUIManager::SetUpMapSelection()
 	m_vecText_ControlPanel.push_back(currentText);
 
 	newButton = new CButton;
-	newButton->Initialize(std::string("MountVillage"), m_pFont, std::string("Mountain\nVilage"), sf::Vector2f(m_uSceneWidth + 32.0f, 128.0f), 32);
+	newButton->Initialize_Text(std::string("MountVillage"), m_pFont, std::string("Mountain\nVilage"), sf::Vector2f(m_uSceneWidth + 32.0f, 128.0f));
 	m_vecCustomButtons.push_back(newButton);
 
 	newButton = new CButton;
-	newButton->Initialize(std::string("MountPass"), m_pFont, std::string("Mountain\nPassage"), sf::Vector2f(m_uSceneWidth + 32.0f, 208), 32);
+	newButton->Initialize_Text(std::string("MountPass"), m_pFont, std::string("Mountain\nPassage"), sf::Vector2f(m_uSceneWidth + 32.0f, 208));
 	m_vecCustomButtons.push_back(newButton);
 
 	newButton = new CButton;
-	newButton->Initialize(std::string("Bridge"), m_pFont, std::string("Bridge\nPass"), sf::Vector2f(m_uSceneWidth + 32.0f, 288.0f), 32);
+	newButton->Initialize_Text(std::string("Bridge"), m_pFont, std::string("Bridge\nPass"), sf::Vector2f(m_uSceneWidth + 32.0f, 288.0f));
 	m_vecCustomButtons.push_back(newButton);
 
 	newButton = new CButton;
-	newButton->Initialize(std::string("Back"), m_pFont, std::string("Back"), sf::Vector2f(m_uSceneWidth + 32.0f, 368.0f), 32);
+	newButton->Initialize_Text(std::string("Back"), m_pFont, std::string("Back"), sf::Vector2f(m_uSceneWidth + 32.0f, 368.0f));
 	m_vecCustomButtons.push_back(newButton);
 
 	newButton = nullptr;
@@ -647,43 +676,99 @@ void CUIManager::SetUpMapSelection()
 void CUIManager::SetUpFactionSelection()
 {
 	ClearUIElements();
-	sf::Sprite* currentButton = nullptr;
+	sf::Sprite* spriteBackground = nullptr;
 	sf::Text* currentText = nullptr;
-	sf::IntRect currentRect;
+	sf::IntRect currentInactiveRect = m_ButtonFactionEmblem;
+	sf::IntRect currentActiveRect = currentInactiveRect;
+	currentInactiveRect.left += 32;
+	CButton* newButton = nullptr;
+	sf::Vector2f spriteSize = sf::Vector2f(96.0f, 96.0f);
 
-	currentButton = new sf::Sprite;
-	currentButton->setTexture(*m_pEmblemTexture);
-	currentRect = m_ButtonUnitRect_Blue;
-	currentButton->setTextureRect(currentRect);
-	currentButton->setScale(3.0f, 3.0f);
-	currentButton->setPosition(sf::Vector2f((float)(m_uSceneWidth), 16.0f));
-	m_vecButtons_ControlPanel.push_back(currentButton);
+	currentText = new sf::Text;
+	currentText->setString("Select Faction:");
+	currentText->setFont(*m_pFont);
+	currentText->setCharacterSize(24);
+	currentText->setFillColor(sf::Color::White);
+	currentText->setPosition((float)m_uSceneWidth , 8.0f);
+	m_vecText_ControlPanel.push_back(currentText);
 
-	currentButton = new sf::Sprite;
-	currentButton->setTexture(*m_pEmblemTexture);
-	currentRect = m_ButtonUnitRect_Blue;
-	currentButton->setTextureRect(currentRect);
-	currentButton->setScale(3.0f, 3.0f);
-	currentButton->setPosition(sf::Vector2f((float)(m_uSceneWidth), 112.0f));
-	m_vecButtons_ControlPanel.push_back(currentButton);
+	newButton = new CButton;
+	newButton->Initialize_Sprite(std::string("FactionTalon"), m_pEmblemTexture, sf::Vector2f(m_uSceneWidth + 40.0f, 46.0f), spriteSize);
+	newButton->SetSpriteScale(3.0f,3.0f);
+	newButton->SetActiveInactiveRect(currentActiveRect, currentInactiveRect);
+	m_vecCustomButtons.push_back(newButton);
 
-	currentButton = new sf::Sprite;
-	currentButton->setTexture(*m_pEmblemTexture);
-	currentRect = m_ButtonUnitRect_Blue;
-	currentButton->setTextureRect(currentRect);
-	currentButton->setScale(3.0f, 3.0f);
-	currentButton->setPosition(sf::Vector2f((float)(m_uSceneWidth), 208.0f));
-	m_vecButtons_ControlPanel.push_back(currentButton);
+	currentActiveRect.top += 32;
+	currentInactiveRect.top += 32;
+
+	newButton = new CButton;
+	newButton->Initialize_Sprite(std::string("FactionUrsine"), m_pEmblemTexture, sf::Vector2f(m_uSceneWidth + 40.0f, 142.0f), spriteSize);
+	newButton->SetSpriteScale(3.0f, 3.0f);
+	newButton->SetActiveInactiveRect(currentActiveRect, currentInactiveRect);
+	m_vecCustomButtons.push_back(newButton);
+
+	currentActiveRect.top += 32;
+	currentInactiveRect.top += 32;
+
+	newButton = new CButton;
+	newButton->Initialize_Sprite(std::string("FactionLynx"), m_pEmblemTexture, sf::Vector2f(m_uSceneWidth + 40.0f, 238.0f), spriteSize);
+	newButton->SetSpriteScale(3.0f, 3.0f);
+	newButton->SetActiveInactiveRect(currentActiveRect, currentInactiveRect);
+	m_vecCustomButtons.push_back(newButton);
+
+	newButton = new CButton;
+	newButton->Initialize_Text(std::string("LoadMenu"), m_pFont, std::string("Back"), sf::Vector2f(m_uSceneWidth - 02.0f, 450.0f), sf::Vector2f(64.0f,32.0f));
+	m_vecCustomButtons.push_back(newButton);
+
+	newButton = new CButton;
+	newButton->Initialize_Text(std::string("ChangeFactions"), m_pFont, std::string("Redo"), sf::Vector2f(m_uSceneWidth+62.0f, 450.0f), sf::Vector2f(64.0f, 32.0f));
+	m_vecCustomButtons.push_back(newButton);
+
+	newButton = new CButton;
+	newButton->Initialize_Text(std::string("LoadBattle"), m_pFont, std::string("Start"), sf::Vector2f(m_uSceneWidth + 126.0f, 450.0f), sf::Vector2f(64.0f, 32.0f));
+	m_vecCustomButtons.push_back(newButton);
+
+	//spriteBackground = new sf::Sprite;
+	//spriteBackground->setTexture(*m_pEmblemTexture);
+	////currentRect.top += 32;
+	//spriteBackground->setTextureRect(currentRect);
+	//spriteBackground->setScale(3.0f, 3.0f);
+	//spriteBackground->setPosition(sf::Vector2f((float)(m_uSceneWidth), 46.0f));
+	//m_vecButtons_ControlPanel.push_back(currentButton);
+
+	//currentButton = new sf::Sprite;
+	//currentButton->setTexture(*m_pEmblemTexture);
+	//currentRect.top += 32;
+	//currentButton->setTextureRect(currentRect);
+	//currentButton->setScale(3.0f, 3.0f);
+	//currentButton->setPosition(sf::Vector2f((float)(m_uSceneWidth), 142.0f));
+	//m_vecButtons_ControlPanel.push_back(currentButton);
+
+	//currentButton = new sf::Sprite;
+	//currentButton->setTexture(*m_pEmblemTexture);
+	//currentRect.top += 32;
+	//currentButton->setTextureRect(currentRect);
+	//currentButton->setScale(3.0f, 3.0f);
+	//currentButton->setPosition(sf::Vector2f((float)(m_uSceneWidth), 238.0f));
+	//m_vecButtons_ControlPanel.push_back(currentButton);
 
 	//TODO: Setup images to describe faction buffs/debuffs
-
+	//m_Info_FactionBonus.Initialize(m_uSceneWidth - 32.0f, 334.0f, m_pFont, 5);
+	m_Info_FactionBonus.AdjustPosition(m_v2fFactionSelectInfoAdjust);
+	m_Info_FactionBonus.SetTextAtIndex(0, "SELECTED BONUSES", "");
+	m_Info_FactionBonus.SetTextAtIndex(1, "HP :", "+0");
+	m_Info_FactionBonus.SetTextAtIndex(2, "MOV:", "+0");
+	m_Info_FactionBonus.SetTextAtIndex(3, "DMG:", "+0");
+	m_Info_FactionBonus.SetTextAtIndex(4, "RGE:", "+0");
 
 	m_eCurrentUIState = CUIEnums::GAMESTATE::FACTION;
 	m_eCurrentTurn = CUIEnums::TURN::BLUE;
 	m_eCurrentMouseState = CUIEnums::MOUSESTATE::SELECT;
 
 	m_bDisplayInfoText = false;
-	currentButton = nullptr;
+	m_bDisplayFactionButtons = true;
+	newButton = nullptr;
+	//currentButton = nullptr;
 	currentText = nullptr;
 }
 
@@ -769,7 +854,7 @@ void CUIManager::SetUpUnitPlacementPanel(int* _inAmountA, int* _inAmountB, int* 
 /// 8 = Tile under selected unit
 /// 9 = Tile under pointer
 /// 
-/// 'buttons' 4-9 are info displays
+/// 'buttons' 4-9 are info displays, using a back button background
 /// </summary>
 void CUIManager::SetUpGameLoopPanel()
 {
@@ -905,6 +990,9 @@ bool CUIManager::UpdateInfoDisplay(	CUnit* _inSelectedUnit,
 			currentRect = m_ButtonFactionEmblem;
 			switch (selectUnitFaction)	
 			{
+				//Faction emblem spriteSheet changed to vertical format
+				//to allow for use as buttons with active/inactive sprites
+				//in faction selection screen.
 				case CUnitEnums::FACTION::TALONS:
 				{
 					factionName = "Graysong Talons";
@@ -913,13 +1001,15 @@ bool CUIManager::UpdateInfoDisplay(	CUnit* _inSelectedUnit,
 				case CUnitEnums::FACTION::URSINE:
 				{
 					factionName = "Coldfield Ursine";
-					currentRect.left += 32;
+					currentRect.top += 32;
+					//currentRect.left += 32;
 					break;
 				}
 				case CUnitEnums::FACTION::LYNXES:
 				{
 					factionName = "Lowvale Lynxes";
-					currentRect.left += 64;
+					currentRect.top += 64;
+					//currentRect.left += 64;
 					break;
 				}
 				case CUnitEnums::FACTION::NONE:
@@ -1036,6 +1126,7 @@ bool CUIManager::UpdateInfoDisplay(	CUnit* _inSelectedUnit,
 	//======================================
 	//Updating Viewed Terrain Modifiers
 	//======================================
+	//TODO: Modify to show  modifiers relative to selected unit if tile has no enemy unit
 	if (_inViewedUnitTerrain != nullptr && _inViewedUnit != nullptr)
 	{
 		float valueToUpdate = 0.0f;
@@ -1109,6 +1200,7 @@ CUIEnums::MOUSESTATE CUIManager::GetMouseCurrentState()
 	//Check if mouseState is None. If so, set to select and print a warning
 	if (m_eCurrentMouseState == CUIEnums::MOUSESTATE::NONE)
 	{
+		printf("\nUIManager mousestate was NONE when retrieved.");
 		m_eCurrentMouseState = CUIEnums::MOUSESTATE::SELECT;
 	}
 	return m_eCurrentMouseState;

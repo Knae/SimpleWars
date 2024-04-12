@@ -166,6 +166,7 @@ bool CGameManager::Update(double& _inElapsedTime)
 	sf::Vector2f mousePosition = m_pGameWindow->mapPixelToCoords(sf::Mouse::getPosition(*(m_pGameWindow)));
 
 	if (m_eCurrentState != CUIEnums::GAMESTATE::MODE &&
+		m_eCurrentState != CUIEnums::GAMESTATE::FACTION &&
 		m_eCurrentState != CUIEnums::GAMESTATE::MAPSELECTION &&
 		m_eCurrentState != CUIEnums::GAMESTATE::GAMEEND)
 	{
@@ -495,6 +496,8 @@ bool CGameManager::LoadScene(CSceneEnums::SCENETYPE _inScene)
 	case CSceneEnums::SCENETYPE::MAINMENU:
 	{
 		configPath = m_strMainMenuConfig;
+		m_eChosenFaction_Blue = CUnitEnums::FACTION::NONE;
+		m_eChosenFaction_Red = CUnitEnums::FACTION::NONE;
 		break;
 	}
 	case CSceneEnums::SCENETYPE::MOUNTAINVILLAGE:
@@ -569,7 +572,7 @@ bool CGameManager::InitializeUI()
 void CGameManager::ProcessMouseClick()
 {
 	sf::Vector2f mousePosition = m_pGameWindow->mapPixelToCoords(sf::Mouse::getPosition(*(m_pGameWindow)));
-	std::cout << "\nClicking at " << mousePosition.x << "x " << mousePosition.y << "y" << std::endl;
+	//std::cout << "\nClicking at " << mousePosition.x << "x " << mousePosition.y << "y" << std::endl;
 
 	//m_eCurrentUIMouseState = CUIManager::GetMouseCurrentState();
 
@@ -595,10 +598,10 @@ void CGameManager::ProcessMouseClick()
 				//is pressed.
 				if (buttonIndex != 2)
 				{
-					m_bAIEnabled = buttonIndex == 0 ? true : false;
-					ChangeCurrentState(CUIEnums::GAMESTATE::MAPSELECTION);
+					m_bAIEnabled = (buttonIndex == 0 ? true : false);
+					//ChangeCurrentState(CUIEnums::GAMESTATE::MAPSELECTION);
 					//For testing faction screen
-					//ChangeCurrentState(CUIEnums::GAMESTATE::FACTION);
+					ChangeCurrentState(CUIEnums::GAMESTATE::FACTION);
 				}
 				else
 				{
@@ -608,7 +611,63 @@ void CGameManager::ProcessMouseClick()
 			}
 			case CUIEnums::GAMESTATE::FACTION:
 			{
+				CUnitEnums::FACTION* currentSide = nullptr;
+				sf::Color borderColour = sf::Color::Black;
+
+				if (m_eChosenFaction_Blue == CUnitEnums::FACTION::NONE)
+				{
+					currentSide = &m_eChosenFaction_Blue;
+					borderColour = sf::Color::Blue;
+				}
+				else if((m_eChosenFaction_Red == CUnitEnums::FACTION::NONE))
+				{
+					currentSide = &m_eChosenFaction_Red;
+					borderColour = sf::Color::Red;
+				}
+
 				//TODO: Add funcitonality for faction selection and also the cancel button
+				if (currentSide != nullptr && buttonIndex >=0 && buttonIndex < 3)
+				{
+					if (buttonIndex == 0)
+					{
+						//printf("\nClicked on Talon\n");
+						*currentSide = CUnitEnums::FACTION::TALONS;
+					}
+					else if (buttonIndex == 1)
+					{
+						//printf("\nClicked on Ursine\n");
+						*currentSide = CUnitEnums::FACTION::URSINE;
+					}
+					else if (buttonIndex == 2)
+					{
+						//printf("\nClicked on Lynx\n");
+						*currentSide = CUnitEnums::FACTION::LYNXES;
+					}
+
+					CUIManager::SetCButtonActive(buttonIndex, borderColour);
+				}
+				else if(buttonIndex == 3)
+				{
+					//Back
+					ChangeCurrentState(CUIEnums::GAMESTATE::MODE);
+				}
+				else if (buttonIndex == 4)
+				{
+					//Reset
+					CUIManager::ResetCButtons();
+					m_eChosenFaction_Blue = CUnitEnums::FACTION::NONE;
+					m_eChosenFaction_Red = CUnitEnums::FACTION::NONE;
+				}
+				else if (buttonIndex == 5)
+				{
+					//Load Scene Selector
+					if (m_eChosenFaction_Blue != CUnitEnums::FACTION::NONE && 
+						m_eChosenFaction_Red != CUnitEnums::FACTION::NONE)
+					{
+						ChangeCurrentState(CUIEnums::GAMESTATE::MAPSELECTION);
+					}
+				}
+
 				break;
 			}
 			case CUIEnums::GAMESTATE::MAPSELECTION:

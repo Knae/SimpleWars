@@ -80,6 +80,7 @@ void CUnitManager::ParseConfig(const std::string& _inUnitConfigPath, const std::
 				{
 					if (currentLine.compare("<Type>") == 0)
 					{
+						std::getline(currentConfig, currentLine);
 						while (currentLine.compare("</Type>") != 0)
 						{
 							ParseLineGetLabel(currentLine, readValue);
@@ -114,7 +115,7 @@ void CUnitManager::ParseConfig(const std::string& _inUnitConfigPath, const std::
 					}
 					else if (currentLine.compare("<SpriteInfo>") == 0)
 					{
-						//std::getline(currentConfig, currentLine);
+						std::getline(currentConfig, currentLine);
 						while (currentLine.compare("</SpriteInfo>") != 0)
 						{
 							readLabel = ParseLineGetLabel(currentLine, readValue);
@@ -259,10 +260,11 @@ void CUnitManager::ParseConfig(const std::string& _inUnitConfigPath, const std::
 				{
 					while (currentLine.compare("</TYPE>") != 0)
 					{
+						std::getline(currentConfig, currentLine);
 						ConvertToUnitType(currentLine, currentType);
 						if (currentType == CUnitEnums::TYPE::NONE)
 						{
-							std::cout << "\nUnknown type in this config file: " << element << std::endl;
+							std::cout << "\nUnknown type in this config file. Processed Line:\n " << currentLine << std::endl;
 						}
 						std::getline(currentConfig, currentLine);
 					}
@@ -401,12 +403,13 @@ CUnit* CUnitManager::CreateUnit(CUnitEnums::TYPE _inType, CUnitEnums::FACTION _i
 	//TODO: Check for if no faction exists
 	CUnitEnums::StatBonus_Add* factionBonus = (*m_mapFactionsBonuses.find(_inFaction)).second;
 	//increase HP by doing negative damage to it
-	float factionAdjusted = -1 * factionBonus->m_tfHPBonus;
-	newUnit->TakeDamage(factionAdjusted);
+	//newUnit->TakeDamage(factionAdjusted);
 	float dummy;
+	float factionAdjusted = 0;
 	newUnit->GetMovementStat(factionAdjusted, dummy);
 	factionAdjusted += factionBonus->m_tfMoveBonus;
 	newUnit->SetMovement(factionAdjusted);
+	newUnit->IncrementHealth(factionBonus->m_tfHPBonus);
 	newUnit->IncrementDamageDealt(factionBonus->m_tfAtkBonus);
 	newUnit->IncrementRange(factionBonus->m_tiRangeBonus);
 
@@ -431,8 +434,6 @@ CUnit* CUnitManager::CreateUnit(CUnitEnums::TYPE _inType, CUnitEnums::FACTION _i
 		newUnit->Initialize(unitSprite);
 		m_vecCurrentUnits_Red.push_back(newUnit);
 	}
-
-
 
 	unitSprite = nullptr;
 	return newUnit;
@@ -463,7 +464,7 @@ bool CUnitManager::MoveUnit(CUnit* _inUnit, sf::Vector2u _inPosition, CSceneEnum
 		if ((_inUnit->GetMovePoints() + targetTileMoveBonus) >= 0)
 		{
 			//apply terrain movement bonus by adding it after subtracting one for moving
-			_inUnit->IncrementMovementPoints(targetTileMoveBonus);
+			_inUnit->IncrementMovePoints(targetTileMoveBonus);
 			_inUnit->MoveTo(_inPosition);
 			_inUnit->SetCurrentTileType(_inTile);
 			m_ptrActingUnit = _inUnit;
@@ -516,7 +517,7 @@ bool CUnitManager::Attack(CUnit* _inAttackinUnit, CUnit* _inDefendingUnit)
 	std::cout << "\nTotal: " << totalDamage << ". Defender remaining HP: " << remainingHP << std::endl;
 	_inAttackinUnit->SetHasAttacked();
 	//Make unit unable to move after attacking
-	_inAttackinUnit->IncrementMovementPoints(-10);
+	_inAttackinUnit->IncrementMovePoints(-10);
 	m_ptrActingUnit = _inAttackinUnit;
 	if (remainingHP <= 0)
 	{

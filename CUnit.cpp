@@ -6,8 +6,8 @@ CUnit::CUnit(	CUnitEnums::TYPE _inUnits, CUnitEnums::SIDE _inSIDE,
 {
 	m_eUnitType = _inUnits;
 	m_fHP = _inHP;
-	m_fMovementPoints_Base = _inMovement;
-	m_fMovementPoints = m_fMovementPoints_Base;
+	m_fMovePoints_Base = _inMovement;
+	m_fMovePoints = m_fMovePoints_Base;
 	m_fDamage = _inDamage;
 	m_iRange = _inRange;
 	m_fTileSize = (float)(_tileSize);
@@ -36,7 +36,7 @@ CUnit::~CUnit()
 void CUnit::Initialize(sf::Sprite* _inSpriteSource)
 {
 	m_UnitSprite = _inSpriteSource;
-	m_fMovementPoints = m_fMovementPoints_Base;
+	m_fMovePoints = m_fMovePoints_Base;
 }
 
 /// <summary>
@@ -138,7 +138,7 @@ void CUnit::MoveTo(sf::Vector2u _inTileLocation)
 {
 	m_CurrentTileLocation = _inTileLocation;
 	m_eCurrentState = CUnitEnums::STATE::MOVE;
-	IncrementMovementPoints(-1.0f);
+	IncrementMovePoints(-1.0f);
 	m_bIsActing = true;
 }
 
@@ -161,7 +161,7 @@ void CUnit::Replenish()
 {
 	if (m_eCurrentState != CUnitEnums::STATE::DESTROYED)
 	{
-		m_fMovementPoints = m_fMovementPoints_Base;
+		m_fMovePoints = m_fMovePoints_Base;
 		m_bHasAttacked = false;
 		m_eCurrentState = CUnitEnums::STATE::IDLE;
 	}

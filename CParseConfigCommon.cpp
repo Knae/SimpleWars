@@ -79,7 +79,7 @@ bool CParseConfigCommon::ConvertToTileType(std::string& _inputString, CSceneEnum
 	else
 	{
 		//Unrecognised tile type name
-		std::cout << "\nWARN::Unreocignized/Unrecorded tile type" << std::endl;
+		std::cout << "\nWARN::Unreocignized/Unrecorded tile type. Line: \n" << _inputString << std::endl;
 		return false;
 	}
 	return true;
@@ -108,7 +108,7 @@ bool CParseConfigCommon::ConvertToUnitType(std::string& _inputString, CUnitEnums
 	else
 	{
 		//Unrecognised line
-		std::cout << "\nWARN::Unrecognized/Unrecorded unit type" << std::endl;
+		std::cout << "\nWARN::Unrecognized/Unrecorded unit type. Line: \n" << _inputString << std::endl;
 		_outType = CUnitEnums::TYPE::NONE;
 		return false;
 	}
@@ -138,7 +138,7 @@ bool CParseConfigCommon::ConvertUnitTypeToString(CUnitEnums::TYPE& _inType, std:
 	else
 	{
 		//Unrecognised line
-		std::cout << "\nWARN::Unrecognized/Unrecorded unit type" << std::endl;
+		std::cout << "\nWARN::Unrecognized/Unrecorded unit type. Type Code: " << (int)_inType<< std::endl;
 		_outString = "Unknown Unit";
 		return false;
 	}

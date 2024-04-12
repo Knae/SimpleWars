@@ -19,44 +19,45 @@ public:
 
 	//void Initialize(sf::Texture* _inTextureSource);
 	void Initialize(sf::Sprite* _inSpriteSource);
-	void SetHP(float& _inHP)								{ m_fHP = _inHP; }
-	void SetMovement(float& _inMovement)					{ m_fMovementPoints_Base = _inMovement; }
-	void SetDamageDealt(float& _inDamage)					{ m_fDamage = _inDamage; }
-	void SetRange(int& _inRange)							{ m_iRange = _inRange; }
-	void SetFaction(CUnitEnums::FACTION _inFaction)			{ m_eFaction = _inFaction; }
-	void SetSide(CUnitEnums::SIDE _inSide)					{ m_eControllingPlayer = _inSide; }
-	void SetHasAttacked()									{ m_bHasAttacked = true; }
-	void SetCurrentTileType(CSceneEnums::TILETYPE _inType)	{ m_eCurrentTileType = _inType; }
+	inline void SetHP(float& _inHP)									{ m_fHP = _inHP; }
+	inline void SetMovement(float& _inMovement)						{ m_fMovePoints_Base = _inMovement; }
+	inline void SetDamageDealt(float& _inDamage)					{ m_fDamage = _inDamage; }
+	inline void SetRange(int& _inRange)								{ m_iRange = _inRange; }
+	inline void SetFaction(CUnitEnums::FACTION _inFaction)			{ m_eFaction = _inFaction; }
+	inline void SetSide(CUnitEnums::SIDE _inSide)					{ m_eControllingPlayer = _inSide; }
+	inline void SetHasAttacked()									{ m_bHasAttacked = true; }
+	inline void SetCurrentTileType(CSceneEnums::TILETYPE _inType)	{ m_eCurrentTileType = _inType; }
 	void SetLocation(sf::Vector2f _inPosition);
 	void SetLocation(sf::Vector2u _inPosition);
 
 	void GetMovementStat(float& _outMoveBase, float& _outMovePoints) {
-		_outMoveBase = m_fMovementPoints_Base;
-		_outMovePoints = m_fMovementPoints;
+		_outMoveBase = m_fMovePoints_Base;
+		_outMovePoints = m_fMovePoints;
 	}
-	float GetMovePoints()						{ return m_fMovementPoints; }
-	bool GetHasAtacked()						{ return m_bHasAttacked; }
-	bool GetIfActing()							{ return m_bIsActing; }
-	sf::Vector2u GetCurrentTile()				{ return m_CurrentTileLocation; }
-	CSceneEnums::TILETYPE GetCurrentTileType()	{ return m_eCurrentTileType; }
-	CUnitEnums::STATE GetState()				{ return m_eCurrentState; }
-	CUnitEnums::FACTION GetFaction()			{ return m_eFaction; }
-	CUnitEnums::SIDE GetSide()					{ return m_eControllingPlayer; }
-	CUnitEnums::TYPE GetType()					{ return m_eUnitType; }
-	int GetRange()								{ return m_iRange; }
-	float GetHP()								{ return m_fHP; }
-	float GetDamageDealt()						{ return m_fDamage; }
-	sf::Sprite* GetSprite()						{ return m_UnitSprite; }
+	inline float GetMovePoints()						{ return m_fMovePoints; }
+	inline bool GetHasAtacked()							{ return m_bHasAttacked; }
+	inline bool GetIfActing()							{ return m_bIsActing; }
+	inline sf::Vector2u GetCurrentTile()				{ return m_CurrentTileLocation; }
+	inline CSceneEnums::TILETYPE GetCurrentTileType()	{ return m_eCurrentTileType; }
+	inline CUnitEnums::STATE GetState()					{ return m_eCurrentState; }
+	inline CUnitEnums::FACTION GetFaction()				{ return m_eFaction; }
+	inline CUnitEnums::SIDE GetSide()					{ return m_eControllingPlayer; }
+	inline CUnitEnums::TYPE GetType()					{ return m_eUnitType; }
+	inline int GetRange()								{ return m_iRange; }
+	inline float GetHP()								{ return m_fHP; }
+	inline float GetDamageDealt()						{ return m_fDamage; }
+	inline sf::Sprite* GetSprite()						{ return m_UnitSprite; }
 
 	void Update();
 	void Update(double& _inTimeElapsed);
 	void Attack();
 	void MoveTo(sf::Vector2u _inTileLocation);
 	void MoveTo(sf::Vector2f _inPosition);
-	float TakeDamage(float& _inDamage)				{ m_fHP -= _inDamage; return m_fHP; }
-	void IncrementMovementPoints(float _inPoints)	{ m_fMovementPoints += _inPoints; }
-	void IncrementDamageDealt(float _inAmount)		{ m_fDamage += _inAmount; }
-	void IncrementRange(int _inAmount)				{ m_iRange += _inAmount; }
+	inline float TakeDamage(float& _inDamage)	{ m_fHP -= _inDamage; return m_fHP; }
+	void IncrementHealth(float _inAmount)		{ m_fHP += _inAmount; m_fHP = (m_fHP>0 ? m_fHP:1.0f);};
+	void IncrementMovePoints(float _inPoints)	{ m_fMovePoints += _inPoints; m_fMovePoints = (m_fMovePoints<0 ? 0.0f:m_fMovePoints);}
+	void IncrementDamageDealt(float _inAmount)	{ m_fDamage += _inAmount; m_fDamage = (m_fDamage>0 ? m_fDamage:1.0f);}
+	void IncrementRange(int _inAmount)			{ m_iRange += _inAmount; m_iRange = (m_iRange>0 ? m_iRange:1);}
 	void Replenish();
 	void ExplodeInFlamingGlory();
 
@@ -70,8 +71,8 @@ private:
 	CUnitEnums::DIRECTION m_eCurrentDirection;
 	CSceneEnums::TILETYPE m_eCurrentTileType;
 	float m_fHP;
-	float m_fMovementPoints_Base;
-	float m_fMovementPoints;
+	float m_fMovePoints_Base;
+	float m_fMovePoints;
 	float m_fDamage;
 	float m_fTileSize;
 	int m_iRange;

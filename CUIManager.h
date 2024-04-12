@@ -32,6 +32,8 @@ public:
 	static bool ProcessClick(sf::Vector2f& _inCoords, int& _outIndex);
 	static int	ProcessClickInCtrlPanel(sf::Vector2f& _inCoords);
 	static bool GetCButtonClicked(sf::Vector2f _inPosition, int& _outButtonIndex);
+	static void SetCButtonActive(int _inButtonIndex,sf::Color _inBackgroundColor = sf::Color::Black);
+	static void ResetCButtons();
 	static void SetUpModeSelectionPanel();
 	static void SetUpMapSelection();
 	static void SetUpFactionSelection();
@@ -93,6 +95,7 @@ private:
 	static const sf::IntRect m_ButtonUnitRect_Red;
 	static const sf::IntRect m_ButtonGameLoop;
 	static const sf::IntRect m_ButtonFactionEmblem;
+	static const sf::Vector2f m_v2fFactionSelectInfoAdjust;
 
 	static std::vector<CButton*> m_vecCustomButtons;
 	static std::vector<sf::Sprite*> m_vecButtons_ControlPanel;
@@ -121,6 +124,8 @@ private:
 	static bool m_bDisplayVictory;
 	static bool m_bDisplayInfoText;
 	static bool m_bDisplayStats;
+	
+	static bool m_bDisplayFactionButtons;
 
 	static const CUnitEnums::TYPE m_eUnitOnButton[4];
 

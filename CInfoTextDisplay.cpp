@@ -87,6 +87,19 @@ bool CInfoTextDisplay::SetValueDisplayAtIndex(int _inIndex, std::string _inValue
 	}
 }
 
+/// <summary>
+/// Adjust the x and y position of this info display relative to original position
+/// </summary>
+/// <param name="_inDisplacement"></param>
+void CInfoTextDisplay::AdjustPosition(sf::Vector2f _inChange)
+{
+	for (unsigned int i = 0; i < m_vecLabels.size(); i++)
+	{
+		m_vecLabels[i]->setPosition(m_TopLeftPosition.x + 8.0f + _inChange.x, m_TopLeftPosition.y + 8.0f + (16.0f * i) + _inChange.y);
+		m_vecValues[i]->setPosition(m_TopLeftPosition.x + 48.0f + _inChange.x, m_TopLeftPosition.y + 8.0f + (16.0f * i) + _inChange.y);
+	}
+}
+
 //Display all the items
 void CInfoTextDisplay::DisplayInfo(sf::RenderWindow& _inWindow)
 {
