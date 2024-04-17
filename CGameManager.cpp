@@ -625,26 +625,43 @@ void CGameManager::ProcessMouseClick()
 					borderColour = sf::Color::Red;
 				}
 
+				CUnitEnums::FACTION selectedFaction = CUnitEnums::FACTION::NONE;
 				//TODO: Add funcitonality for faction selection and also the cancel button
-				if (currentSide != nullptr && buttonIndex >=0 && buttonIndex < 3)
+				if (/*currentSide != nullptr && */buttonIndex >=0 && buttonIndex < 3)
 				{
+					
 					if (buttonIndex == 0)
 					{
 						//printf("\nClicked on Talon\n");
-						*currentSide = CUnitEnums::FACTION::TALONS;
+						//*currentSide = CUnitEnums::FACTION::TALONS;
+						selectedFaction = CUnitEnums::FACTION::TALONS;
 					}
 					else if (buttonIndex == 1)
 					{
-						//printf("\nClicked on Ursine\n");
-						*currentSide = CUnitEnums::FACTION::URSINE;
+						//printf("\nClicked on Lynx\n");
+						//*currentSide = CUnitEnums::FACTION::LYNXES;
+						selectedFaction = CUnitEnums::FACTION::LYNXES;
+
 					}
 					else if (buttonIndex == 2)
 					{
-						//printf("\nClicked on Lynx\n");
-						*currentSide = CUnitEnums::FACTION::LYNXES;
+						//printf("\nClicked on Ursine\n");
+						//*currentSide = CUnitEnums::FACTION::URSINE;
+						selectedFaction = CUnitEnums::FACTION::URSINE;
 					}
 
-					CUIManager::SetCButtonActive(buttonIndex, borderColour);
+					CUIManager::UpdateFactionBonusDisplay(
+							CUnitManager::GetFactionBonuses(selectedFaction),
+							selectedFaction);
+
+					//Skips if currentSide is a valid pointer and
+					//if the selected faction has not be previously chosen by blue.
+					if (currentSide != nullptr && 
+						m_eChosenFaction_Blue!=selectedFaction)
+					{
+						*currentSide = selectedFaction;
+						CUIManager::SetCButtonActive(buttonIndex, borderColour);
+					}
 				}
 				else if(buttonIndex == 3)
 				{

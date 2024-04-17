@@ -39,6 +39,9 @@ public:
 	static void SetUpFactionSelection();
 	static void SetUpUnitPlacementPanel(int* _inAmountA, int* _inAmountB, int* _inAmountC);
 	static void SetUpGameLoopPanel();
+	static void UpdateFactionBonusDisplay(
+		CUnitEnums::StatBonus_Add* _inFacBonus = nullptr,
+		CUnitEnums::FACTION _inFaction = CUnitEnums::FACTION::NONE);
 	static bool UpdateInfoDisplay(
 			CUnit* _inSelectedUnit = nullptr,
 			CUnit* _inViewedUnit = nullptr,

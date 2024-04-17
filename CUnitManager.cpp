@@ -402,12 +402,16 @@ CUnit* CUnitManager::CreateUnit(CUnitEnums::TYPE _inType, CUnitEnums::FACTION _i
 	newUnit->SetFaction(_inFaction);
 	//TODO: Check for if no faction exists
 	CUnitEnums::StatBonus_Add* factionBonus = (*m_mapFactionsBonuses.find(_inFaction)).second;
-	//increase HP by doing negative damage to it
-	//newUnit->TakeDamage(factionAdjusted);
 	float dummy;
 	float factionAdjusted = 0;
 	newUnit->GetMovementStat(factionAdjusted, dummy);
 	factionAdjusted += factionBonus->m_tfMoveBonus;
+
+	if (factionAdjusted <= 0)
+	{
+		factionAdjusted = 1;
+	}
+
 	newUnit->SetMovement(factionAdjusted);
 	newUnit->IncrementHealth(factionBonus->m_tfHPBonus);
 	newUnit->IncrementDamageDealt(factionBonus->m_tfAtkBonus);
