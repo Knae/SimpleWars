@@ -146,6 +146,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="CAI_Controller.cpp" />
+    <ClCompile Include="CAudioManager.cpp" />
     <ClCompile Include="CButton.cpp" />
     <ClCompile Include="CDebug.cpp" />
     <ClCompile Include="CGameManager.cpp" />
@@ -163,6 +164,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CAI_Controller.h" />
+    <ClInclude Include="CAudioManager.h" />
     <ClInclude Include="CButton.h" />
     <ClInclude Include="CDebug.h" />
     <ClInclude Include="CFactionBonus.h" />

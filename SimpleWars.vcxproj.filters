@@ -90,6 +90,9 @@
     <ClCompile Include="CAI_Controller.cpp">
       <Filter>Source Files\Systems</Filter>
     </ClCompile>
+    <ClCompile Include="CAudioManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CScene.h">
@@ -148,6 +151,9 @@
     </ClInclude>
     <ClInclude Include="CFactionBonus.h">
       <Filter>Header Files\UnitRelatedHeaders</Filter>
+    </ClInclude>
+    <ClInclude Include="CAudioManager.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
