@@ -5,6 +5,8 @@
 #include <SFML/Audio.hpp>
 #include <vector>
 
+//Each unit represents a sound 
+// that can be played simultaneously
 struct SoundUnit
 {
 	sf::SoundBuffer soundBuffer;
@@ -21,7 +23,7 @@ enum RESULT
 class CAudioManager
 {
 	public:
-		static CAudioManager& getInstance()
+		static CAudioManager& getRef()
 		{
 			static CAudioManager instance; return instance;
 		}
@@ -36,9 +38,10 @@ class CAudioManager
 		CAudioManager(CAudioManager const&) = delete;
 		void operator=(CAudioManager const&) = delete;
 
+		sf::Music m_backgroundMusic;
 		std::vector<SoundUnit*> m_vecSoundUnits;
 
-		float m_fDefaultVolume = 50.0f;
+		float m_fDefaultVolume = 25.0f;
 		int m_iMaxSoundEvents = 20;
 };
 

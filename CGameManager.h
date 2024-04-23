@@ -138,6 +138,9 @@ private:
 	std::map<CUnitEnums::TYPE, int> m_mapUnitsToPlaced_B;
 	std::map<CUnitEnums::TYPE, int> m_mapUnitsToPlaced_R;
 	std::map<CUnitEnums::TYPE, int>* m_pUnitsToPlace;
+
+	//Track texture currrently in used to avoid storing duplicates
+	std::map<std::string, sf::Texture> m_mapTextures;
 };
 
 #endif // !__CGAMEMANAGER_H__

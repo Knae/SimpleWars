@@ -1,4 +1,5 @@
 #include "CUnit.h"
+#include "CAudioManager.h"
 
 CUnit::CUnit(	CUnitEnums::TYPE _inUnits, CUnitEnums::SIDE _inSIDE,
 				int _tileSize, float _inHP, float _inMovement, float _inDamage, int _inRange,
@@ -171,6 +172,7 @@ void CUnit::ExplodeInFlamingGlory()
 {
 	//Boom Boom Animation goes here.
 	m_eCurrentState = CUnitEnums::STATE::DESTROYED;
+	CAudioManager::getRef().AddSoundEvent(m_strSoundFile_Death);
 }
 
 /// <summary>

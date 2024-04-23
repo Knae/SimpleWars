@@ -64,6 +64,13 @@ public:
 private:
 	sf::Vector2f LerpMovement(sf::Vector2f& _currentPos, sf::Vector2f& _destinationPos, float _fAlpha);
 
+	//std::string m_strUnitConfigLocation = "";
+	std::string m_strSoundFile_Idle		= "";
+	std::string m_strSoundFile_Move		= "";
+	std::string m_strSoundFile_Attack	= "";
+	std::string m_strSoundFile_Death	= "assets/audio/explosion_large_07.wav";
+
+
 	CUnitEnums::TYPE m_eUnitType;
 	CUnitEnums::SIDE m_eControllingPlayer;
 	CUnitEnums::STATE m_eCurrentState;

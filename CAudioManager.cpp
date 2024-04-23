@@ -40,7 +40,7 @@ RESULT CAudioManager::AddSoundEvent(std::string& inSoundFile)
 	if (unitInUse == nullptr)
 	{
 		//No free soundUnit to use
-		printf("\nNo free sound unit to play sound. Requested sound file:\n%s\n",inSoundFile);
+		printf("\nNo free sound unit to play sound. Requested sound file:\n%s\n",inSoundFile.c_str());
 		return NO_SLOT;
 	}
 	else
@@ -52,7 +52,7 @@ RESULT CAudioManager::AddSoundEvent(std::string& inSoundFile)
 		}
 		else
 		{	
-			printf("\nUnable to load sound file. Requested sound file:\n%s\n", inSoundFile);
+			printf("\nUnable to load sound file. Requested sound file:\n%s\n", inSoundFile.c_str());
 			return FAIL;
 		}
 	}
